@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# CS0162: Se detectó código inaccesible
+dotnet_diagnostic.CS0162.severity = silent

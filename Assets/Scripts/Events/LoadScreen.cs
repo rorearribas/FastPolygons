@@ -52,7 +52,7 @@ public class LoadScreen : MonoBehaviour
                 {
                     asyncOperation.allowSceneActivation = true;
                     textToContinueObj.SetActive(false);
-                    GameManager.Instance.state = GameManager.States.Start;
+                    GameManager.Instance.state = GameManager.States.START;
                     GameManager.Instance.fadeAnimator.SetTrigger("FadeOut");
                     reset = false;
                 }

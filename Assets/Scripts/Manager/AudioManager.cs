@@ -21,26 +21,26 @@ namespace FastPolygons.Manager
         {
             switch (estados)
             {
-                case GameManager.States.MainMenu:
+                case GameManager.States.MENU:
                     AudioManager.Instance.aS.clip = Resources.Load<AudioClip>("Music/Theme01");
                     aS.Play();
                     aS.loop = true;
                     break;
 
-                case GameManager.States.PauseMenu:
+                case GameManager.States.PAUSE:
                     Instance.musicChanged += Instance.musicChanged;
                     aS.Pause();
                     break;
 
-                case GameManager.States.LoadScreen:
+                case GameManager.States.LOADSCREEN:
                     aS.Stop();
                     break;
 
-                case GameManager.States.Finish:
+                case GameManager.States.END:
                     aS.Stop();
                     break;
 
-                case GameManager.States.Playing:
+                case GameManager.States.PLAYING:
                     Instance.musicChanged += Instance.musicChanged;
                     aS.UnPause();
                     aS.Play();

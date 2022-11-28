@@ -73,7 +73,7 @@ namespace FastPolygons.Manager
             {
                 #region StartRace
 
-                case GameManager.States.Start:
+                case GameManager.States.START:
 
                     OnLoadCars?.Invoke();
                     OnLoadCars -= RaceManager_OnLoadCars;
@@ -84,7 +84,7 @@ namespace FastPolygons.Manager
 
                 #region Playing
 
-                case GameManager.States.Playing:
+                case GameManager.States.PLAYING:
 
                     for (int i = 0; i < checkPoints.Count; i++)
                     {

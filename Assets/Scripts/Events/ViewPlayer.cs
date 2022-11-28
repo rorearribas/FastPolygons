@@ -7,6 +7,7 @@ public class ViewPlayer : MonoBehaviour
     public event EventHandler ChangeCar;
     public GenerateCar_SO config;
     public MeshRenderer chasisColor;
+
     private void Awake()
     {
         ChangeCar += OnChangeCar;

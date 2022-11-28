@@ -12,22 +12,21 @@ namespace FastPolygons.Manager
     {
         public enum States
         {
-
-            MainMenu, //MENU PRINCIPAL.
-            PauseMenu, //MENU DE PAUSA.
-            PreLoad, //SE GUARDA LA SELECCIÓN DE COCHE/MODO ANTES DE LA PANTALLA DE CARGA.
-            Settings, //MENU DE AJUSTES.
-            LoadScreen, //PANTALLA DE CARGA DE NIVEL.
-            Start, //ANTES DE COMENZAR LA PARTIDA.
-            Playing, //MIENTRAS ESTAMOS JUGANDO LA PARTIDA.
-            Finish //CUANDO TERMINAMOS LA PARTIDA.
+            MENU, //MENU PRINCIPAL.
+            PAUSE, //MENU DE PAUSA.
+            PRELOAD, //SE GUARDA LA SELECCIÓN DE COCHE/MODO ANTES DE LA PANTALLA DE CARGA.
+            SETTINGS, //MENU DE AJUSTES.
+            LOADSCREEN, //PANTALLA DE CARGA DE NIVEL.
+            START, //ANTES DE COMENZAR LA PARTIDA.
+            PLAYING, //MIENTRAS ESTAMOS JUGANDO LA PARTIDA.
+            END //CUANDO TERMINAMOS LA PARTIDA.
         }
         public enum Gamemode
         {
-            Race, //MODO CARRERA ORIGINAL
-            Drift, //MODO DE DRIFT
-            Trial, //MODO CONTRARRELOJ
-            Random //MODO RANDOM
+            RACE, //MODO CARRERA ORIGINAL
+            DRIFT, //MODO DE DRIFT
+            TRIAL, //MODO CONTRARRELOJ
+            RANDOM //MODO RANDOM
         }
 
         [Header("Game States")]
@@ -52,7 +51,7 @@ namespace FastPolygons.Manager
         {
             fadeAnimator.SetTrigger("FadeOut");
 
-            state = States.MainMenu;
+            state = States.MENU;
             Canvas myCanvas = transform.GetChild(0).GetComponent<Canvas>();
             myCanvas.enabled = false;
 
@@ -74,7 +73,7 @@ namespace FastPolygons.Manager
         {
             switch (states)
             {
-                case States.MainMenu:
+                case States.MENU:
 
                     Time.timeScale = 1;
                     loadCars = false;
@@ -92,7 +91,7 @@ namespace FastPolygons.Manager
 
                     break;
 
-                case States.PauseMenu:
+                case States.PAUSE:
 
                     AudioManager.Instance.aS.Pause();
 
@@ -122,7 +121,7 @@ namespace FastPolygons.Manager
 
                     break;
 
-                case States.PreLoad:
+                case States.PRELOAD:
 
                     pages[0].SetActive(false);
                     pages[1].SetActive(false);
@@ -135,7 +134,7 @@ namespace FastPolygons.Manager
 
                     break;
 
-                case States.LoadScreen:
+                case States.LOADSCREEN:
 
                     Time.timeScale = 1;
                     loadCars = false;
@@ -151,7 +150,7 @@ namespace FastPolygons.Manager
 
                     break;
 
-                case States.Settings:
+                case States.SETTINGS:
 
                     pages[0].SetActive(false);
                     pages[1].SetActive(true);
@@ -167,7 +166,7 @@ namespace FastPolygons.Manager
 
                     break;
 
-                case States.Start:
+                case States.START:
 
                     LoadCars();
 
@@ -185,7 +184,7 @@ namespace FastPolygons.Manager
 
                     break;
 
-                case States.Playing:
+                case States.PLAYING:
 
                     Time.timeScale = 1;
 
@@ -215,12 +214,12 @@ namespace FastPolygons.Manager
 
                     if (RaceManager.instance.checkPoints[0].currentLap == 4)
                     {
-                        state = States.Finish;
+                        state = States.END;
                     }
 
                     break;
 
-                case States.Finish:
+                case States.END:
 
                     positionText.text = "Position " + RaceManager.instance.position.ToString();
                     bestTimeText.text = RaceManager.instance.bestTimeLapTxt.text;
@@ -309,7 +308,7 @@ namespace FastPolygons.Manager
         {
             Canvas myCanvas = transform.GetChild(0).GetComponent<Canvas>();
             myCanvas.enabled = true;
-            state = States.PreLoad;
+            state = States.PRELOAD;
 
             fadeAnimator.SetTrigger("FadeIn");
         }
@@ -350,7 +349,7 @@ namespace FastPolygons.Manager
             yield return new WaitForSeconds(0.5f);
             GameObject.Find("Directional_Light").GetComponent<Animator>().SetTrigger("Cycle");
 
-            state = States.Playing;
+            state = States.PLAYING;
 
             AudioManager.Instance.aS.clip = Resources.Load<AudioClip>("Music/Theme01");
             AudioManager.Instance.aS.Play();
@@ -366,7 +365,7 @@ namespace FastPolygons.Manager
             transform.GetChild(0).GetComponent<AudioSource>().Play();
             Canvas inGame = GameObject.FindGameObjectWithTag("CanvasInGame").GetComponent<Canvas>();
             inGame.enabled = true;
-            state = States.Playing;
+            state = States.PLAYING;
         }
 
         public void RestartGame()
@@ -375,7 +374,7 @@ namespace FastPolygons.Manager
 
             Canvas myCanvas = transform.GetChild(0).GetComponent<Canvas>();
             myCanvas.enabled = true;
-            state = States.PreLoad;
+            state = States.PRELOAD;
 
             fadeAnimator.SetTrigger("FadeIn");
 
@@ -389,7 +388,7 @@ namespace FastPolygons.Manager
             Canvas myCanvas = transform.GetChild(0).GetComponent<Canvas>();
             myCanvas.enabled = false;
 
-            state = States.MainMenu;
+            state = States.MENU;
             AudioManager.Instance.musicChanged?.Invoke(state);
         }
         public void OpenSettings()
@@ -398,7 +397,7 @@ namespace FastPolygons.Manager
             myCanvas.enabled = true;
 
             transform.GetChild(0).GetComponent<AudioSource>().Play();
-            state = States.Settings;
+            state = States.SETTINGS;
 
             if (SceneManager.GetActiveScene().name != "Menu")
             {
@@ -417,7 +416,7 @@ namespace FastPolygons.Manager
                 Canvas myCanvas = transform.GetChild(0).GetComponent<Canvas>();
                 myCanvas.enabled = false;
 
-                state = States.MainMenu;
+                state = States.MENU;
                 MenuManager.mM.estados = MenuManager.States.MainMenu;
             }
 
@@ -425,7 +424,7 @@ namespace FastPolygons.Manager
             {
                 transform.GetChild(0).GetComponent<AudioSource>().Play();
                 Camera.main.clearFlags = CameraClearFlags.Skybox;
-                state = States.PauseMenu;
+                state = States.PAUSE;
             }
         }
 

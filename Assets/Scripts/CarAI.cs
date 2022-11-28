@@ -95,7 +95,7 @@ public class CarAI : MonoBehaviour, IEnableLights
         chasisColor.materials[1].color = car_config.chasisColor;
 
         float dot = Vector3.Dot(transform.forward, rb.velocity);
-        if (Mathf.Abs(dot) < 0.1f && !isCollision && GameManager.Instance.state == GameManager.States.Playing)
+        if (Mathf.Abs(dot) < 0.1f && !isCollision && GameManager.Instance.state == GameManager.States.PLAYING)
         {
             timerDie += Time.deltaTime;
 
@@ -216,7 +216,7 @@ public class CarAI : MonoBehaviour, IEnableLights
 
     void CarHandler() 
     {
-        if(GameManager.Instance.state == GameManager.States.Playing)
+        if(GameManager.Instance.state == GameManager.States.PLAYING)
         {
             if (wayPoints[currentNode].tag == "Curve" && currentSpeed > 30)
             {

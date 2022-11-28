@@ -280,6 +280,7 @@ public class CarController : MonoBehaviour, IEnableLights
 
             GetComponent<BoxCollider>().enabled = false;
             rb.useGravity = false;
+            rb.constraints = RigidbodyConstraints.FreezeAll;
 
             if (RaceManager.instance.checkPoints[0].currentCheckPoint == 0)
             {
@@ -308,11 +309,12 @@ public class CarController : MonoBehaviour, IEnableLights
 
             GetComponent<BoxCollider>().enabled = false;
             rb.useGravity = false;
+            rb.constraints = RigidbodyConstraints.FreezeAll;
 
             if (RaceManager.instance.checkPoints[0].currentCheckPoint == 0)
             {
                 newPos = wayPoints[1].transform.position;
-                newRot = wayPoints[1].transform.rotation;
+                newRot = wayPoints[1].transform.localRotation;
                 newPos.y += 5;
             }
             else
@@ -328,7 +330,10 @@ public class CarController : MonoBehaviour, IEnableLights
     {
         transform.position = newPos;
         transform.rotation = newRot;
+
         rb.useGravity = true;
+        rb.constraints = RigidbodyConstraints.None;
+
         GetComponent<BoxCollider>().enabled = true;
         isMoving = true;
         collision = false;

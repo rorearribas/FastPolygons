@@ -13,8 +13,6 @@ public class CarController : MonoBehaviour, IEnableLights
     Rigidbody rb;
     Animator anim;
 
-    float reverse = -1f;
-
     public bool isReverse, isBreaking, isReverseTrue, isMoving = true, collision;
     private float currentSteerAngle;
     private float realSpeed;
@@ -41,7 +39,6 @@ public class CarController : MonoBehaviour, IEnableLights
     public GameObject brakeObj;
 
     private List<Transform> wayPoints;
-    private int currentNode = 0;
     private Vector3 newPos;
     private Quaternion newRot;
     private Transform circuitPath;

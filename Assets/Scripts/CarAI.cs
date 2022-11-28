@@ -37,15 +37,18 @@ public class CarAI : MonoBehaviour, IEnableLights
     [SerializeField] WheelCollider frontRightWheelCollider;
     [SerializeField] WheelCollider rearLeftWheelCollider;
     [SerializeField] WheelCollider rearRightWheelCollider;
+
     [SerializeField] Transform frontLeftWheelTransform;
     [SerializeField] Transform frontRightWheelTransform;
     [SerializeField] Transform rearLeftWheelTransform;
     [SerializeField] Transform rearRightWheelTransform;
+
     [SerializeField] Vector3 centerOfMass;
     [SerializeField] Material[] brakeLightColour;
     [SerializeField] GameObject brakeObj;
     [SerializeField] ParticleSystem[] effects;
-    [SerializeField] bool isBraking = false, isCollision;
+    [SerializeField] bool isBraking = false;
+    [SerializeField] bool isCollision;
 
     #endregion
 

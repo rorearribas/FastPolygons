@@ -175,7 +175,7 @@ public class CarController : MonoBehaviour, IEnableLights
 
     void Controls()
     {
-        if(isMoving && GameManager.gM.state == GameManager.States.Playing)
+        if(isMoving && GameManager.Instance.state == GameManager.States.Playing)
         {
             h = Input.GetAxis("Horizontal");
             v = Input.GetAxis("Vertical");
@@ -191,7 +191,7 @@ public class CarController : MonoBehaviour, IEnableLights
 
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                GameManager.gM.state = GameManager.States.PauseMenu;
+                GameManager.Instance.state = GameManager.States.PauseMenu;
                 for (int i = 0; i < 5; i++)
                 {
                     AudioSource aS = GetComponentInChildren<ArcadeEngineAudio>().transform.GetChild(i).GetComponent<AudioSource>();
@@ -339,7 +339,7 @@ public class CarController : MonoBehaviour, IEnableLights
 
     public float LocalSpeed()
     {
-        if (isMoving && GameManager.gM.state == GameManager.States.Playing)
+        if (isMoving && GameManager.Instance.state == GameManager.States.Playing)
         {
             float dot = Vector3.Dot(transform.forward, rb.velocity);
             if (Mathf.Abs(dot) > 0.1f)

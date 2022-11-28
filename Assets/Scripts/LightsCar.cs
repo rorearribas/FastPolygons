@@ -13,7 +13,6 @@ public class LightsCar : MonoBehaviour
         }
     }
 }
-
 public interface IEnableLights 
 {
     void SwitchLights();

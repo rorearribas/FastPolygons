@@ -5,7 +5,7 @@ public class SwitchFade : MonoBehaviour
 {
     public void LoadLevel() 
     {
-        GameManager.gM.state = GameManager.States.LoadScreen;
-        AudioManager.audioM.musicChanged?.Invoke(GameManager.gM.state);
+        GameManager.Instance.state = GameManager.States.LoadScreen;
+        AudioManager.Instance.musicChanged?.Invoke(GameManager.Instance.state);
     }
 }

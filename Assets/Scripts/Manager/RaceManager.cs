@@ -69,7 +69,7 @@ namespace FastPolygons.Manager
 
         private void RaceUpdate()
         {
-            switch (GameManager.gM.state)
+            switch (GameManager.Instance.state)
             {
                 #region StartRace
 

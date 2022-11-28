@@ -1,15 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.Rendering.PostProcessing;
 
 namespace FastPolygons.Manager
 {
-    public class GameManager : MonoBehaviour
+    public class GameManager : PersistentSingleton<GameManager>
     {
-        public static GameManager gM;
         public enum States
         {
 
@@ -22,7 +22,6 @@ namespace FastPolygons.Manager
             Playing, //MIENTRAS ESTAMOS JUGANDO LA PARTIDA.
             Finish //CUANDO TERMINAMOS LA PARTIDA.
         }
-
         public enum Gamemode
         {
             Race, //MODO CARRERA ORIGINAL
@@ -49,23 +48,6 @@ namespace FastPolygons.Manager
         private bool isCountDown, loadCars;
         private int currentResolution;
 
-        #region Singleton pattern
-        private void Awake()
-        {
-            if (gM == null)
-            {
-                gM = this;
-            }
-            else
-            {
-                Destroy(this.gameObject);
-            }
-
-            DontDestroyOnLoad(this.gameObject);
-        }
-
-        #endregion
-
         private void OnEnable()
         {
             fadeAnimator.SetTrigger("FadeOut");
@@ -77,7 +59,7 @@ namespace FastPolygons.Manager
             LoadResolutions();
             LoadGraphics();
 
-            AudioManager.audioM.musicChanged.Invoke(state);
+            AudioManager.Instance.musicChanged.Invoke(state);
             AudioSource aS = transform.GetChild(0).GetComponent<AudioSource>();
             aS.Stop();
         }
@@ -112,7 +94,7 @@ namespace FastPolygons.Manager
 
                 case States.PauseMenu:
 
-                    AudioManager.audioM.aS.Pause();
+                    AudioManager.Instance.aS.Pause();
 
                     Time.timeScale = 0;
 
@@ -210,8 +192,8 @@ namespace FastPolygons.Manager
                     inGame = GameObject.FindGameObjectWithTag("CanvasInGame").GetComponent<Canvas>();
                     inGame.enabled = true;
 
-                    AudioManager.audioM.aS.UnPause();
-                    AudioManager.audioM.aS.loop = true;
+                    AudioManager.Instance.aS.UnPause();
+                    AudioManager.Instance.aS.loop = true;
 
                     pages[0].SetActive(false);
                     pages[1].SetActive(false);
@@ -252,7 +234,7 @@ namespace FastPolygons.Manager
                     inGame = GameObject.FindGameObjectWithTag("CanvasInGame").GetComponent<Canvas>();
                     inGame.enabled = false;
 
-                    AudioManager.audioM.aS.Stop();
+                    AudioManager.Instance.aS.Stop();
 
                     if (ArcadeEngineAudio.instance == null)
                     {
@@ -323,7 +305,6 @@ namespace FastPolygons.Manager
                 loadCars = true;
             }
         }
-
         public void LoadLevel()
         {
             Canvas myCanvas = transform.GetChild(0).GetComponent<Canvas>();
@@ -356,23 +337,23 @@ namespace FastPolygons.Manager
                 time--;
                 countDownText.text = time.ToString();
 
-                AudioManager.audioM.aS.clip = Resources.Load<AudioClip>("Effects/StartSound01");
-                AudioManager.audioM.aS.Play();
+                AudioManager.Instance.aS.clip = Resources.Load<AudioClip>("Effects/StartSound01");
+                AudioManager.Instance.aS.Play();
 
                 yield return new WaitForSeconds(1);
             }
             countDownText.text = "GO!";
 
-            AudioManager.audioM.aS.clip = Resources.Load<AudioClip>("Effects/StartSound02");
-            AudioManager.audioM.aS.Play();
+            AudioManager.Instance.aS.clip = Resources.Load<AudioClip>("Effects/StartSound02");
+            AudioManager.Instance.aS.Play();
 
             yield return new WaitForSeconds(0.5f);
             GameObject.Find("Directional_Light").GetComponent<Animator>().SetTrigger("Cycle");
 
             state = States.Playing;
 
-            AudioManager.audioM.aS.clip = Resources.Load<AudioClip>("Music/Theme01");
-            AudioManager.audioM.aS.Play();
+            AudioManager.Instance.aS.clip = Resources.Load<AudioClip>("Music/Theme01");
+            AudioManager.Instance.aS.Play();
 
             isCountDown = false;
         }
@@ -409,7 +390,7 @@ namespace FastPolygons.Manager
             myCanvas.enabled = false;
 
             state = States.MainMenu;
-            AudioManager.audioM.musicChanged?.Invoke(state);
+            AudioManager.Instance.musicChanged?.Invoke(state);
         }
         public void OpenSettings()
         {
@@ -517,6 +498,16 @@ namespace FastPolygons.Manager
         }
 
         #endregion
+
+        public static EventSystem _EventSystem {
+            get
+            {
+                if (EventSystem.current == null)
+                    return null;
+                else
+                    return EventSystem.current;
+            }
+        }
     }
 
 }

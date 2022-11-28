@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using System;
 
 namespace FastPolygons.Manager
@@ -11,7 +12,7 @@ namespace FastPolygons.Manager
         public enum States 
         { 
             MainMenu, 
-            SelectorCar,
+            CarSelector,
             Settings
         }
 
@@ -68,10 +69,9 @@ namespace FastPolygons.Manager
             anim.SetTrigger("Selector");
             aS.Play();
         }
-
         public void Settings()
         {
-            GameManager.gM.OpenSettings();
+            GameManager.Instance.OpenSettings();
             aS.Play();
         }
         public void ExitGame()
@@ -85,31 +85,23 @@ namespace FastPolygons.Manager
             switch (states)
             {
                 case States.MainMenu:
-
                     pages[0].SetActive(true);
                     pages[1].SetActive(false);
                     stateName.text = "FAST POLYGONS";
-
                     break;
 
                 case States.Settings:
-
                     pages[0].SetActive(false);
                     pages[1].SetActive(false);
                     stateName.text = "";
-
                     break;
 
-                case States.SelectorCar:
-
+                case States.CarSelector:
                     pages[0].SetActive(false);
                     pages[1].SetActive(true);
-
                     OnSelectorCar?.Invoke();
                     OnSelectorCar -= MenuManager_OnSelectorCar;
-
                     stateName.text = "CAR SELECTOR";
-
                     break;
             }
         }
@@ -123,7 +115,6 @@ namespace FastPolygons.Manager
             {
                 indexConfig = 0;
             }
-
             else
             {
                 indexConfig++;
@@ -139,11 +130,11 @@ namespace FastPolygons.Manager
 
             for (int i = 0; i < sliderConfigs.Length; i++)
             {
-                sliderConfigs[i].fillRect.GetComponent<Image>().color = carConfigs[indexConfig].chasisColor;
+                sliderConfigs[i].fillRect.GetComponent<Image>().color = 
+                    carConfigs[indexConfig].chasisColor;
             }
         }
-
-        public void PreviusCar()
+        public void PreviousCar()
         {
             aS.Play();
 
@@ -170,23 +161,27 @@ namespace FastPolygons.Manager
                 sliderConfigs[i].fillRect.GetComponent<Image>().color = carConfigs[indexConfig].chasisColor;
             }
         }
-
         public GenerateCar_SO SetConfig()
         {
             return setConfig = carConfigs[indexConfig];
         }
-
         #endregion
 
         public void LoadLevel()
         {
             aS.Play();
-            GameManager.gM.LoadLevel();
+            GameManager.Instance.LoadLevel();
+
+            GameObject CurrentGO = GameManager._EventSystem.currentSelectedGameObject;
+            if (CurrentGO.GetComponent<Button>() != null)
+            {
+                CurrentGO.GetComponent<Button>().enabled = false;
+            }
         }
 
         public void ChangeToSelector()
         {
-            estados = States.SelectorCar;
+            estados = States.CarSelector;
         }
 
         public void BackToMainMenu()

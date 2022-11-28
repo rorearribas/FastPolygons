@@ -5,25 +5,14 @@ using FastPolygons.Manager;
 
 namespace FastPolygons.Manager
 {
-    public class AudioManager : MonoBehaviour
+    public class AudioManager : PersistentSingleton<AudioManager>
     {
-        public static AudioManager audioM;
         public AudioSource aS;
         public delegate void OnMusicChanged(GameManager.States estados);
         public OnMusicChanged musicChanged;
-        private void Awake()
+
+        public void OnEnable()
         {
-            if (audioM == null)
-            {
-                audioM = this;
-            }
-            else
-            {
-                Destroy(this.gameObject);
-            }
-
-            DontDestroyOnLoad(this.gameObject);
-
             aS = GetComponent<AudioSource>();
             musicChanged += SelectMusic;
         }
@@ -33,13 +22,13 @@ namespace FastPolygons.Manager
             switch (estados)
             {
                 case GameManager.States.MainMenu:
-                    AudioManager.audioM.aS.clip = Resources.Load<AudioClip>("Music/Theme01");
+                    AudioManager.Instance.aS.clip = Resources.Load<AudioClip>("Music/Theme01");
                     aS.Play();
                     aS.loop = true;
                     break;
 
                 case GameManager.States.PauseMenu:
-                    audioM.musicChanged += audioM.musicChanged;
+                    Instance.musicChanged += Instance.musicChanged;
                     aS.Pause();
                     break;
 
@@ -52,7 +41,7 @@ namespace FastPolygons.Manager
                     break;
 
                 case GameManager.States.Playing:
-                    audioM.musicChanged += audioM.musicChanged;
+                    Instance.musicChanged += Instance.musicChanged;
                     aS.UnPause();
                     aS.Play();
                     aS.loop = true;

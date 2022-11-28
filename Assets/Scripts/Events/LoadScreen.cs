@@ -20,7 +20,6 @@ public class LoadScreen : MonoBehaviour
     {
         instance = this;    
     }
-
     void Start()
     {
         fillLoading.fillAmount = 0;
@@ -53,8 +52,8 @@ public class LoadScreen : MonoBehaviour
                 {
                     asyncOperation.allowSceneActivation = true;
                     textToContinueObj.SetActive(false);
-                    GameManager.gM.state = GameManager.States.Start;
-                    GameManager.gM.fadeAnimator.SetTrigger("FadeOut");
+                    GameManager.Instance.state = GameManager.States.Start;
+                    GameManager.Instance.fadeAnimator.SetTrigger("FadeOut");
                     reset = false;
                 }
             }

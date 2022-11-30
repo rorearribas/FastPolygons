@@ -169,7 +169,7 @@ public class CarController : MonoBehaviour, IEnableLights
 
         for (int i = 0; i < effects.Length - 1; i++)
         {
-                effects[i].Stop();   
+            effects[i].Stop();   
         }
 
         MeshRenderer matObj = brakeObj.GetComponent<MeshRenderer>();
@@ -336,14 +336,16 @@ public class CarController : MonoBehaviour, IEnableLights
             if (RaceManager.Instance.CurrentData[m_ID].m_currentCheckpoint == 0)
             {
                 m_Respawn.newPos = wayPoints[1].transform.position;
-                m_Respawn.newRot = wayPoints[1].transform.rotation;
-                m_Respawn.newPos.y += 5;
+                m_Respawn.newPos.y += 3;
+
+                Vector3 DesiredRot = (wayPoints[2].position - transform.position);
+                transform.rotation = Quaternion.LookRotation(DesiredRot, Vector3.up);
             }
             else
             {
                 m_Respawn.newPos = RespawnData.CurrentPosition;
                 m_Respawn.newRot = RespawnData.CurrentRotation;
-                m_Respawn.newPos.y += 5;
+                m_Respawn.newPos.y += 3;
             }
         }
     }

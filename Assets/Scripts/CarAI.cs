@@ -66,8 +66,6 @@ public class CarAI : MonoBehaviour, IEnableLights
     private List<Transform> wayPoints;
     private int currentNode = 0;
     private Animator anim;
-    private Vector3 newPos;
-    private Quaternion newRot;
     private float timerDie;
     private Rigidbody rb;
     private Vector3 relativeVector;
@@ -113,14 +111,20 @@ public class CarAI : MonoBehaviour, IEnableLights
             {
                 if (currentNode < 1)
                 {
-                    newPos = wayPoints[0].position;
-                    newPos.y += 1;
+                    m_Respawn.newPos = wayPoints[0].position;
+                    m_Respawn.newPos.y += 3;
+
+                    Vector3 DesiredRot = (wayPoints[1].position - m_Respawn.newPos);
+                    m_Respawn.newRot = Quaternion.LookRotation(DesiredRot, Vector3.up);
                 }
                 else
                 {
-                    newPos = wayPoints[currentNode - 2].position;
+                    m_Respawn.newPos = wayPoints[currentNode - 2].position;
                     currentNode = currentNode - 2;
-                    newPos.y += 1;
+                    m_Respawn.newPos.y += 3;
+
+                    Vector3 DesiredRot = (wayPoints[currentNode - 2].position - m_Respawn.newPos);
+                    m_Respawn.newRot = Quaternion.LookRotation(DesiredRot, Vector3.up);
                 }
 
                 ParticleSystem col = Instantiate(effects[2], transform.position, Quaternion.identity);
@@ -130,7 +134,6 @@ public class CarAI : MonoBehaviour, IEnableLights
 
                 GetComponent<BoxCollider>().enabled = false;
                 rb.useGravity = false;
-
 
                 anim.SetTrigger("Crash");
                 timerDie = 0;
@@ -285,13 +288,13 @@ public class CarAI : MonoBehaviour, IEnableLights
             {
                 m_Respawn.newPos = wayPoints[1].transform.position;
                 m_Respawn.newRot = wayPoints[1].transform.rotation;
-                m_Respawn.newPos.y += 5;
+                m_Respawn.newPos.y += 3;
             }
             else
             {
                 m_Respawn.newPos = RespawnData.CurrentPosition;
                 m_Respawn.newRot = RespawnData.CurrentRotation;
-                m_Respawn.newPos.y += 5;
+                m_Respawn.newPos.y += 3;
             }
         }
     }
@@ -523,8 +526,8 @@ public class CarAI : MonoBehaviour, IEnableLights
 
     public void Respawn()
     {
-        transform.position = newPos;
-        transform.rotation = newRot;
+        transform.position = m_Respawn.newPos;
+        transform.rotation = m_Respawn.newRot;
 
         rb.useGravity = true;
         rb.constraints = RigidbodyConstraints.None;

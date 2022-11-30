@@ -20,14 +20,22 @@ namespace FastPolygons
                     Data.CurrentPosition = RaceManager.Instance.CurrentData[_id].m_Checkpoints
                     [RaceManager.Instance.CurrentData[_id].m_currentCheckpoint - 1].transform.position;
 
-                    Quaternion LocalRot = RaceManager.Instance.CurrentData[_id].m_Checkpoints
-                    [RaceManager.Instance.CurrentData[_id].m_currentCheckpoint - 1].transform.localRotation;
+                    Transform CheckPoint = RaceManager.Instance.CurrentData[_id].m_Checkpoints
+                    [RaceManager.Instance.CurrentData[_id].m_currentCheckpoint - 1].transform;
 
-                    Data.CurrentRotation = Quaternion.Euler(0.0f, 
-                        LocalRot.eulerAngles.y * -1.0f, LocalRot.eulerAngles.z * -1.0f);
+                    Transform Target = RaceManager.Instance.CurrentData[_id].m_Checkpoints
+                    [RaceManager.Instance.CurrentData[_id].m_currentCheckpoint - 1].GetComponent<Checkpoints>().LookRotation;
+
+                    Data.CurrentRotation = GetRotation(CheckPoint, Target);
                 }
             }
             return Data;
+        }
+
+        private Quaternion GetRotation(Transform Start, Transform End)
+        {
+            Vector3 DesiredRot = (End.position - Start.position);
+            return Quaternion.LookRotation(DesiredRot, Vector3.up);
         }
 
     }

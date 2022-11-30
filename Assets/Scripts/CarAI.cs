@@ -286,9 +286,11 @@ public class CarAI : MonoBehaviour, IEnableLights
 
             if (RaceManager.Instance.CurrentData[m_ID].m_currentCheckpoint == 0)
             {
-                m_Respawn.newPos = wayPoints[1].transform.position;
-                m_Respawn.newRot = wayPoints[1].transform.rotation;
+                m_Respawn.newPos = wayPoints[0].transform.position;
                 m_Respawn.newPos.y += 3;
+
+                Vector3 DesiredRot = (wayPoints[1].position - m_Respawn.newPos);
+                m_Respawn.newRot = Quaternion.LookRotation(DesiredRot, Vector3.up);
             }
             else
             {

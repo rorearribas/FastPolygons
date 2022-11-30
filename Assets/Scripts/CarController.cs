@@ -271,7 +271,7 @@ public class CarController : MonoBehaviour, IEnableLights
                     m_Respawn.newPos.y += 3;
                 }
 
-                anim.SetTrigger("Die");
+                anim.SetTrigger("Crash");
                 isMoving = false;
             }
             
@@ -335,11 +335,11 @@ public class CarController : MonoBehaviour, IEnableLights
 
             if (RaceManager.Instance.CurrentData[m_ID].m_currentCheckpoint == 0)
             {
-                m_Respawn.newPos = wayPoints[1].transform.position;
+                m_Respawn.newPos = wayPoints[0].transform.position;
                 m_Respawn.newPos.y += 3;
 
-                Vector3 DesiredRot = (wayPoints[2].position - transform.position);
-                transform.rotation = Quaternion.LookRotation(DesiredRot, Vector3.up);
+                Vector3 DesiredRot = (wayPoints[1].position - m_Respawn.newPos);
+                m_Respawn.newRot = Quaternion.LookRotation(DesiredRot, Vector3.up);
             }
             else
             {

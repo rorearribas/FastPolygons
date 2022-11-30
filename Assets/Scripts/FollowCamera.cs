@@ -11,7 +11,6 @@ public class FollowCamera : MonoBehaviour
     {
         OnFollowCar += FollowCamera_FollowCar;
     }
-
     private void FollowCamera_FollowCar(object sender, EventArgs e)
     {
         car = GameObject.FindGameObjectWithTag("Player").transform;

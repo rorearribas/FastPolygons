@@ -8,7 +8,7 @@ namespace FastPolygons.Manager
     public class RaceManager : TemporalSingleton<RaceManager>
     {
         public List<RaceData> CurrentData;
-        public List<RaceData> sorting;
+        public List<GameObject> CurrentCheckpoints;
 
         public Text lapCountTxt;
         public Text timeLapTxt;
@@ -43,12 +43,6 @@ namespace FastPolygons.Manager
                     CurrentData[0].m_Checkpoints[CurrentData[0].m_currentCheckpoint].GetComponent<MeshRenderer>().material = matt[1];
                 }
             }
-
-            for (int i = 0; i < CurrentData.Count; i++)
-            {
-                sorting.Add(CurrentData[i]);
-            }
-
             OnLoadCars -= RaceManager_OnLoadCars;
         }
 
@@ -118,7 +112,7 @@ namespace FastPolygons.Manager
 
                     if (Vector3.Distance(CurrentData[0].m_CarGO.transform.position, CurrentData[0].m_Checkpoints[CurrentData[0].m_currentCheckpoint].transform.position) < 6)
                     {
-                        if (CurrentData[0].m_currentCheckpoint == CurrentData[0].m_Checkpoints.Length - 1)
+                        if (CurrentData[0].m_currentCheckpoint == CurrentData[0].m_Checkpoints.Count - 1)
                         {
                             CurrentData[0].m_currentCheckpoint = 0;
                             CurrentData[0].m_Checkpoints[CurrentData[0].m_currentCheckpoint].GetComponent<BoxCollider>().enabled = true;
@@ -146,7 +140,6 @@ namespace FastPolygons.Manager
                                 horas = 0;
                                 realTime = 0;
                             }
-
                             else
                             {
                                 if (CurrentData[0].m_currentLap == 0 && lastTime == 0)
@@ -190,99 +183,69 @@ namespace FastPolygons.Manager
                             aS.Play();
                         }
                     }
-
                     if (Vector3.Distance(CurrentData[1].m_CarGO.transform.position, CurrentData[1].m_Checkpoints[CurrentData[1].m_currentCheckpoint].transform.position) < 6)
                     {
-                        if (CurrentData[1].m_currentCheckpoint == CurrentData[1].m_Checkpoints.Length - 1)
+                        if (CurrentData[1].m_currentCheckpoint == CurrentData[1].m_Checkpoints.Count - 1)
                         {
                             CurrentData[1].m_currentCheckpoint = 0;
-                            CurrentData[1].m_Checkpoints[CurrentData[1].m_currentCheckpoint].SetActive(true);
-                            CurrentData[1].m_Checkpoints[12].SetActive(false);
-
                             CurrentData[1].m_currentLap++;
                         }
 
                         else
                         {
                             CurrentData[1].m_currentCheckpoint++;
-                            CurrentData[1].m_Checkpoints[CurrentData[1].m_currentCheckpoint - 1].SetActive(false);
-                            CurrentData[1].m_Checkpoints[CurrentData[1].m_currentCheckpoint].SetActive(true);
                         }
                     }
-
                     if (Vector3.Distance(CurrentData[2].m_CarGO.transform.position, CurrentData[2].m_Checkpoints[CurrentData[2].m_currentCheckpoint].transform.position) < 6)
                     {
-                        if (CurrentData[2].m_currentCheckpoint == CurrentData[2].m_Checkpoints.Length - 1)
+                        if (CurrentData[2].m_currentCheckpoint == CurrentData[2].m_Checkpoints.Count - 1)
                         {
                             CurrentData[2].m_currentCheckpoint = 0;
-                            CurrentData[2].m_Checkpoints[CurrentData[2].m_currentCheckpoint].SetActive(true);
-                            CurrentData[2].m_Checkpoints[12].SetActive(false);
-
                             CurrentData[2].m_currentLap++;
                         }
 
                         else
                         {
                             CurrentData[2].m_currentCheckpoint++;
-                            CurrentData[2].m_Checkpoints[CurrentData[2].m_currentCheckpoint - 1].SetActive(false);
-                            CurrentData[2].m_Checkpoints[CurrentData[2].m_currentCheckpoint].SetActive(true);
                         }
                     }
-
                     if (Vector3.Distance(CurrentData[3].m_CarGO.transform.position, CurrentData[3].m_Checkpoints[CurrentData[3].m_currentCheckpoint].transform.position) < 6)
                     {
-                        if (CurrentData[3].m_currentCheckpoint == CurrentData[3].m_Checkpoints.Length - 1)
+                        if (CurrentData[3].m_currentCheckpoint == CurrentData[3].m_Checkpoints.Count - 1)
                         {
                             CurrentData[3].m_currentCheckpoint = 0;
-                            CurrentData[3].m_Checkpoints[CurrentData[3].m_currentCheckpoint].SetActive(true);
-                            CurrentData[3].m_Checkpoints[12].SetActive(false);
-
                             CurrentData[3].m_currentLap++;
                         }
 
                         else
                         {
                             CurrentData[3].m_currentCheckpoint++;
-                            CurrentData[3].m_Checkpoints[CurrentData[3].m_currentCheckpoint - 1].SetActive(false);
-                            CurrentData[3].m_Checkpoints[CurrentData[3].m_currentCheckpoint].SetActive(true);
                         }
                     }
-
                     if (Vector3.Distance(CurrentData[4].m_CarGO.transform.position, CurrentData[4].m_Checkpoints[CurrentData[4].m_currentCheckpoint].transform.position) < 6)
                     {
-                        if (CurrentData[4].m_currentCheckpoint == CurrentData[4].m_Checkpoints.Length - 1)
+                        if (CurrentData[4].m_currentCheckpoint == CurrentData[4].m_Checkpoints.Count - 1)
                         {
                             CurrentData[4].m_currentCheckpoint = 0;
-                            CurrentData[4].m_Checkpoints[CurrentData[3].m_currentCheckpoint].SetActive(true);
-                            CurrentData[4].m_Checkpoints[12].SetActive(false);
-
                             CurrentData[4].m_currentLap++;
                         }
 
                         else
                         {
                             CurrentData[4].m_currentCheckpoint++;
-                            CurrentData[4].m_Checkpoints[CurrentData[4].m_currentCheckpoint - 1].SetActive(false);
-                            CurrentData[4].m_Checkpoints[CurrentData[4].m_currentCheckpoint].SetActive(true);
                         }
                     }
-
                     if (Vector3.Distance(CurrentData[5].m_CarGO.transform.position, CurrentData[5].m_Checkpoints[CurrentData[5].m_currentCheckpoint].transform.position) < 6)
                     {
-                        if (CurrentData[5].m_currentCheckpoint == CurrentData[5].m_Checkpoints.Length - 1)
+                        if (CurrentData[5].m_currentCheckpoint == CurrentData[5].m_Checkpoints.Count - 1)
                         {
                             CurrentData[5].m_currentCheckpoint = 0;
-                            CurrentData[5].m_Checkpoints[CurrentData[3].m_currentCheckpoint].SetActive(true);
-                            CurrentData[5].m_Checkpoints[12].SetActive(false);
-
                             CurrentData[5].m_currentLap++;
                         }
 
                         else
                         {
                             CurrentData[5].m_currentCheckpoint++;
-                            CurrentData[5].m_Checkpoints[CurrentData[5].m_currentCheckpoint - 1].SetActive(false);
-                            CurrentData[5].m_Checkpoints[CurrentData[5].m_currentCheckpoint].SetActive(true);
                         }
                     }
 
@@ -290,9 +253,8 @@ namespace FastPolygons.Manager
 
                     #region SortingPositions
 
-                    sorting.Sort((r1, r2) =>
+                    CurrentData.Sort((r1, r2) =>
                     {
-
                         if (r2.m_currentLap != r1.m_currentLap)
                             return r1.m_currentLap.CompareTo(r2.m_currentLap);
 
@@ -302,7 +264,7 @@ namespace FastPolygons.Manager
                         return r2.m_nextCheckpointDistance.CompareTo(r1.m_nextCheckpointDistance);
                     });
 
-                    int index = sorting.FindIndex(a => a.m_name.Contains("Player"));
+                    int index = CurrentData.FindIndex(a => a.m_CarGO.CompareTag("Player"));
 
                     switch (index)
                     {

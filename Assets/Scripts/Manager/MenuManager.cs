@@ -51,6 +51,7 @@ namespace FastPolygons.Manager
             }
 
             OnSelectorCar += MenuManager_OnSelectorCar;
+            GameManager.Instance.OnLoadCars += GameManager.Instance.GameManager_OnLoadCars;
         }
 
         private void MenuManager_OnSelectorCar()

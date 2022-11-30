@@ -2435,6 +2435,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CurrentData: []
   sorting: []
+  CurrentCheckpoints:
+  - {fileID: 6649792932994428803}
+  - {fileID: 6649792932188519531}
+  - {fileID: 6649792933887686888}
+  - {fileID: 6649792932970468266}
+  - {fileID: 6649792933982944801}
+  - {fileID: 6649792933212999529}
+  - {fileID: 6649792933381635945}
+  - {fileID: 6649792932567247288}
+  - {fileID: 6649792932556243032}
+  - {fileID: 6649792932429749107}
+  - {fileID: 6649792934002055666}
+  - {fileID: 6649792933990938674}
+  - {fileID: 6649792932424339480}
   lapCountTxt: {fileID: 927210829}
   timeLapTxt: {fileID: 258548410}
   bestTimeLapTxt: {fileID: 2088109545}

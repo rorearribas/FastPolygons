@@ -15,5 +15,5 @@ public class RaceData
     public string m_name;
 
     [Header("Checkpoints")]
-    public GameObject[] m_Checkpoints;
+    public List<GameObject> m_Checkpoints;
 }

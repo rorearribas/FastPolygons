@@ -70,12 +70,7 @@ namespace FastPolygons.Manager
             aS.Stop();
         }
 
-        private void Start()
-        {
-            OnLoadCars += GameManager_OnLoadCars;
-        }
-
-        private void GameManager_OnLoadCars()
+        public void GameManager_OnLoadCars()
         {
             List<GenerateCar_SO> CarSettings = new List<GenerateCar_SO>();
             List<Transform> InitPos = new List<Transform>();
@@ -96,7 +91,6 @@ namespace FastPolygons.Manager
             if (player.GetComponent<CarController>())
             {
                 player.GetComponent<CarController>().m_ID = 0;
-                player.tag = "Player";
             }
 
             player.GetComponent<CarController>().car_config = MenuManager.mM.GetConfig();
@@ -132,9 +126,11 @@ namespace FastPolygons.Manager
                 {
                     RaceManager.Instance.CurrentData.Add(new RaceData());
                     RaceManager.Instance.CurrentData[i].m_CarGO = TmpCars[i];
+                    RaceManager.Instance.CurrentData[i].m_Checkpoints = RaceManager.Instance.CurrentCheckpoints; 
                 }
                 TmpCars.Clear();
                 RaceManager.Instance.Callback();
+                OnLoadCars -= GameManager_OnLoadCars;
             }
         }
 
@@ -161,13 +157,11 @@ namespace FastPolygons.Manager
 
                     Cursor.lockState = CursorLockMode.None;
                     Cursor.visible = true;
-
                     break;
 
                 case States.PAUSE:
 
                     AudioManager.Instance.aS.Pause();
-
                     Time.timeScale = 0;
 
                     pages[0].SetActive(false);
@@ -238,9 +232,7 @@ namespace FastPolygons.Manager
                     break;
 
                 case States.START:
-
                     OnLoadCars?.Invoke();
-                    OnLoadCars -= GameManager_OnLoadCars;
 
                     if (!isCountDown)
                         StartCoroutine(CountDown(4));

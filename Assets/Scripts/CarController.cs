@@ -253,6 +253,7 @@ public class CarController : MonoBehaviour, IEnableLights
 
                 GetComponent<BoxCollider>().enabled = false;
                 rb.useGravity = false;
+                rb.constraints = RigidbodyConstraints.FreezeAll;
 
                 if (RaceManager.Instance.CurrentData[0].m_currentCheckpoint == 0)
                 {

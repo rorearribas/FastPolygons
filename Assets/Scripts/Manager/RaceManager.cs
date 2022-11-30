@@ -22,9 +22,9 @@ namespace FastPolygons.Manager
 
         [HideInInspector] public float timeLap, lastTime, realTime;
         [HideInInspector] public float horas, minutos, segundos;
+        [HideInInspector] public List<RaceData> SortingData;
 
         private AudioSource aS;
-        private List<RaceData> SortingData;
 
         public delegate void LoadCars();
         public event LoadCars OnLoadCars;
@@ -45,7 +45,11 @@ namespace FastPolygons.Manager
                 }
             }
 
-            SortingData = CurrentData;
+            for (int i = 0; i < CurrentData.Count; i++)
+            {
+                SortingData.Add(CurrentData[i]);
+            }
+
             OnLoadCars -= RaceManager_OnLoadCars;
         }
 

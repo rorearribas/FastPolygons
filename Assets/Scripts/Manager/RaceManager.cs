@@ -7,7 +7,7 @@ namespace FastPolygons.Manager
 {
     public class RaceManager : TemporalSingleton<RaceManager>
     {
-        public List<RaceData> CurrentData;
+        public List<DriverData> CurrentData;
         public List<GameObject> CurrentCheckpoints;
 
         public Text lapCountTxt;
@@ -21,8 +21,8 @@ namespace FastPolygons.Manager
         public int maxLaps;
 
         [HideInInspector] public float timeLap, lastTime, realTime;
-        [HideInInspector] public float horas, minutos, segundos;
-        [HideInInspector] public List<RaceData> SortingData;
+        [HideInInspector] public float m_fHours, m_fMinutes, m_fSeconds;
+        [HideInInspector] public List<DriverData> SortData;
 
         private AudioSource aS;
 
@@ -47,7 +47,7 @@ namespace FastPolygons.Manager
 
             for (int i = 0; i < CurrentData.Count; i++)
             {
-                SortingData.Add(CurrentData[i]);
+                SortData.Add(CurrentData[i]);
             }
 
             OnLoadCars -= RaceManager_OnLoadCars;
@@ -80,35 +80,39 @@ namespace FastPolygons.Manager
 
                 case GameManager.States.PLAYING:
 
+                    timeLap += Time.deltaTime;
+                    realTime += Time.deltaTime;
+                    m_fSeconds = Mathf.Round(timeLap);
+
                     for (int i = 0; i < CurrentData.Count; i++)
                     {
                         CurrentData[i].m_nextCheckpointDistance = Vector3.Distance(CurrentData[i].m_CarGO.transform.position, 
                             CurrentData[i].m_Checkpoints[CurrentData[i].m_currentCheckpoint].transform.position);
+
+                        if(CurrentData[i].m_CarGO.CompareTag("Player"))
+                        {
+                            lapCountTxt.text = "Current Lap " + CurrentData[CurrentData[i].m_CarGO.
+                                GetComponent<CarController>().m_ID].m_currentLap.ToString() + "/" + maxLaps.ToString();
+                        }
                     }
-
-                    timeLap += Time.deltaTime;
-                    realTime += Time.deltaTime;
-                    segundos = Mathf.Round(timeLap);
-
-                    lapCountTxt.text = "Current Lap " + CurrentData[0].m_currentLap.ToString() + "/" + maxLaps.ToString();
 
                     #region TimeLap
 
-                    if (segundos < 10)
+                    if (m_fSeconds < 10)
                     {
-                        timeLapTxt.text = "TIME: 0" + horas.ToString() + ":0" + minutos.ToString() + ":0" + segundos.ToString();
+                        timeLapTxt.text = "TIME: 0" + m_fHours.ToString() + ":0" + m_fMinutes.ToString() + ":0" + m_fSeconds.ToString();
                     }
 
                     else
                     {
-                        timeLapTxt.text = "TIME: 0" + horas.ToString() + ":0" + minutos.ToString() + ":" + segundos.ToString();
+                        timeLapTxt.text = "TIME: 0" + m_fHours.ToString() + ":0" + m_fMinutes.ToString() + ":" + m_fSeconds.ToString();
                     }
 
-                    if (segundos > 59)
+                    if (m_fSeconds > 59)
                     {
-                        minutos++;
+                        m_fMinutes++;
                         timeLap = 0;
-                        timeLapTxt.text = "TIME: 0" + horas.ToString() + ":0" + minutos.ToString() + ":" + segundos.ToString();
+                        timeLapTxt.text = "TIME: 0" + m_fHours.ToString() + ":0" + m_fMinutes.ToString() + ":" + m_fSeconds.ToString();
                     }
 
                     #endregion
@@ -132,19 +136,19 @@ namespace FastPolygons.Manager
                             {
                                 lastTime = realTime;
 
-                                if (segundos < 10)
+                                if (m_fSeconds < 10)
                                 {
-                                    bestTimeLapTxt.text = "BEST: 0" + horas.ToString() + ":0" + minutos.ToString() + ":0" + segundos.ToString();
+                                    bestTimeLapTxt.text = "BEST: 0" + m_fHours.ToString() + ":0" + m_fMinutes.ToString() + ":0" + m_fSeconds.ToString();
                                 }
 
                                 else
                                 {
-                                    bestTimeLapTxt.text = "BEST: 0" + horas.ToString() + ":0" + minutos.ToString() + ":" + segundos.ToString();
+                                    bestTimeLapTxt.text = "BEST: 0" + m_fHours.ToString() + ":0" + m_fMinutes.ToString() + ":" + m_fSeconds.ToString();
                                 }
 
                                 timeLap = 0;
-                                minutos = 0;
-                                horas = 0;
+                                m_fMinutes = 0;
+                                m_fHours = 0;
                                 realTime = 0;
                             }
                             else
@@ -153,28 +157,28 @@ namespace FastPolygons.Manager
                                 {
                                     lastTime = realTime;
 
-                                    if (segundos < 10)
+                                    if (m_fSeconds < 10)
                                     {
-                                        bestTimeLapTxt.text = "BEST: 0" + horas.ToString() + ":0" + minutos.ToString() + ":0" + segundos.ToString();
+                                        bestTimeLapTxt.text = "BEST: 0" + m_fHours.ToString() + ":0" + m_fMinutes.ToString() + ":0" + m_fSeconds.ToString();
 
                                     }
 
                                     else
                                     {
-                                        bestTimeLapTxt.text = "BEST: 0" + horas.ToString() + ":0" + minutos.ToString() + ":" + segundos.ToString();
+                                        bestTimeLapTxt.text = "BEST: 0" + m_fHours.ToString() + ":0" + m_fMinutes.ToString() + ":" + m_fSeconds.ToString();
 
                                     }
 
                                     timeLap = 0;
                                     realTime = 0;
-                                    minutos = 0;
-                                    horas = 0;
+                                    m_fMinutes = 0;
+                                    m_fHours = 0;
                                 }
 
                                 timeLap = 0;
                                 realTime = 0;
-                                minutos = 0;
-                                horas = 0;
+                                m_fMinutes = 0;
+                                m_fHours = 0;
                             }
 
                             CurrentData[0].m_currentLap++;
@@ -258,59 +262,29 @@ namespace FastPolygons.Manager
 
                     #endregion
 
-                    #region SortingPositions
-
-                    SortingData.Sort((r1, r2) =>
-                    {
-                        if (r2.m_currentLap != r1.m_currentLap)
-                            return r1.m_currentLap.CompareTo(r2.m_currentLap);
-
-                        if (r2.m_currentCheckpoint != r1.m_currentCheckpoint)
-                            return r1.m_currentCheckpoint.CompareTo(r2.m_currentCheckpoint);
-
-                        return r2.m_nextCheckpointDistance.CompareTo(r1.m_nextCheckpointDistance);
-                    });
-
-                    int index = SortingData.FindIndex(a => a.m_CarGO.CompareTag("Player"));
-
-                    switch (index)
-                    {
-                        case 0:
-                            position = 6;
-                            playerPos.text = "Position " + position;
-                            break;
-
-                        case 1:
-                            position = 5;
-                            playerPos.text = "Position " + position;
-                            break;
-
-                        case 2:
-                            position = 4;
-                            playerPos.text = "Position " + position;
-                            break;
-
-                        case 3:
-                            position = 3;
-                            playerPos.text = "Position " + position;
-                            break;
-                        case 4:
-                            position = 2;
-                            playerPos.text = "Position " + position;
-                            break;
-
-                        case 5:
-                            position = 1;
-                            playerPos.text = "Position " + position;
-                            break;
-                    }
-
-                    #endregion
-
+                    //Update player position.
+                    UpdatePlayerPosition();
                     break;
 
                     #endregion
             }
+        }
+
+        private void UpdatePlayerPosition()
+        {
+            SortData.Sort((r1, r2) =>
+            {
+                if (r2.m_currentLap != r1.m_currentLap)
+                    return r1.m_currentLap.CompareTo(r2.m_currentLap);
+
+                if (r2.m_currentCheckpoint != r1.m_currentCheckpoint)
+                    return r1.m_currentCheckpoint.CompareTo(r2.m_currentCheckpoint);
+
+                return r2.m_nextCheckpointDistance.CompareTo(r1.m_nextCheckpointDistance);
+            });
+
+            int index = SortData.FindIndex(a => a.m_CarGO.CompareTag("Player"));
+            playerPos.text = "Position " + (SortData.Count - index).ToString();
         }
     }
 }

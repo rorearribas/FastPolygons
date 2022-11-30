@@ -1,15 +1,17 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using FastPolygons.Manager;
 
 public class LightsCar : MonoBehaviour
 {
     void SwitchLights()
     {
-        GameObject[] cars = GameObject.FindGameObjectsWithTag("Car");
-        foreach (GameObject item in cars)
+        int Size = RaceManager.Instance.CurrentData.Count;
+        for (int i = 0; i < Size; i++)
         {
-            item.GetComponent<IEnableLights>().SwitchLights();
+            GameObject GO = RaceManager.Instance.CurrentData[i].m_CarGO;
+            GO.GetComponent<IEnableLights>().SwitchLights();
         }
     }
 }

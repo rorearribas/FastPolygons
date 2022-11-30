@@ -39,9 +39,16 @@ public class CarController : MonoBehaviour, IEnableLights
     public GameObject brakeObj;
 
     private List<Transform> wayPoints;
-    private Vector3 newPos;
-    private Quaternion newRot;
     private Transform circuitPath;
+
+    [HideInInspector] public int m_ID = -1;
+
+    struct SRespawn
+    {
+        public Vector3 newPos;
+        public Quaternion newRot;
+    } private SRespawn m_Respawn;
+
     private void Awake()
     {
         circuitPath = GameObject.FindGameObjectWithTag("Path").transform;
@@ -104,7 +111,6 @@ public class CarController : MonoBehaviour, IEnableLights
 
     private void FixedUpdate()
     {
-
         HandleMotor();
         DirectionCar();
         UpdateWheels();
@@ -248,17 +254,21 @@ public class CarController : MonoBehaviour, IEnableLights
                 GetComponent<BoxCollider>().enabled = false;
                 rb.useGravity = false;
 
-                if (RaceManager.instance.checkPoints[0].currentCheckPoint == 0)
+                if (RaceManager.Instance.CurrentData[0].m_currentCheckpoint == 0)
                 {
-                    newPos = wayPoints[1].transform.position;
-                    newRot = wayPoints[1].transform.rotation;
-                    newPos.y += 3;
+                    m_Respawn.newPos = wayPoints[1].transform.position;
+                    m_Respawn.newRot = wayPoints[1].transform.rotation;
+                    m_Respawn.newPos.y += 3;
                 }
                 else
                 {
-                    newPos = RaceManager.instance.checkPoints[0].checkPoints[RaceManager.instance.checkPoints[0].currentCheckPoint - 1].transform.position;
-                    newRot = Quaternion.Euler(RaceManager.instance.checkPoints[0].checkPoints[RaceManager.instance.checkPoints[0].currentCheckPoint - 1].transform.localRotation.x, 0, 0);
-                    newPos.y += 3;
+                    m_Respawn.newPos = RaceManager.Instance.CurrentData[0].m_Checkpoints
+                    [RaceManager.Instance.CurrentData[0].m_currentCheckpoint - 1].transform.position;
+
+                    m_Respawn.newRot = Quaternion.Euler(RaceManager.Instance.CurrentData[0].m_Checkpoints
+                    [RaceManager.Instance.CurrentData[0].m_currentCheckpoint - 1].transform.localRotation.x, 0, 0);
+
+                    m_Respawn.newPos.y += 3;
                 }
 
                 anim.SetTrigger("Die");
@@ -270,66 +280,17 @@ public class CarController : MonoBehaviour, IEnableLights
     }
     private void OnCollisionEnter(Collision coll)
     {
-        if (coll.gameObject.tag == "Columnas")
-        {
-            anim.SetTrigger("Die");
-            collision = true;
-
-            ParticleSystem col = Instantiate(effects[2], transform.position, Quaternion.identity);
-            Destroy(col.gameObject, 2);
-
-            GetComponent<BoxCollider>().enabled = false;
-            rb.useGravity = false;
-            rb.constraints = RigidbodyConstraints.FreezeAll;
-
-            if (RaceManager.instance.checkPoints[0].currentCheckPoint == 0)
-            {
-                newPos = wayPoints[1].transform.position;
-                newRot = wayPoints[1].transform.rotation;
-                newPos.y += 5;
-            }
-            else
-            {
-                newPos = RaceManager.instance.checkPoints[0].checkPoints[RaceManager.instance.checkPoints[0].currentCheckPoint - 1].transform.position;
-                newRot = Quaternion.Euler(RaceManager.instance.checkPoints[0].checkPoints[RaceManager.instance.checkPoints[0].currentCheckPoint - 1].transform.localRotation.x, 0, 0);
-                newPos.y += 5;
-            }
-        }
+        CheckCollision(coll.gameObject);
     }
 
     private void OnTriggerEnter(Collider coll)
     {
-        if (coll.gameObject.tag == "Water")
-        {
-            anim.SetTrigger("Die");
-            collision = true;
-
-            ParticleSystem col = Instantiate(effects[2], transform.position, Quaternion.identity);
-            Destroy(col.gameObject, 2);
-
-            GetComponent<BoxCollider>().enabled = false;
-            rb.useGravity = false;
-            rb.constraints = RigidbodyConstraints.FreezeAll;
-
-            if (RaceManager.instance.checkPoints[0].currentCheckPoint == 0)
-            {
-                newPos = wayPoints[1].transform.position;
-                newRot = wayPoints[1].transform.localRotation;
-                newPos.y += 5;
-            }
-            else
-            {
-                newPos = RaceManager.instance.checkPoints[0].checkPoints[RaceManager.instance.checkPoints[0].currentCheckPoint - 1].transform.position;
-                newRot = Quaternion.Euler(RaceManager.instance.checkPoints[0].checkPoints[RaceManager.instance.checkPoints[0].currentCheckPoint - 1].transform.localRotation.x, 0, 0);
-                newPos.y += 5;
-            }
-        }
+        CheckCollision(coll.gameObject);
     }
-
-    public void RespawnAfterDie()
+    public void Respawn()
     {
-        transform.position = newPos;
-        transform.rotation = newRot;
+        transform.position = m_Respawn.newPos;
+        transform.rotation = m_Respawn.newRot;
 
         rb.useGravity = true;
         rb.constraints = RigidbodyConstraints.None;
@@ -338,7 +299,6 @@ public class CarController : MonoBehaviour, IEnableLights
         isMoving = true;
         collision = false;
     }
-
     public float LocalSpeed()
     {
         if (isMoving && GameManager.Instance.state == GameManager.States.PLAYING)
@@ -354,6 +314,39 @@ public class CarController : MonoBehaviour, IEnableLights
         else
         {
             return 0;
+        }
+    }
+    private void CheckCollision(GameObject Object)
+    {
+        if(Object.GetComponent<FastPolygons.Respawn>())
+        {
+            anim.SetTrigger("Crash");
+            collision = true;
+
+            ParticleSystem col = Instantiate(effects[2], transform.position, Quaternion.identity);
+            Destroy(col.gameObject, 2);
+
+            GetComponent<BoxCollider>().enabled = false;
+            rb.useGravity = false;
+            rb.constraints = RigidbodyConstraints.FreezeAll;
+
+            FastPolygons.Respawn RespawnData = 
+                Object.GetComponent<FastPolygons.Respawn>().GetData(m_ID);
+
+            if (RaceManager.Instance.CurrentData[0].m_currentCheckpoint == 0)
+            {
+                m_Respawn.newPos = wayPoints[1].transform.position;
+                m_Respawn.newRot = wayPoints[1].transform.rotation;
+                m_Respawn.newPos.y += 5;
+            }
+            else
+            {
+                m_Respawn.newPos = RaceManager.Instance.CurrentData[0].m_Checkpoints
+                [RaceManager.Instance.CurrentData[0].m_currentCheckpoint - 1].transform.position;
+                m_Respawn.newRot = Quaternion.Euler(RaceManager.Instance.CurrentData[0].m_Checkpoints
+                [RaceManager.Instance.CurrentData[0].m_currentCheckpoint - 1].transform.localRotation.x, 0, 0);
+                m_Respawn.newPos.y += 5;
+            }
         }
     }
 }

@@ -7,9 +7,11 @@ public class CarAI : MonoBehaviour, IEnableLights
 {
     [Header("Car Config")]
     public GenerateCar_SO car_config;
-    public float currentSpeed;
     public MeshRenderer chasisColor;
+    public float currentSpeed;
     public bool isReverse;
+
+    [HideInInspector] public int m_ID = -1;
 
     #region Car Sensors
 
@@ -22,7 +24,7 @@ public class CarAI : MonoBehaviour, IEnableLights
     public bool isAvoiding;
 
     #endregion
-    
+
     #region Lights
 
     [Header("Lights")]
@@ -53,6 +55,7 @@ public class CarAI : MonoBehaviour, IEnableLights
     #endregion
 
     #region Extra
+
     private List<Transform> wayPoints;
     private int currentNode = 0;
     private Animator anim;
@@ -83,7 +86,7 @@ public class CarAI : MonoBehaviour, IEnableLights
 
         for (int i = 0; i < pathTransform.Length; i++)
         {
-            if(pathTransform[i] != circuitPath.transform) 
+            if (pathTransform[i] != circuitPath.transform)
             {
                 wayPoints.Add(pathTransform[i]);
             }
@@ -99,7 +102,7 @@ public class CarAI : MonoBehaviour, IEnableLights
         {
             timerDie += Time.deltaTime;
 
-            if(timerDie > 1.5f)
+            if (timerDie > 1.5f)
             {
                 if (currentNode < 1)
                 {
@@ -127,18 +130,18 @@ public class CarAI : MonoBehaviour, IEnableLights
             }
         }
 
-        if (isReverse) 
+        if (isReverse)
         {
-            stopReverseTime+= Time.deltaTime;
+            stopReverseTime += Time.deltaTime;
 
-            if(stopReverseTime >= 2.5f) 
+            if (stopReverseTime >= 2.5f)
             {
                 isReverse = false;
                 stopReverseTime = 0;
             }
-        }    
+        }
     }
-    
+
     private void FixedUpdate()
     {
         currentSpeed = rb.velocity.magnitude * 3.6f;
@@ -148,35 +151,36 @@ public class CarAI : MonoBehaviour, IEnableLights
         CheckWaypointDistance();
         CarHandler();
     }
-    private void CheckWaypointDistance () 
+
+    private void CheckWaypointDistance()
     {
-        if(Vector3.Distance(transform.position, wayPoints[currentNode].position) < 10f) 
+        if (Vector3.Distance(transform.position, wayPoints[currentNode].position) < 10f)
         {
-            if(currentNode == wayPoints.Count - 1)
+            if (currentNode == wayPoints.Count - 1)
             {
                 currentNode = 0;
             }
 
-            else 
+            else
             {
                 currentNode++;
             }
         }
     }
 
-    private void Drive() 
+    private void Drive()
     {
         float conversionSpeed = Mathf.Round(currentSpeed);
 
-        if(currentSpeed < car_config.maxSpeed && !isCollision) 
+        if (currentSpeed < car_config.maxSpeed && !isCollision)
         {
-            if(isReverse) 
+            if (isReverse)
             {
                 frontLeftWheelCollider.motorTorque = -100;
                 frontRightWheelCollider.motorTorque = -100;
             }
 
-            else 
+            else
             {
                 frontLeftWheelCollider.motorTorque = car_config.maxMotorTorque;
                 frontRightWheelCollider.motorTorque = car_config.maxMotorTorque;
@@ -187,36 +191,36 @@ public class CarAI : MonoBehaviour, IEnableLights
 
             for (int i = 0; i < effects.Length - 1; i++)
             {
-                effects[i].Play();   
+                effects[i].Play();
             }
         }
 
-        else 
+        else
         {
             frontLeftWheelCollider.motorTorque = 0;
             frontRightWheelCollider.motorTorque = 0;
 
             for (int i = 0; i < effects.Length - 1; i++)
             {
-                effects[i].Stop();   
+                effects[i].Stop();
             }
         }
     }
 
-    private void WheelsDirection() 
+    private void WheelsDirection()
     {
-        if(isAvoiding || isReverse) return;
+        if (isAvoiding || isReverse) return;
 
         relativeVector = transform.InverseTransformPoint(wayPoints[currentNode].position);
-        newSteer = (relativeVector.x  / relativeVector.magnitude) * car_config.maxSteerAngle;
+        newSteer = (relativeVector.x / relativeVector.magnitude) * car_config.maxSteerAngle;
 
         frontLeftWheelCollider.steerAngle = newSteer;
         frontRightWheelCollider.steerAngle = newSteer;
     }
 
-    void CarHandler() 
+    void CarHandler()
     {
-        if(GameManager.Instance.state == GameManager.States.PLAYING)
+        if (GameManager.Instance.state == GameManager.States.PLAYING)
         {
             if (wayPoints[currentNode].tag == "Curve" && currentSpeed > 30)
             {
@@ -243,7 +247,7 @@ public class CarAI : MonoBehaviour, IEnableLights
             }
         }
     }
-    
+
     private void OnCollisionEnter(Collision coll)
     {
         if (coll.gameObject.tag == "Columnas")
@@ -257,7 +261,7 @@ public class CarAI : MonoBehaviour, IEnableLights
             GetComponent<BoxCollider>().enabled = false;
             rb.useGravity = false;
 
-            if (RaceManager.instance.checkPoints[0].currentCheckPoint == 0)
+            if (RaceManager.Instance.CurrentData[0].m_currentCheckpoint == 0)
             {
                 newPos = wayPoints[1].transform.position;
                 newRot = wayPoints[1].transform.rotation;
@@ -265,8 +269,8 @@ public class CarAI : MonoBehaviour, IEnableLights
             }
             else
             {
-                newPos = RaceManager.instance.checkPoints[0].checkPoints[RaceManager.instance.checkPoints[0].currentCheckPoint - 1].transform.position;
-                newRot = RaceManager.instance.checkPoints[0].checkPoints[RaceManager.instance.checkPoints[0].currentCheckPoint - 1].transform.localRotation;
+                newPos = RaceManager.Instance.CurrentData[0].m_Checkpoints[RaceManager.Instance.CurrentData[0].m_currentCheckpoint - 1].transform.position;
+                newRot = RaceManager.Instance.CurrentData[0].m_Checkpoints[RaceManager.Instance.CurrentData[0].m_currentCheckpoint - 1].transform.localRotation;
                 newPos.y += 5;
             }
         }
@@ -285,7 +289,7 @@ public class CarAI : MonoBehaviour, IEnableLights
             GetComponent<BoxCollider>().enabled = false;
             rb.useGravity = false;
 
-            if (RaceManager.instance.checkPoints[0].currentCheckPoint == 0)
+            if (RaceManager.Instance.CurrentData[0].m_currentCheckpoint == 0)
             {
                 newPos = wayPoints[1].transform.position;
                 newRot = wayPoints[1].transform.rotation;
@@ -293,14 +297,14 @@ public class CarAI : MonoBehaviour, IEnableLights
             }
             else
             {
-                newPos = RaceManager.instance.checkPoints[0].checkPoints[RaceManager.instance.checkPoints[0].currentCheckPoint - 1].transform.position;
-                newRot = Quaternion.Euler(RaceManager.instance.checkPoints[0].checkPoints[RaceManager.instance.checkPoints[0].currentCheckPoint - 1].transform.localRotation.x, 0, 0);
+                newPos = RaceManager.Instance.CurrentData[0].m_Checkpoints[RaceManager.Instance.CurrentData[0].m_currentCheckpoint - 1].transform.position;
+                newRot = Quaternion.Euler(RaceManager.Instance.CurrentData[0].m_Checkpoints[RaceManager.Instance.CurrentData[0].m_currentCheckpoint - 1].transform.localRotation.x, 0, 0);
                 newPos.y += 5;
             }
         }
     }
 
-    public void SwitchLights() 
+    public void SwitchLights()
     {
         for (int i = 0; i < carLights.Length; i++)
         {
@@ -319,11 +323,11 @@ public class CarAI : MonoBehaviour, IEnableLights
         //FrontRight
         if (Physics.Raycast(sensorPos[1].position, transform.forward, out hit, sensorLenght))
         {
-            if(!hit.collider.CompareTag("Untagged")) 
+            if (!hit.collider.CompareTag("Untagged"))
             {
                 float v = Vector3.Dot(transform.forward, Vector3.Normalize(rb.velocity));
 
-                if(v > 0.5f) 
+                if (v > 0.5f)
                 {
                     isAvoiding = true;
                     avoidMultiplier -= 1f;
@@ -341,11 +345,11 @@ public class CarAI : MonoBehaviour, IEnableLights
         //FrontRight_Angle
         else if (Physics.Raycast(sensorPos[4].position, Quaternion.AngleAxis(sensorAngle, transform.up) * transform.forward, out hit, sensorLenght))
         {
-            if(!hit.collider.CompareTag("Untagged")) 
+            if (!hit.collider.CompareTag("Untagged"))
             {
                 float v = Vector3.Dot(transform.forward, Vector3.Normalize(rb.velocity));
-                    
-                if(v > 0.5f) 
+
+                if (v > 0.5f)
                 {
                     isAvoiding = true;
                     avoidMultiplier -= 0.5f;
@@ -366,11 +370,11 @@ public class CarAI : MonoBehaviour, IEnableLights
         //FrontLeft
         if (Physics.Raycast(sensorPos[2].position, transform.forward, out hit, sensorLenght))
         {
-            if(!hit.collider.CompareTag("Untagged")) 
-            {       
+            if (!hit.collider.CompareTag("Untagged"))
+            {
                 float v = Vector3.Dot(transform.forward, Vector3.Normalize(rb.velocity));
 
-                if(v > 0.5f) 
+                if (v > 0.5f)
                 {
                     isAvoiding = true;
                     avoidMultiplier += 1;
@@ -385,26 +389,26 @@ public class CarAI : MonoBehaviour, IEnableLights
             }
         }
 
-          //FrontLeft_Angle
+        //FrontLeft_Angle
         else if (Physics.Raycast(sensorPos[3].position, Quaternion.AngleAxis(-sensorAngle, transform.up) * transform.forward, out hit, sensorLenght))
         {
-            if(!hit.collider.CompareTag("Untagged")) 
+            if (!hit.collider.CompareTag("Untagged"))
             {
-                    float v = Vector3.Dot(transform.forward, Vector3.Normalize(rb.velocity));
+                float v = Vector3.Dot(transform.forward, Vector3.Normalize(rb.velocity));
 
-                    if(v > 0.5f) 
-                    {
-                        isAvoiding = true;
-                        avoidMultiplier += 0.5f;
-                    }
+                if (v > 0.5f)
+                {
+                    isAvoiding = true;
+                    avoidMultiplier += 0.5f;
+                }
 
-                    else
-                    {
-                        isBraking = false;
-                        isReverse = true;
-                        avoidMultiplier -= 0.5f;
-                    }
-                
+                else
+                {
+                    isBraking = false;
+                    isReverse = true;
+                    avoidMultiplier -= 0.5f;
+                }
+
             }
         }
 
@@ -412,26 +416,27 @@ public class CarAI : MonoBehaviour, IEnableLights
         Debug.DrawRay(sensorPos[2].position, transform.forward * sensorLenght);
 
         //FrontCenter
-        
-        if(avoidMultiplier == 0) { 
+
+        if (avoidMultiplier == 0)
+        {
 
             if (Physics.Raycast(sensorPos[0].position, transform.forward, out hit, sensorLenght))
             {
-                if(!hit.collider.CompareTag("Untagged")) 
+                if (!hit.collider.CompareTag("Untagged"))
                 {
                     Debug.Log(hit.collider.name);
                     float v = Vector3.Dot(transform.forward, Vector3.Normalize(rb.velocity));
 
-                    if(v > 0.5f) 
+                    if (v > 0.5f)
                     {
                         isAvoiding = true;
 
-                        if(hit.normal.x < 0 && currentSpeed > 1) 
+                        if (hit.normal.x < 0 && currentSpeed > 1)
                         {
                             avoidMultiplier = -1f;
                         }
 
-                        else 
+                        else
                         {
                             avoidMultiplier = 1f;
                         }
@@ -442,19 +447,19 @@ public class CarAI : MonoBehaviour, IEnableLights
                         isBraking = false;
                         isReverse = true;
                     }
-                    
+
                 }
             }
         }
 
         #endregion
 
-        #region  BackSensors
+        #region BackSensors
 
         //FrontRight
         if (Physics.Raycast(backSensorPos[1].position, -transform.forward, out hit, sensorLenghtBack))
         {
-            if(!hit.collider.CompareTag("Untagged")) 
+            if (!hit.collider.CompareTag("Untagged"))
             {
                 isReverse = false;
                 stopReverseTime = 0;
@@ -464,7 +469,7 @@ public class CarAI : MonoBehaviour, IEnableLights
         //FrontRight_Angle
         else if (Physics.Raycast(backSensorPos[4].position, Quaternion.AngleAxis(-sensorAngle, transform.up) * -transform.forward, out hit, sensorLenghtBack))
         {
-            if(!hit.collider.CompareTag("Untagged")) 
+            if (!hit.collider.CompareTag("Untagged"))
             {
                 isReverse = false;
                 stopReverseTime = 0;
@@ -477,17 +482,17 @@ public class CarAI : MonoBehaviour, IEnableLights
         //FrontLeft
         if (Physics.Raycast(backSensorPos[2].position, -transform.forward, out hit, sensorLenghtBack))
         {
-            if(!hit.collider.CompareTag("Untagged")) 
+            if (!hit.collider.CompareTag("Untagged"))
             {
                 isReverse = false;
                 stopReverseTime = 0;
             }
         }
 
-          //FrontLeft_Angle
+        //FrontLeft_Angle
         else if (Physics.Raycast(backSensorPos[3].position, Quaternion.AngleAxis(sensorAngle, transform.up) * -transform.forward, out hit, sensorLenghtBack))
         {
-            if(!hit.collider.CompareTag("Untagged")) 
+            if (!hit.collider.CompareTag("Untagged"))
             {
                 isReverse = false;
                 stopReverseTime = 0;
@@ -498,12 +503,13 @@ public class CarAI : MonoBehaviour, IEnableLights
         Debug.DrawRay(backSensorPos[2].position, -transform.forward * sensorLenghtBack);
 
         //FrontCenter
-        
-        if(avoidMultiplier == 0) { 
+
+        if (avoidMultiplier == 0)
+        {
 
             if (Physics.Raycast(backSensorPos[0].position, -transform.forward, out hit, sensorLenghtBack))
             {
-                if(!hit.collider.CompareTag("Untagged")) 
+                if (!hit.collider.CompareTag("Untagged"))
                 {
                     isReverse = false;
                     stopReverseTime = 0;
@@ -516,20 +522,24 @@ public class CarAI : MonoBehaviour, IEnableLights
         Debug.DrawRay(sensorPos[0].position, transform.forward * sensorLenght);
         Debug.DrawRay(backSensorPos[0].position, -transform.forward * sensorLenghtBack);
 
-        if(isAvoiding || isReverse) 
+        if (isAvoiding || isReverse)
         {
             frontLeftWheelCollider.steerAngle = car_config.maxSteerAngle * avoidMultiplier;
             frontRightWheelCollider.steerAngle = car_config.maxSteerAngle * avoidMultiplier;
         }
     }
 
-    public void RespawnAfterDie()
+    public void Respawn()
     {
         transform.position = newPos;
         transform.rotation = newRot;
-        timerDie = -2f;
-        isCollision = false;
+
         rb.useGravity = true;
+        rb.constraints = RigidbodyConstraints.None;
+
+        isCollision = false;
+        timerDie = -2f;
+
         GetComponent<BoxCollider>().enabled = true;
     }
 }

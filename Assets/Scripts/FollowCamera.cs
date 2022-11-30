@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System;
+using FastPolygons.Manager;
 
 public class FollowCamera : MonoBehaviour
 {
@@ -13,7 +14,7 @@ public class FollowCamera : MonoBehaviour
 
     private void FollowCamera_FollowCar(object sender, EventArgs e)
     {
-        car = GameObject.Find("Car_0").transform;
+        car = GameObject.FindGameObjectWithTag("Player").transform;
 
         if (car == null)
         {

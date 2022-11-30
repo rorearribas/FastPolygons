@@ -64,16 +64,19 @@ namespace FastPolygons.Manager
         {
             GameStates(estados);
         }
+
         public void PlayGame()
         {
             anim.SetTrigger("Selector");
             aS.Play();
         }
+
         public void Settings()
         {
             GameManager.Instance.OpenSettings();
             aS.Play();
         }
+
         public void ExitGame()
         {
             aS.Play();
@@ -134,6 +137,7 @@ namespace FastPolygons.Manager
                     carConfigs[indexConfig].chasisColor;
             }
         }
+
         public void PreviousCar()
         {
             aS.Play();
@@ -142,7 +146,6 @@ namespace FastPolygons.Manager
             {
                 indexConfig = carConfigs.Length - 1;
             }
-
             else
             {
                 indexConfig--;
@@ -161,10 +164,12 @@ namespace FastPolygons.Manager
                 sliderConfigs[i].fillRect.GetComponent<Image>().color = carConfigs[indexConfig].chasisColor;
             }
         }
-        public GenerateCar_SO SetConfig()
+
+        public GenerateCar_SO GetConfig()
         {
             return setConfig = carConfigs[indexConfig];
         }
+
         #endregion
 
         public void LoadLevel()

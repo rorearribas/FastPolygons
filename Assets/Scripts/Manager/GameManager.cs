@@ -44,8 +44,15 @@ namespace FastPolygons.Manager
         public Dropdown[] drops;
         private Resolution[] res;
         private Transform[] initPos = new Transform[6];
-        private bool isCountDown, loadCars;
+        public bool isCountDown;
         private int currentResolution;
+
+        [HideInInspector]
+        public List<GameObject> TmpCars;
+
+        //Delegates
+        public delegate void LoadCars();
+        public event LoadCars OnLoadCars;
 
         private void OnEnable()
         {
@@ -63,6 +70,74 @@ namespace FastPolygons.Manager
             aS.Stop();
         }
 
+        private void Start()
+        {
+            OnLoadCars += GameManager_OnLoadCars;
+        }
+
+        private void GameManager_OnLoadCars()
+        {
+            List<GenerateCar_SO> CarSettings = new List<GenerateCar_SO>();
+            List<Transform> InitPos = new List<Transform>();
+
+            InitPos.AddRange(initPos);
+            CarSettings.AddRange(configs);
+
+            for (int i = 0; i < InitPos.Count; i++)
+            {
+                InitPos[i] = GameObject.Find("LapPos_" + i).transform;
+            }
+
+            int rndPosPlayer = Random.Range(0, InitPos.Count);
+            GameObject player = Instantiate(Resources.Load<GameObject>("Prefabs/Player"),
+            InitPos[rndPosPlayer].position, Quaternion.Euler(0, 180, 0));
+
+            //Set player ID
+            if (player.GetComponent<CarController>())
+            {
+                player.GetComponent<CarController>().m_ID = 0;
+                player.tag = "Player";
+            }
+
+            player.GetComponent<CarController>().car_config = MenuManager.mM.GetConfig();
+            TmpCars.Add(player);
+
+            CarSettings.RemoveAt(MenuManager.mM.indexConfig);
+            InitPos.RemoveAt(rndPosPlayer);
+
+            GameObject[] AI = new GameObject[5];
+            for (int i = 0; i < 5; i++)
+            {
+                int rndPos = Random.Range(0, InitPos.Count);
+                AI[i] = Instantiate(Resources.Load<GameObject>("Prefabs/Car_IA"), 
+                    InitPos[rndPos].position, Quaternion.Euler(0, 180, 0));
+                InitPos.RemoveAt(rndPos);
+            }
+
+            //Set settings and id
+            for (int i = 0; i < AI.Length; i++)
+            {
+                int rndConfig = Random.Range(0, CarSettings.Count);
+                AI[i].GetComponent<CarAI>().car_config = CarSettings[rndConfig];
+                AI[i].GetComponent<CarAI>().m_ID = i + 1;
+                TmpCars.Add(AI[i]);
+                CarSettings.RemoveAt(rndConfig);
+            }
+
+            //Send all these data to the RaceManager
+            if (RaceManager.Instance != null)
+            {
+                int Size = TmpCars.Count;
+                for (int i = 0; i < Size; i++)
+                {
+                    RaceManager.Instance.CurrentData.Add(new RaceData());
+                    RaceManager.Instance.CurrentData[i].m_CarGO = TmpCars[i];
+                }
+                TmpCars.Clear();
+                RaceManager.Instance.Callback();
+            }
+        }
+
         private void Update()
         {
             GameStates(state);
@@ -76,8 +151,6 @@ namespace FastPolygons.Manager
                 case States.MENU:
 
                     Time.timeScale = 1;
-                    loadCars = false;
-
                     Canvas myCanvas = transform.GetChild(0).GetComponent<Canvas>();
                     myCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
 
@@ -137,8 +210,6 @@ namespace FastPolygons.Manager
                 case States.LOADSCREEN:
 
                     Time.timeScale = 1;
-                    loadCars = false;
-
                     pages[0].SetActive(true);
                     pages[1].SetActive(false);
                     pages[2].SetActive(false);
@@ -168,7 +239,8 @@ namespace FastPolygons.Manager
 
                 case States.START:
 
-                    LoadCars();
+                    OnLoadCars?.Invoke();
+                    OnLoadCars -= GameManager_OnLoadCars;
 
                     if (!isCountDown)
                         StartCoroutine(CountDown(4));
@@ -212,7 +284,7 @@ namespace FastPolygons.Manager
                     Cursor.lockState = CursorLockMode.Locked;
                     Cursor.visible = false;
 
-                    if (RaceManager.instance.checkPoints[0].currentLap == 4)
+                    if (RaceManager.Instance.CurrentData[0].m_currentLap == 4)
                     {
                         state = States.END;
                     }
@@ -221,8 +293,8 @@ namespace FastPolygons.Manager
 
                 case States.END:
 
-                    positionText.text = "Position " + RaceManager.instance.position.ToString();
-                    bestTimeText.text = RaceManager.instance.bestTimeLapTxt.text;
+                    positionText.text = "Position " + RaceManager.Instance.position.ToString();
+                    bestTimeText.text = RaceManager.Instance.bestTimeLapTxt.text;
 
                     Time.timeScale = 0.05f;
                     Time.fixedDeltaTime = Time.timeScale * 0.02f;
@@ -256,60 +328,12 @@ namespace FastPolygons.Manager
         }
         #endregion
 
-        private void LoadCars()
-        {
-            if (!loadCars)
-            {
-                List<GenerateCar_SO> compare = new List<GenerateCar_SO>();
-                List<Transform> initPosCompare = new List<Transform>();
-
-                initPosCompare.AddRange(initPos);
-                compare.AddRange(configs);
-
-                for (int i = 0; i < initPosCompare.Count; i++)
-                {
-                    initPosCompare[i] = GameObject.Find("LapPos_" + i).transform;
-                }
-
-                int rndPosPlayer = Random.Range(0, initPosCompare.Count);
-                GameObject player = Instantiate(Resources.Load<GameObject>("Prefabs/Player"), initPosCompare[rndPosPlayer].position, Quaternion.Euler(0, 180, 0));
-                player.name = "Car_0";
-                player.GetComponent<CarController>().car_config = MenuManager.mM.SetConfig();
-                compare.RemoveAt(MenuManager.mM.indexConfig);
-                initPosCompare.RemoveAt(rndPosPlayer);
-
-                GameObject[] IA = new GameObject[5];
-
-                for (int i = 0; i < 5; i++)
-                {
-                    int rndPos = Random.Range(0, initPosCompare.Count);
-                    IA[i] = Instantiate(Resources.Load<GameObject>("Prefabs/Car_IA"), initPosCompare[rndPos].position, Quaternion.Euler(0, 180, 0));
-                    initPosCompare.RemoveAt(rndPos);
-                }
-
-                for (int i = 0; i < IA.Length; i++)
-                {
-                    int rndConfig = Random.Range(0, compare.Count);
-                    IA[i].GetComponent<CarAI>().car_config = compare[rndConfig];
-                    compare.RemoveAt(rndConfig);
-                }
-
-                IA[0].name = "Car_" + 1.ToString();
-                IA[1].name = "Car_" + 2.ToString();
-                IA[2].name = "Car_" + 3.ToString();
-                IA[3].name = "Car_" + 4.ToString();
-                IA[4].name = "Car_" + 5.ToString();
-
-
-                loadCars = true;
-            }
-        }
         public void LoadLevel()
         {
             Canvas myCanvas = transform.GetChild(0).GetComponent<Canvas>();
             myCanvas.enabled = true;
-            state = States.PRELOAD;
 
+            state = States.PRELOAD;
             fadeAnimator.SetTrigger("FadeIn");
         }
 

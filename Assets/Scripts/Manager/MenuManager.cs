@@ -30,7 +30,6 @@ namespace FastPolygons.Manager
 
         private AudioSource aS;
         private Animator anim;
-        private GenerateCar_SO setConfig;
 
         private delegate void SelectorCar();
         private event SelectorCar OnSelectorCar;
@@ -168,7 +167,7 @@ namespace FastPolygons.Manager
 
         public GenerateCar_SO GetConfig()
         {
-            return setConfig = carConfigs[indexConfig];
+            return carConfigs[indexConfig];
         }
 
         #endregion

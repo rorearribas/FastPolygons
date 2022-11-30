@@ -20,8 +20,11 @@ namespace FastPolygons
                     Data.CurrentPosition = RaceManager.Instance.CurrentData[_id].m_Checkpoints
                     [RaceManager.Instance.CurrentData[_id].m_currentCheckpoint - 1].transform.position;
 
-                    Data.CurrentRotation = RaceManager.Instance.CurrentData[_id].m_Checkpoints
-                    [RaceManager.Instance.CurrentData[_id].m_currentCheckpoint - 1].transform.rotation;
+                    Quaternion LocalRot = RaceManager.Instance.CurrentData[_id].m_Checkpoints
+                    [RaceManager.Instance.CurrentData[_id].m_currentCheckpoint - 1].transform.localRotation;
+
+                    Data.CurrentRotation = Quaternion.Euler(0.0f, 
+                        LocalRot.eulerAngles.y * -1.0f, LocalRot.eulerAngles.z * -1.0f);
                 }
             }
             return Data;

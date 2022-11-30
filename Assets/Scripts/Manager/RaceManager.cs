@@ -24,6 +24,7 @@ namespace FastPolygons.Manager
         [HideInInspector] public float horas, minutos, segundos;
 
         private AudioSource aS;
+        private List<RaceData> SortingData;
 
         public delegate void LoadCars();
         public event LoadCars OnLoadCars;
@@ -43,6 +44,8 @@ namespace FastPolygons.Manager
                     CurrentData[0].m_Checkpoints[CurrentData[0].m_currentCheckpoint].GetComponent<MeshRenderer>().material = matt[1];
                 }
             }
+
+            SortingData = CurrentData;
             OnLoadCars -= RaceManager_OnLoadCars;
         }
 
@@ -253,7 +256,7 @@ namespace FastPolygons.Manager
 
                     #region SortingPositions
 
-                    CurrentData.Sort((r1, r2) =>
+                    SortingData.Sort((r1, r2) =>
                     {
                         if (r2.m_currentLap != r1.m_currentLap)
                             return r1.m_currentLap.CompareTo(r2.m_currentLap);
@@ -264,7 +267,7 @@ namespace FastPolygons.Manager
                         return r2.m_nextCheckpointDistance.CompareTo(r1.m_nextCheckpointDistance);
                     });
 
-                    int index = CurrentData.FindIndex(a => a.m_CarGO.CompareTag("Player"));
+                    int index = SortingData.FindIndex(a => a.m_CarGO.CompareTag("Player"));
 
                     switch (index)
                     {

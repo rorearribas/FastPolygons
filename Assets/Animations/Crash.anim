@@ -304,9 +304,10 @@ AnimationClip:
   m_HasMotionFloatCurves: 0
   m_Events:
   - time: 1.9166666
-    functionName: RespawnAfterDie
+    functionName: Respawn
     data: 
-    objectReferenceParameter: {fileID: 0}
+    objectReferenceParameter: {fileID: 11500000, guid: 403ee1f51ab2cb244a17622b17981c87,
+      type: 3}
     floatParameter: 0
     intParameter: 0
     messageOptions: 0

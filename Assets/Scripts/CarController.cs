@@ -255,7 +255,7 @@ public class CarController : MonoBehaviour, IEnableLights
                 rb.useGravity = false;
                 rb.constraints = RigidbodyConstraints.FreezeAll;
 
-                if (RaceManager.Instance.CurrentData[0].m_currentCheckpoint == 0)
+                if (RaceManager.Instance.m_currentData[0].m_currentCheckpoint == 0)
                 {
                     m_Respawn.newPos = wayPoints[1].transform.position;
                     m_Respawn.newRot = wayPoints[1].transform.rotation;
@@ -263,11 +263,11 @@ public class CarController : MonoBehaviour, IEnableLights
                 }
                 else
                 {
-                    m_Respawn.newPos = RaceManager.Instance.CurrentData[0].m_Checkpoints
-                    [RaceManager.Instance.CurrentData[0].m_currentCheckpoint - 1].transform.position;
+                    m_Respawn.newPos = RaceManager.Instance.m_currentData[0].m_Checkpoints
+                    [RaceManager.Instance.m_currentData[0].m_currentCheckpoint - 1].transform.position;
 
-                    m_Respawn.newRot = Quaternion.Euler(RaceManager.Instance.CurrentData[0].m_Checkpoints
-                    [RaceManager.Instance.CurrentData[0].m_currentCheckpoint - 1].transform.localRotation.x, 0, 0);
+                    m_Respawn.newRot = Quaternion.Euler(RaceManager.Instance.m_currentData[0].m_Checkpoints
+                    [RaceManager.Instance.m_currentData[0].m_currentCheckpoint - 1].transform.localRotation.x, 0, 0);
 
                     m_Respawn.newPos.y += 3;
                 }
@@ -334,7 +334,7 @@ public class CarController : MonoBehaviour, IEnableLights
             FastPolygons.Respawn RespawnData = 
                 Object.GetComponent<FastPolygons.Respawn>().GetData(m_ID);
 
-            if (RaceManager.Instance.CurrentData[m_ID].m_currentCheckpoint == 0)
+            if (RaceManager.Instance.m_currentData[m_ID].m_currentCheckpoint == 0)
             {
                 m_Respawn.newPos = wayPoints[0].transform.position;
                 m_Respawn.newPos.y += 3;

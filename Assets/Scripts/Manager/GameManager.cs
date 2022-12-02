@@ -124,9 +124,9 @@ namespace FastPolygons.Manager
                 int Size = TmpCars.Count;
                 for (int i = 0; i < Size; i++)
                 {
-                    RaceManager.Instance.CurrentData.Add(new DriverData());
-                    RaceManager.Instance.CurrentData[i].m_CarGO = TmpCars[i];
-                    RaceManager.Instance.CurrentData[i].m_Checkpoints = RaceManager.Instance.CurrentCheckpoints; 
+                    RaceManager.Instance.m_currentData.Add(new DriverData());
+                    RaceManager.Instance.m_currentData[i].m_CarGO = TmpCars[i];
+                    RaceManager.Instance.m_currentData[i].m_Checkpoints = RaceManager.Instance.m_currentCheckpoints; 
                 }
                 TmpCars.Clear();
                 RaceManager.Instance.Callback();
@@ -276,7 +276,7 @@ namespace FastPolygons.Manager
                     Cursor.lockState = CursorLockMode.Locked;
                     Cursor.visible = false;
 
-                    if (RaceManager.Instance.CurrentData[0].m_currentLap == 4)
+                    if (RaceManager.Instance.m_currentData[0].m_currentLap == 4)
                     {
                         state = States.END;
                     }
@@ -285,7 +285,7 @@ namespace FastPolygons.Manager
 
                 case States.END:
 
-                    positionText.text = "Position " + RaceManager.Instance.position.ToString();
+                    positionText.text = "Position " + RaceManager.Instance.m_position.ToString();
                     bestTimeText.text = RaceManager.Instance.bestTimeLapTxt.text;
 
                     Time.timeScale = 0.05f;

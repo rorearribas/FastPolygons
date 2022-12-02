@@ -3,7 +3,7 @@ using UnityEngine;
 using System;
 
 [Serializable]
-public class DriverData
+public class DriverData : ICloneable
 {
     [Header("Configuration")]
 
@@ -14,4 +14,8 @@ public class DriverData
 
     [Header("Checkpoints")]
     public List<GameObject> m_Checkpoints;
+    public object Clone()
+    {
+        return this.MemberwiseClone();
+    }
 }

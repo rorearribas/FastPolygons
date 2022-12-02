@@ -19,7 +19,6 @@ public class CarAI : MonoBehaviour, IEnableLights
 
     [HideInInspector] public int m_ID = -1;
 
-
     #region Car Sensors
 
     [Header("Car Sensors")]
@@ -284,7 +283,7 @@ public class CarAI : MonoBehaviour, IEnableLights
             FastPolygons.Respawn RespawnData =
                 Object.GetComponent<FastPolygons.Respawn>().GetData(m_ID);
 
-            if (RaceManager.Instance.CurrentData[m_ID].m_currentCheckpoint == 0)
+            if (RaceManager.Instance.m_currentData[m_ID].m_currentCheckpoint == 0)
             {
                 m_Respawn.newPos = wayPoints[0].transform.position;
                 m_Respawn.newPos.y += 3;
@@ -416,7 +415,6 @@ public class CarAI : MonoBehaviour, IEnableLights
 
         if (avoidMultiplier == 0)
         {
-
             if (Physics.Raycast(sensorPos[0].position, transform.forward, out hit, sensorLenght))
             {
                 if (!hit.collider.CompareTag("Untagged"))

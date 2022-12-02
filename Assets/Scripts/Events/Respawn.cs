@@ -15,16 +15,16 @@ namespace FastPolygons
             Respawn Data = new Respawn();
             if(RaceManager.Instance != null)
             {
-                if(RaceManager.Instance.CurrentData[_id].m_currentCheckpoint > 0)
+                if(RaceManager.Instance.m_currentData[_id].m_currentCheckpoint > 0)
                 {
-                    Data.CurrentPosition = RaceManager.Instance.CurrentData[_id].m_Checkpoints
-                    [RaceManager.Instance.CurrentData[_id].m_currentCheckpoint - 1].transform.position;
+                    Data.CurrentPosition = RaceManager.Instance.m_currentData[_id].m_Checkpoints
+                    [RaceManager.Instance.m_currentData[_id].m_currentCheckpoint - 1].transform.position;
 
-                    Transform CheckPoint = RaceManager.Instance.CurrentData[_id].m_Checkpoints
-                    [RaceManager.Instance.CurrentData[_id].m_currentCheckpoint - 1].transform;
+                    Transform CheckPoint = RaceManager.Instance.m_currentData[_id].m_Checkpoints
+                    [RaceManager.Instance.m_currentData[_id].m_currentCheckpoint - 1].transform;
 
-                    Transform Target = RaceManager.Instance.CurrentData[_id].m_Checkpoints
-                    [RaceManager.Instance.CurrentData[_id].m_currentCheckpoint - 1].GetComponent<Checkpoints>().LookRotation;
+                    Transform Target = RaceManager.Instance.m_currentData[_id].m_Checkpoints
+                    [RaceManager.Instance.m_currentData[_id].m_currentCheckpoint - 1].GetComponent<Checkpoints>().LookRotation;
 
                     Data.CurrentRotation = GetRotation(CheckPoint, Target);
                 }

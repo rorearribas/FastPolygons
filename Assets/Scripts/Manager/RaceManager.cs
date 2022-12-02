@@ -18,7 +18,7 @@ namespace FastPolygons.Manager
         public Material[] matt;
 
         public float m_position;
-        public int m_maxLaps;
+        public int m_maxLaps = 3;
 
         [HideInInspector] public float timeLap, lastTime, realTime;
         [HideInInspector] public float m_fHours, m_fMinutes, m_fSeconds;
@@ -32,6 +32,16 @@ namespace FastPolygons.Manager
         public void Start()
         {
             aS = GetComponent<AudioSource>();
+            if(m_currentCheckpoints.Count == 0)
+            {
+                GameObject GO_Father = transform.GetChild(0).gameObject;
+                for (int i = 0; i < GO_Father.transform.childCount; i++)
+                {
+                    GameObject GO_Checkpoint = GO_Father.transform.GetChild(i).gameObject;
+                    m_currentCheckpoints.Add(GO_Checkpoint);
+                }
+                
+            }
         }
 
         private void RaceManager_OnLoadCars()

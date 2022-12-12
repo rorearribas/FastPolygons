@@ -72,8 +72,8 @@ namespace FastPolygons.Manager
 
         public void GameManager_OnLoadCars()
         {
-            List<GenerateCar_SO> CarSettings = new List<GenerateCar_SO>();
-            List<Transform> InitPos = new List<Transform>();
+            List<GenerateCar_SO> CarSettings = new();
+            List<Transform> InitPos = new();
 
             InitPos.AddRange(initPos);
             CarSettings.AddRange(configs);

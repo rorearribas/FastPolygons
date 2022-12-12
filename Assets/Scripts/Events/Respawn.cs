@@ -12,7 +12,7 @@ namespace FastPolygons
 
         public Respawn GetData(int _id)
         {
-            Respawn Data = new Respawn();
+            Respawn Data = new();
             if(RaceManager.Instance != null)
             {
                 if(RaceManager.Instance.m_currentData[_id].m_currentCheckpoint > 0)
@@ -24,7 +24,8 @@ namespace FastPolygons
                     [RaceManager.Instance.m_currentData[_id].m_currentCheckpoint - 1].transform;
 
                     Transform Target = RaceManager.Instance.m_currentData[_id].m_Checkpoints
-                    [RaceManager.Instance.m_currentData[_id].m_currentCheckpoint - 1].GetComponent<Checkpoints>().LookRotation;
+                    [RaceManager.Instance.m_currentData[_id].m_currentCheckpoint - 1]
+                    .GetComponent<Checkpoints>().LookRotation;
 
                     Data.CurrentRotation = GetRotation(CheckPoint, Target);
                 }

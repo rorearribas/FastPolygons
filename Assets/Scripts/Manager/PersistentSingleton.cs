@@ -17,7 +17,7 @@ namespace FastPolygons
 
                     if(m_instance == null)
                     {
-                        GameObject obj = new GameObject();
+                        GameObject obj = new();
                         m_instance = obj.AddComponent<T>();
                     }
 

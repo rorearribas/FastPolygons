@@ -14,8 +14,7 @@ public class CarAI : MonoBehaviour, IEnableLights
     {
         public Vector3 newPos;
         public Quaternion newRot;
-    }
-    private SRespawn m_Respawn;
+    }SRespawn m_Respawn;
 
     [HideInInspector] public int m_ID = -1;
 
@@ -118,11 +117,12 @@ public class CarAI : MonoBehaviour, IEnableLights
                 }
                 else
                 {
-                    m_Respawn.newPos = wayPoints[currentNode - 2].position;
-                    currentNode = currentNode - 2;
+                    m_Respawn.newPos = wayPoints[currentNode - 1].position;
+                    int lastNode = currentNode;
+                    currentNode -= 1;
                     m_Respawn.newPos.y += 3;
 
-                    Vector3 DesiredRot = (wayPoints[currentNode - 2].position - m_Respawn.newPos);
+                    Vector3 DesiredRot = (wayPoints[lastNode].position - m_Respawn.newPos);
                     m_Respawn.newRot = Quaternion.LookRotation(DesiredRot, Vector3.up);
                 }
 
@@ -166,21 +166,14 @@ public class CarAI : MonoBehaviour, IEnableLights
         if (Vector3.Distance(transform.position, wayPoints[currentNode].position) < 10f)
         {
             if (currentNode == wayPoints.Count - 1)
-            {
                 currentNode = 0;
-            }
-
             else
-            {
                 currentNode++;
-            }
         }
     }
 
     private void Drive()
     {
-        float conversionSpeed = Mathf.Round(currentSpeed);
-
         if (currentSpeed < car_config.maxSpeed && !isCollision)
         {
             if (isReverse)
@@ -231,7 +224,7 @@ public class CarAI : MonoBehaviour, IEnableLights
     {
         if (GameManager.Instance.state == GameManager.States.PLAYING)
         {
-            if (wayPoints[currentNode].tag == "Curve" && currentSpeed > 30)
+            if (wayPoints[currentNode].CompareTag("Curve") && currentSpeed > 30)
             {
                 isBraking = true;
 

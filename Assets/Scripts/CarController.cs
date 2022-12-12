@@ -53,7 +53,6 @@ public class CarController : MonoBehaviour, IEnableLights
     {
         circuitPath = GameObject.FindGameObjectWithTag("Path").transform;
     }
-
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -72,7 +71,6 @@ public class CarController : MonoBehaviour, IEnableLights
             }
         }
     }
-
     private void Update()
     {
         Controls();
@@ -108,7 +106,6 @@ public class CarController : MonoBehaviour, IEnableLights
         }
 
     }
-
     private void FixedUpdate()
     {
         HandleMotor();
@@ -134,8 +131,7 @@ public class CarController : MonoBehaviour, IEnableLights
                 effects[i].Stop();
             }
         }
-    }
-    
+    } 
     void HandleMotor()
     {
         if (!isBreaking || !isReverse)
@@ -150,7 +146,6 @@ public class CarController : MonoBehaviour, IEnableLights
             realSpeed = car_config.maxSpeed;
         }
     }
-
     void MoveFire()
     {
         if(v > 0)
@@ -161,7 +156,6 @@ public class CarController : MonoBehaviour, IEnableLights
             }
         }
     }
-
     void BrakeMotor()
     {
         frontLeftWheelCollider.brakeTorque = car_config.maxBrakeTorque;
@@ -175,7 +169,6 @@ public class CarController : MonoBehaviour, IEnableLights
         MeshRenderer matObj = brakeObj.GetComponent<MeshRenderer>();
         matObj.material = brakeLightColour[1];
     }
-
     void Controls()
     {
         if(isMoving && GameManager.Instance.state == GameManager.States.PLAYING)
@@ -203,7 +196,6 @@ public class CarController : MonoBehaviour, IEnableLights
             }
         }
     }
-
     public void SwitchLights()
     {
         for (int i = 0; i < carLights.Length; i++)
@@ -211,14 +203,12 @@ public class CarController : MonoBehaviour, IEnableLights
             carLights[i].enabled = !carLights[i].enabled;
         }
     }
-
     private void DirectionCar()
     {
         currentSteerAngle = car_config.maxSteerAngle * h;
         frontLeftWheelCollider.steerAngle = currentSteerAngle;
         frontRightWheelCollider.steerAngle = currentSteerAngle;
     }
-
     private void UpdateWheels()
     {
         UpdateSingleWheel(frontLeftWheelCollider, frontLeftWheelTransform);
@@ -226,7 +216,6 @@ public class CarController : MonoBehaviour, IEnableLights
         UpdateSingleWheel(rearLeftWheelCollider, rearLeftWheelTransform);
         UpdateSingleWheel(rearRightWheelCollider, rearRightWheelTransform);
     }
-
     void UpdateSingleWheel(WheelCollider wheelCollider, Transform wheelTransform)
     {
         Vector3 pos;
@@ -237,7 +226,6 @@ public class CarController : MonoBehaviour, IEnableLights
         wheelTransform.rotation = rot;
         wheelTransform.position = pos;
     }
-
     private void Sensor() 
     {
         RaycastHit hit;
@@ -283,7 +271,6 @@ public class CarController : MonoBehaviour, IEnableLights
     {
         CheckCollision(coll.gameObject);
     }
-
     private void OnTriggerEnter(Collider coll)
     {
         CheckCollision(coll.gameObject);

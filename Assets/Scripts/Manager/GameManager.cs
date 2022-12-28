@@ -54,6 +54,9 @@ namespace FastPolygons.Manager
         public delegate void LoadCars();
         public event LoadCars OnLoadCars;
 
+        //Event system
+        public static EventSystem EventSystem => EventSystem.current;
+
         private void OnEnable()
         {
             fadeAnimator.SetTrigger("FadeOut");
@@ -104,7 +107,7 @@ namespace FastPolygons.Manager
             {
                 int rndPos = Random.Range(0, InitPos.Count);
                 AI[i] = Instantiate(Resources.Load<GameObject>("Prefabs/Car_IA"), 
-                    InitPos[rndPos].position, Quaternion.Euler(0, 180, 0));
+                InitPos[rndPos].position, Quaternion.Euler(0, 180, 0));
                 InitPos.RemoveAt(rndPos);
             }
 
@@ -162,7 +165,7 @@ namespace FastPolygons.Manager
                 case States.PAUSE:
 
                     AudioManager.Instance.aS.Pause();
-                    Time.timeScale = 0;
+                    Time.timeScale = 0.0f;
 
                     pages[0].SetActive(false);
                     pages[1].SetActive(false);
@@ -513,16 +516,6 @@ namespace FastPolygons.Manager
         }
 
         #endregion
-
-        public static EventSystem _EventSystem {
-            get
-            {
-                if (EventSystem.current == null)
-                    return null;
-                else
-                    return EventSystem.current;
-            }
-        }
     }
 
 }

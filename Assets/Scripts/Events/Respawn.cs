@@ -7,35 +7,35 @@ namespace FastPolygons
 {
     public class Respawn : MonoBehaviour
     {
-        [HideInInspector] public Vector3 CurrentPosition;
-        [HideInInspector] public Quaternion CurrentRotation;
+        [HideInInspector] public Vector3 RespawnPosition;
+        [HideInInspector] public Quaternion RespawnRotation;
 
-        public Respawn GetData(int _id)
+        public Respawn GetData(int _carID)
         {
             Respawn Data = new();
             if(RaceManager.Instance != null)
             {
-                if(RaceManager.Instance.m_currentData[_id].m_currentCheckpoint > 0)
+                if(RaceManager.Instance.m_currentData[_carID].m_currentCheckpoint > 0)
                 {
-                    Data.CurrentPosition = RaceManager.Instance.m_currentData[_id].m_Checkpoints
-                    [RaceManager.Instance.m_currentData[_id].m_currentCheckpoint - 1].transform.position;
+                    //Get current checkpoint
+                    int currentCheckpoint = RaceManager.Instance.m_currentData[_carID].m_currentCheckpoint;
 
-                    Transform CheckPoint = RaceManager.Instance.m_currentData[_id].m_Checkpoints
-                    [RaceManager.Instance.m_currentData[_id].m_currentCheckpoint - 1].transform;
+                    Vector3 vCurrentCheckpoint = RaceManager.Instance.m_currentData[_carID].m_Checkpoints
+                    [currentCheckpoint - 1].transform.position;
 
-                    Transform Target = RaceManager.Instance.m_currentData[_id].m_Checkpoints
-                    [RaceManager.Instance.m_currentData[_id].m_currentCheckpoint - 1]
-                    .GetComponent<Checkpoints>().LookRotation;
+                    Vector3 vTargetCheckpoint = RaceManager.Instance.m_currentData[_carID].m_Checkpoints
+                    [currentCheckpoint].transform.position;
 
-                    Data.CurrentRotation = GetRotation(CheckPoint, Target);
+                    Data.RespawnPosition = vCurrentCheckpoint;
+                    Data.RespawnRotation = GetRotation(vCurrentCheckpoint, vTargetCheckpoint);
                 }
             }
             return Data;
         }
 
-        private Quaternion GetRotation(Transform Start, Transform End)
+        private Quaternion GetRotation(Vector3 Start, Vector3 End)
         {
-            Vector3 DesiredRot = (End.position - Start.position);
+            Vector3 DesiredRot = End - Start;
             return Quaternion.LookRotation(DesiredRot, Vector3.up);
         }
 

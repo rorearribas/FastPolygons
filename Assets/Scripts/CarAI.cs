@@ -286,8 +286,8 @@ public class CarAI : MonoBehaviour, IEnableLights
             }
             else
             {
-                m_Respawn.newPos = RespawnData.CurrentPosition;
-                m_Respawn.newRot = RespawnData.CurrentRotation;
+                m_Respawn.newPos = RespawnData.RespawnPosition;
+                m_Respawn.newRot = RespawnData.RespawnRotation;
                 m_Respawn.newPos.y += 3;
             }
         }

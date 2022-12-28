@@ -80,30 +80,30 @@ namespace FastPolygons.Manager
                 case GameManager.States.START:
                     OnLoadCars?.Invoke();
                 break;
-
                 case GameManager.States.PLAYING:
-                    timeLap += Time.deltaTime;
-                    realTime += Time.deltaTime;
-                    m_fSeconds = Mathf.Round(timeLap);
-
-                    #region TimeLap
-
-                    if (m_fSeconds < 10)
-                        timeLapTxt.text = "TIME: 0" + m_fHours.ToString() + ":0" + m_fMinutes.ToString() + ":0" + m_fSeconds.ToString();
-                    else
-                        timeLapTxt.text = "TIME: 0" + m_fHours.ToString() + ":0" + m_fMinutes.ToString() + ":" + m_fSeconds.ToString();
-
-                    if (m_fSeconds > 59)
-                    {
-                        m_fMinutes++;
-                        timeLap = 0;
-                        timeLapTxt.text = "TIME: 0" + m_fHours.ToString() + ":0" + m_fMinutes.ToString() + ":" + m_fSeconds.ToString();
-                    }
-
-                    #endregion
-
+                    UpdateTime();
                     UpdateRanking();
                 break;
+            }
+        }
+
+        private void UpdateTime()
+        {
+            timeLap += Time.deltaTime;
+            realTime += Time.deltaTime;
+            m_fSeconds = Mathf.Round(timeLap);
+
+            timeLapTxt.text = m_fSeconds switch
+            {
+                < 10 => "TIME: 0" + m_fHours.ToString() + ":0" + m_fMinutes.ToString() + ":0" + m_fSeconds.ToString(),
+                _ => "TIME: 0" + m_fHours.ToString() + ":0" + m_fMinutes.ToString() + ":" + m_fSeconds.ToString(),
+            };
+
+            if (m_fSeconds > 59)
+            {
+                m_fMinutes++;
+                timeLap = 0;
+                timeLapTxt.text = "TIME: 0" + m_fHours.ToString() + ":0" + m_fMinutes.ToString() + ":" + m_fSeconds.ToString();
             }
         }
 

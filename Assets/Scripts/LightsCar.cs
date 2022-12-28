@@ -5,7 +5,7 @@ using FastPolygons.Manager;
 
 public class LightsCar : MonoBehaviour
 {
-    void SwitchLights()
+    public void SwitchLights()
     {
         int Size = RaceManager.Instance.m_currentData.Count;
         for (int i = 0; i < Size; i++)

@@ -177,11 +177,9 @@ namespace FastPolygons.Manager
             aS.Play();
             GameManager.Instance.LoadLevel();
 
-            GameObject CurrentGO = GameManager._EventSystem.currentSelectedGameObject;
-            if (CurrentGO.GetComponent<Button>() != null)
-            {
-                CurrentGO.GetComponent<Button>().enabled = false;
-            }
+            GameObject currentGO = GameManager.EventSystem.currentSelectedGameObject;
+            if (currentGO.GetComponent<Button>() != null)
+                currentGO.GetComponent<Button>().enabled = false;
         }
 
         public void ChangeToSelector()

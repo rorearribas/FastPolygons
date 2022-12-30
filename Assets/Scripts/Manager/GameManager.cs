@@ -10,7 +10,7 @@ namespace FastPolygons.Manager
 {
     public class GameManager : PersistentSingleton<GameManager>
     {
-        public enum States
+        public enum EStates
         {
             MENU, //MENU PRINCIPAL.
             PAUSE, //MENU DE PAUSA.
@@ -21,7 +21,7 @@ namespace FastPolygons.Manager
             PLAYING, //MIENTRAS ESTAMOS JUGANDO LA PARTIDA.
             END //CUANDO TERMINAMOS LA PARTIDA.
         }
-        public enum Gamemode
+        public enum EGamemode
         {
             RACE, //MODO CARRERA ORIGINAL
             DRIFT, //MODO DE DRIFT
@@ -30,10 +30,10 @@ namespace FastPolygons.Manager
         }
 
         [Header("Game States")]
-        public States state;
-        public Gamemode gamemode;
+        [SerializeField] private EStates state;
+        public EGamemode gamemode;
 
-        [Header("Componentes")]
+        [Header("Components")]
         public GameObject[] pages;
         public Animator fadeAnimator;
         public Text countDownText, positionText, bestTimeText;
@@ -50,31 +50,36 @@ namespace FastPolygons.Manager
         [HideInInspector]
         public List<GameObject> TmpCars;
 
-        //Delegates
-        public delegate void LoadCars();
-        public event LoadCars OnLoadCars;
+        //Delegate
+        public System.EventHandler OnLoadCars;
 
         //Event system
         public static EventSystem EventSystem => EventSystem.current;
+
+        //States
+        public EStates State { get => state; set => state = value; }
 
         private void OnEnable()
         {
             fadeAnimator.SetTrigger("FadeOut");
 
-            state = States.MENU;
+            State = EStates.MENU;
             Canvas myCanvas = transform.GetChild(0).GetComponent<Canvas>();
             myCanvas.enabled = false;
 
             LoadResolutions();
             LoadGraphics();
 
-            AudioManager.Instance.musicChanged.Invoke(state);
+            AudioManager.Instance.musicChanged.Invoke(State);
             AudioSource aS = transform.GetChild(0).GetComponent<AudioSource>();
             aS.Stop();
         }
 
-        public void GameManager_OnLoadCars()
+        public void GameManager_OnLoadCars(object sender, System.EventArgs e)
         {
+            if (RaceManager.Instance == null)
+                return;
+
             List<GenerateCar_SO> CarSettings = new();
             List<Transform> InitPos = new();
 
@@ -122,32 +127,29 @@ namespace FastPolygons.Manager
             }
 
             //Send all these data to the RaceManager
-            if (RaceManager.Instance != null)
+            int Size = TmpCars.Count;
+            for (int i = 0; i < Size; i++)
             {
-                int Size = TmpCars.Count;
-                for (int i = 0; i < Size; i++)
-                {
-                    RaceManager.Instance.m_currentData.Add(new DriverData());
-                    RaceManager.Instance.m_currentData[i].m_CarGO = TmpCars[i];
-                    RaceManager.Instance.m_currentData[i].m_Checkpoints = RaceManager.Instance.m_currentCheckpoints; 
-                }
-                TmpCars.Clear();
-                RaceManager.Instance.Callback();
-                OnLoadCars -= GameManager_OnLoadCars;
+                RaceManager.Instance.m_currentData.Add(new DriverData());
+                RaceManager.Instance.m_currentData[i].m_CarGO = TmpCars[i];
+                RaceManager.Instance.m_currentData[i].m_Checkpoints = RaceManager.Instance.m_AllCheckpoints;
             }
+
+            TmpCars.Clear();
+            OnLoadCars -= GameManager_OnLoadCars;
         }
 
         private void Update()
         {
-            GameStates(state);
+            GameStates(State);
         }
 
         #region GameStates
-        public void GameStates(States states)
+        public void GameStates(EStates states)
         {
             switch (states)
             {
-                case States.MENU:
+                case EStates.MENU:
 
                     Time.timeScale = 1;
                     Canvas myCanvas = transform.GetChild(0).GetComponent<Canvas>();
@@ -162,7 +164,7 @@ namespace FastPolygons.Manager
                     Cursor.visible = true;
                     break;
 
-                case States.PAUSE:
+                case EStates.PAUSE:
 
                     AudioManager.Instance.aS.Pause();
                     Time.timeScale = 0.0f;
@@ -191,7 +193,7 @@ namespace FastPolygons.Manager
 
                     break;
 
-                case States.PRELOAD:
+                case EStates.PRELOAD:
 
                     pages[0].SetActive(false);
                     pages[1].SetActive(false);
@@ -204,7 +206,7 @@ namespace FastPolygons.Manager
 
                     break;
 
-                case States.LOADSCREEN:
+                case EStates.LOADSCREEN:
 
                     Time.timeScale = 1;
                     pages[0].SetActive(true);
@@ -218,7 +220,7 @@ namespace FastPolygons.Manager
 
                     break;
 
-                case States.SETTINGS:
+                case EStates.SETTINGS:
 
                     pages[0].SetActive(false);
                     pages[1].SetActive(true);
@@ -226,7 +228,7 @@ namespace FastPolygons.Manager
                     pages[3].SetActive(false);
                     pages[4].SetActive(false);
 
-                    MenuManager.mM.estados = MenuManager.States.Settings;
+                    MenuManager.mM.State = MenuManager.EStates.Settings;
 
                     myCanvas = transform.GetChild(0).GetComponent<Canvas>();
                     myCanvas.renderMode = RenderMode.ScreenSpaceCamera;
@@ -234,8 +236,8 @@ namespace FastPolygons.Manager
 
                     break;
 
-                case States.START:
-                    OnLoadCars?.Invoke();
+                case EStates.START:
+                    OnLoadCars?.Invoke(this, System.EventArgs.Empty);
 
                     if (!isCountDown)
                         StartCoroutine(CountDown(4));
@@ -251,7 +253,7 @@ namespace FastPolygons.Manager
 
                     break;
 
-                case States.PLAYING:
+                case EStates.PLAYING:
 
                     Time.timeScale = 1;
 
@@ -281,12 +283,12 @@ namespace FastPolygons.Manager
 
                     if (RaceManager.Instance.m_currentData[0].m_currentLap == 4)
                     {
-                        state = States.END;
+                        State = EStates.END;
                     }
 
                     break;
 
-                case States.END:
+                case EStates.END:
 
                     positionText.text = "Position " + RaceManager.Instance.m_position.ToString();
                     bestTimeText.text = RaceManager.Instance.bestTimeLapTxt.text;
@@ -328,7 +330,7 @@ namespace FastPolygons.Manager
             Canvas myCanvas = transform.GetChild(0).GetComponent<Canvas>();
             myCanvas.enabled = true;
 
-            state = States.PRELOAD;
+            State = EStates.PRELOAD;
             fadeAnimator.SetTrigger("FadeIn");
         }
 
@@ -368,7 +370,7 @@ namespace FastPolygons.Manager
             yield return new WaitForSeconds(0.5f);
             GameObject.Find("Directional_Light").GetComponent<Animator>().SetTrigger("Cycle");
 
-            state = States.PLAYING;
+            State = EStates.PLAYING;
 
             AudioManager.Instance.aS.clip = Resources.Load<AudioClip>("Music/Theme01");
             AudioManager.Instance.aS.Play();
@@ -384,7 +386,7 @@ namespace FastPolygons.Manager
             transform.GetChild(0).GetComponent<AudioSource>().Play();
             Canvas inGame = GameObject.FindGameObjectWithTag("CanvasInGame").GetComponent<Canvas>();
             inGame.enabled = true;
-            state = States.PLAYING;
+            State = EStates.PLAYING;
         }
 
         public void RestartGame()
@@ -393,7 +395,7 @@ namespace FastPolygons.Manager
 
             Canvas myCanvas = transform.GetChild(0).GetComponent<Canvas>();
             myCanvas.enabled = true;
-            state = States.PRELOAD;
+            State = EStates.PRELOAD;
 
             fadeAnimator.SetTrigger("FadeIn");
 
@@ -407,8 +409,8 @@ namespace FastPolygons.Manager
             Canvas myCanvas = transform.GetChild(0).GetComponent<Canvas>();
             myCanvas.enabled = false;
 
-            state = States.MENU;
-            AudioManager.Instance.musicChanged?.Invoke(state);
+            State = EStates.MENU;
+            AudioManager.Instance.musicChanged?.Invoke(State);
         }
         public void OpenSettings()
         {
@@ -416,7 +418,7 @@ namespace FastPolygons.Manager
             myCanvas.enabled = true;
 
             transform.GetChild(0).GetComponent<AudioSource>().Play();
-            state = States.SETTINGS;
+            State = EStates.SETTINGS;
 
             if (SceneManager.GetActiveScene().name != "Menu")
             {
@@ -435,15 +437,15 @@ namespace FastPolygons.Manager
                 Canvas myCanvas = transform.GetChild(0).GetComponent<Canvas>();
                 myCanvas.enabled = false;
 
-                state = States.MENU;
-                MenuManager.mM.estados = MenuManager.States.MainMenu;
+                State = EStates.MENU;
+                MenuManager.mM.State = MenuManager.EStates.MainMenu;
             }
 
             else
             {
                 transform.GetChild(0).GetComponent<AudioSource>().Play();
                 Camera.main.clearFlags = CameraClearFlags.Skybox;
-                state = States.PAUSE;
+                State = EStates.PAUSE;
             }
         }
 

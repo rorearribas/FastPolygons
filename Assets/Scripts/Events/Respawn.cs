@@ -7,33 +7,46 @@ namespace FastPolygons
 {
     public class Respawn : MonoBehaviour
     {
-        [HideInInspector] public Vector3 RespawnPosition;
-        [HideInInspector] public Quaternion RespawnRotation;
+        private Vector3 respawnPosition;
+        private Quaternion respawnRotation;
+
+        private int currentCheckpoint;
+        private int targetCheckpoint;
+
+        public Respawn(Vector3 respawnPosition, Quaternion respawnRotation)
+        {
+            this.RespawnPosition = respawnPosition;
+            this.RespawnRotation = respawnRotation;
+        }
+
+        public Vector3 RespawnPosition { get => respawnPosition; set => respawnPosition = value; }
+        public Quaternion RespawnRotation { get => respawnRotation; set => respawnRotation = value; }
 
         public Respawn GetData(int _carID)
         {
-            Respawn Data = new();
-            if(RaceManager.Instance != null)
+            if(RaceManager.Instance == null)
+                return null;
+
+            //Get current checkpoint
+            currentCheckpoint = RaceManager.Instance.m_currentData[_carID].m_currentCheckpoint;
+            targetCheckpoint = currentCheckpoint;
+
+            if (currentCheckpoint == 0) 
             {
-                if(RaceManager.Instance.m_currentData[_carID].m_currentCheckpoint > 0)
-                {
-                    //Get current checkpoint
-                    int currentCheckpoint = RaceManager.Instance.m_currentData[_carID].m_currentCheckpoint;
-
-                    Vector3 vCurrentCheckpoint = RaceManager.Instance.m_currentData[_carID].m_Checkpoints
-                    [currentCheckpoint - 1].transform.position;
-
-                    Vector3 vTargetCheckpoint = RaceManager.Instance.m_currentData[_carID].m_Checkpoints
-                    [currentCheckpoint].transform.position;
-
-                    Data.RespawnPosition = vCurrentCheckpoint;
-                    Data.RespawnRotation = GetRotation(vCurrentCheckpoint, vTargetCheckpoint);
-                }
+                currentCheckpoint = RaceManager.Instance.m_AllCheckpoints.Count;
+                targetCheckpoint = 0;
             }
-            return Data;
+
+            Vector3 vCurrentCheckpoint = RaceManager.Instance.m_currentData[_carID].m_Checkpoints
+            [currentCheckpoint - 1].transform.position;
+
+            Vector3 vTargetCheckpoint = RaceManager.Instance.m_currentData[_carID].m_Checkpoints
+            [targetCheckpoint].transform.position;
+
+            return new(vCurrentCheckpoint, CalcRot(vCurrentCheckpoint, vTargetCheckpoint));
         }
 
-        private Quaternion GetRotation(Vector3 Start, Vector3 End)
+        private Quaternion CalcRot(Vector3 Start, Vector3 End)
         {
             Vector3 DesiredRot = End - Start;
             return Quaternion.LookRotation(DesiredRot, Vector3.up);

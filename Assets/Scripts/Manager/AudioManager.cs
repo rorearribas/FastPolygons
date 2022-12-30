@@ -8,7 +8,7 @@ namespace FastPolygons.Manager
     public class AudioManager : PersistentSingleton<AudioManager>
     {
         public AudioSource aS;
-        public delegate void OnMusicChanged(GameManager.States estados);
+        public delegate void OnMusicChanged(GameManager.EStates estados);
         public OnMusicChanged musicChanged;
 
         public void OnEnable()
@@ -17,30 +17,30 @@ namespace FastPolygons.Manager
             musicChanged += SelectMusic;
         }
 
-        public void SelectMusic(GameManager.States estados)
+        public void SelectMusic(GameManager.EStates estados)
         {
             switch (estados)
             {
-                case GameManager.States.MENU:
+                case GameManager.EStates.MENU:
                     AudioManager.Instance.aS.clip = Resources.Load<AudioClip>("Music/Theme01");
                     aS.Play();
                     aS.loop = true;
                     break;
 
-                case GameManager.States.PAUSE:
+                case GameManager.EStates.PAUSE:
                     Instance.musicChanged += Instance.musicChanged;
                     aS.Pause();
                     break;
 
-                case GameManager.States.LOADSCREEN:
+                case GameManager.EStates.LOADSCREEN:
                     aS.Stop();
                     break;
 
-                case GameManager.States.END:
+                case GameManager.EStates.END:
                     aS.Stop();
                     break;
 
-                case GameManager.States.PLAYING:
+                case GameManager.EStates.PLAYING:
                     Instance.musicChanged += Instance.musicChanged;
                     aS.UnPause();
                     aS.Play();

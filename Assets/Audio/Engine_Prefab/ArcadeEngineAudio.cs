@@ -1,61 +1,64 @@
 ﻿using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 
-public class ArcadeEngineAudio : MonoBehaviour
+namespace FastPolygons
 {
-    public static ArcadeEngineAudio instance;
-    [Tooltip("What audio clip should play when the kart starts?")]
-    public AudioSource StartSound;
-    [Tooltip("What audio clip should play when the kart does nothing?")]
-    public AudioSource IdleSound;
-    [Tooltip("What audio clip should play when the kart moves around?")]
-    public AudioSource RunningSound;
-    [Tooltip("What audio clip should play when the kart is drifting")]
-    public AudioSource Drift;
-    [Tooltip("Maximum Volume the running sound will be at full speed")]
-    [Range(0.1f, 1.0f)] public float RunningSoundMaxVolume = 1.0f;
-    [Tooltip("Maximum Pitch the running sound will be at full speed")]
-    [Range(0.1f, 2.0f)] public float RunningSoundMaxPitch = 1.0f;
-    [Tooltip("What audio clip should play when the kart moves in Reverse?")]
-    public AudioSource ReverseSound;
-    [Tooltip("Maximum Volume the Reverse sound will be at full Reverse speed")]
-    [Range(0.1f, 1.0f)] public float ReverseSoundMaxVolume = 0.5f;
-    [Tooltip("Maximum Pitch the Reverse sound will be at full Reverse speed")]
-    [Range(0.1f, 2.0f)] public float ReverseSoundMaxPitch = 0.6f;
-
-    CarController car;
-
-    void Awake()
+    public class ArcadeEngineAudio : MonoBehaviour
     {
-        instance = this;
-        car = GetComponentInParent<CarController>();
-    }
+        public static ArcadeEngineAudio instance;
+        [Tooltip("What audio clip should play when the kart starts?")]
+        public AudioSource StartSound;
+        [Tooltip("What audio clip should play when the kart does nothing?")]
+        public AudioSource IdleSound;
+        [Tooltip("What audio clip should play when the kart moves around?")]
+        public AudioSource RunningSound;
+        [Tooltip("What audio clip should play when the kart is drifting")]
+        public AudioSource Drift;
+        [Tooltip("Maximum Volume the running sound will be at full speed")]
+        [Range(0.1f, 1.0f)] public float RunningSoundMaxVolume = 1.0f;
+        [Tooltip("Maximum Pitch the running sound will be at full speed")]
+        [Range(0.1f, 2.0f)] public float RunningSoundMaxPitch = 1.0f;
+        [Tooltip("What audio clip should play when the kart moves in Reverse?")]
+        public AudioSource ReverseSound;
+        [Tooltip("Maximum Volume the Reverse sound will be at full Reverse speed")]
+        [Range(0.1f, 1.0f)] public float ReverseSoundMaxVolume = 0.5f;
+        [Tooltip("Maximum Pitch the Reverse sound will be at full Reverse speed")]
+        [Range(0.1f, 2.0f)] public float ReverseSoundMaxPitch = 0.6f;
 
-    void Update()
-    {
-        float carSpeed = 0.0f;
-        if (car != null)
+        CarController car;
+
+        void Awake()
         {
-            carSpeed = car.LocalSpeed();
+            instance = this;
+            car = GetComponentInParent<CarController>();
         }
 
-        IdleSound.volume = Mathf.Lerp(0.6f, 0.0f, carSpeed * 4);
-
-        if (carSpeed < 0.0f)
+        void Update()
         {
-            // In reverse
-            RunningSound.volume = 0.0f;
-            ReverseSound.volume = Mathf.Lerp(0.1f, ReverseSoundMaxVolume, -carSpeed * 1.2f);
-            ReverseSound.pitch = Mathf.Lerp(0.1f, ReverseSoundMaxPitch, -carSpeed + (Mathf.Sin(Time.time) * .1f));
-        }
-        else
-        {
-            // Moving forward
-            ReverseSound.volume = 0.0f;
-            RunningSound.volume = Mathf.Lerp(0.1f, RunningSoundMaxVolume, carSpeed * 1.2f);
-            RunningSound.pitch = Mathf.Lerp(0.3f, RunningSoundMaxPitch, carSpeed + (Mathf.Sin(Time.time) * .1f));
-        }
+            float carSpeed = 0.0f;
+            if (car != null)
+            {
+                carSpeed = car.LocalSpeed();
+            }
+
+            IdleSound.volume = Mathf.Lerp(0.6f, 0.0f, carSpeed * 4);
+
+            if (carSpeed < 0.0f)
+            {
+                // In reverse
+                RunningSound.volume = 0.0f;
+                ReverseSound.volume = Mathf.Lerp(0.1f, ReverseSoundMaxVolume, -carSpeed * 1.2f);
+                ReverseSound.pitch = Mathf.Lerp(0.1f, ReverseSoundMaxPitch, -carSpeed + Mathf.Sin(Time.time) * .1f);
+            }
+            else
+            {
+                // Moving forward
+                ReverseSound.volume = 0.0f;
+                RunningSound.volume = Mathf.Lerp(0.1f, RunningSoundMaxVolume, carSpeed * 1.2f);
+                RunningSound.pitch = Mathf.Lerp(0.3f, RunningSoundMaxPitch, carSpeed + Mathf.Sin(Time.time) * .1f);
+            }
 
 
+        }
     }
 }

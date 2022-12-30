@@ -3,19 +3,22 @@ using System.Collections.Generic;
 using UnityEngine;
 using FastPolygons.Manager;
 
-public class LightsCar : MonoBehaviour
+namespace FastPolygons
 {
-    public void SwitchLights()
+    public class LightsCar : MonoBehaviour
     {
-        int Size = RaceManager.Instance.m_currentData.Count;
-        for (int i = 0; i < Size; i++)
+        public void SwitchLights()
         {
-            GameObject GO = RaceManager.Instance.m_currentData[i].m_CarGO;
-            GO.GetComponent<IEnableLights>().SwitchLights();
+            int Size = RaceManager.Instance.m_currentData.Count;
+            for (int i = 0; i < Size; i++)
+            {
+                GameObject GO = RaceManager.Instance.m_currentData[i].m_CarGO;
+                GO.GetComponent<IEnableLights>().SwitchLights();
+            }
         }
     }
-}
-public interface IEnableLights 
-{
-    void SwitchLights();
+    public interface IEnableLights
+    {
+        void SwitchLights();
+    }
 }

@@ -9,7 +9,7 @@ namespace FastPolygons.Manager
 {
     public class MenuManager : MonoBehaviour
     {
-        public enum States 
+        public enum EStates 
         { 
             MainMenu, 
             CarSelector,
@@ -19,7 +19,7 @@ namespace FastPolygons.Manager
         public static MenuManager mM;
 
         [Header("Menu States and Components")]
-        public States estados;
+        private EStates state;
         public GameObject[] pages;
         public Text stateName;
 
@@ -30,6 +30,8 @@ namespace FastPolygons.Manager
 
         private AudioSource aS;
         private Animator anim;
+
+        public EStates State { get => state; set => state = value; }
 
         private delegate void SelectorCar();
         private event SelectorCar OnSelectorCar;
@@ -56,13 +58,13 @@ namespace FastPolygons.Manager
         private void MenuManager_OnSelectorCar()
         {
             GameObject car = GameObject.Find("CarExp");
-            car.GetComponent<ViewPlayer>().config = carConfigs[indexConfig];
-            car.GetComponent<ViewPlayer>().OnChangeCar(this, EventArgs.Empty);
+            car.GetComponent<ModelInspection>().config = carConfigs[indexConfig];
+            car.GetComponent<ModelInspection>().OnChangeCar(this, EventArgs.Empty);
         }
 
         private void Update()
         {
-            GameStates(estados);
+            GameStates(State);
         }
 
         public void PlayGame()
@@ -83,23 +85,23 @@ namespace FastPolygons.Manager
             Application.Quit();
         }
 
-        public void GameStates(States states)
+        public void GameStates(EStates states)
         {
             switch (states)
             {
-                case States.MainMenu:
+                case EStates.MainMenu:
                     pages[0].SetActive(true);
                     pages[1].SetActive(false);
                     stateName.text = "FAST POLYGONS";
                     break;
 
-                case States.Settings:
+                case EStates.Settings:
                     pages[0].SetActive(false);
                     pages[1].SetActive(false);
                     stateName.text = "";
                     break;
 
-                case States.CarSelector:
+                case EStates.CarSelector:
                     pages[0].SetActive(false);
                     pages[1].SetActive(true);
                     OnSelectorCar?.Invoke();
@@ -124,8 +126,8 @@ namespace FastPolygons.Manager
             }
 
             GameObject car = GameObject.Find("CarExp");
-            car.GetComponent<ViewPlayer>().config = carConfigs[indexConfig];
-            car.GetComponent<ViewPlayer>().OnChangeCar(this, EventArgs.Empty);
+            car.GetComponent<ModelInspection>().config = carConfigs[indexConfig];
+            car.GetComponent<ModelInspection>().OnChangeCar(this, EventArgs.Empty);
 
             sliderConfigs[0].value = carConfigs[indexConfig].maxSpeed;
             sliderConfigs[1].value = carConfigs[indexConfig].maxMotorTorque;
@@ -152,8 +154,8 @@ namespace FastPolygons.Manager
             }
 
             GameObject car = GameObject.Find("CarExp");
-            car.GetComponent<ViewPlayer>().config = carConfigs[indexConfig];
-            car.GetComponent<ViewPlayer>().OnChangeCar(this, EventArgs.Empty);
+            car.GetComponent<ModelInspection>().config = carConfigs[indexConfig];
+            car.GetComponent<ModelInspection>().OnChangeCar(this, EventArgs.Empty);
 
             sliderConfigs[0].value = carConfigs[indexConfig].maxSpeed;
             sliderConfigs[1].value = carConfigs[indexConfig].maxMotorTorque;
@@ -184,7 +186,7 @@ namespace FastPolygons.Manager
 
         public void ChangeToSelector()
         {
-            estados = States.CarSelector;
+            State = EStates.CarSelector;
         }
 
         public void BackToMainMenu()
@@ -196,7 +198,7 @@ namespace FastPolygons.Manager
         public void BackToBackToMainMenu_Part2()
         {
             anim.SetTrigger("Back");
-            estados = States.MainMenu;
+            State = EStates.MainMenu;
         }
     }
 }

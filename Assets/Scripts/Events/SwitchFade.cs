@@ -1,11 +1,13 @@
 ﻿using UnityEngine;
-using FastPolygons.Manager;
 
-public class SwitchFade : MonoBehaviour
+namespace FastPolygons.Manager
 {
-    public void LoadLevel() 
+    public class SwitchFade : MonoBehaviour
     {
-        GameManager.Instance.state = GameManager.States.LOADSCREEN;
-        AudioManager.Instance.musicChanged?.Invoke(GameManager.Instance.state);
+        public void LoadLevel()
+        {
+            GameManager.Instance.State = GameManager.EStates.LOADSCREEN;
+            AudioManager.Instance.musicChanged?.Invoke(GameManager.Instance.State);
+        }
     }
 }

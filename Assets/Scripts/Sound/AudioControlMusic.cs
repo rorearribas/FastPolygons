@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 
-public class AudioControlMusic : MonoBehaviour
+namespace FastPolygons.Sound
 {
-    [SerializeField] AudioMixer aM;
-    public void ControlAudio(float value)
+    public class AudioControlMusic : MonoBehaviour
     {
-        aM.SetFloat("Music", Mathf.Log10(value) * 20);
+        [SerializeField] AudioMixer aM;
+        public void ControlAudio(float value)
+        {
+            aM.SetFloat("Music", Mathf.Log10(value) * 20);
+        }
     }
 }

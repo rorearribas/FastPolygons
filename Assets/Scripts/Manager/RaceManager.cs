@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,7 +9,7 @@ namespace FastPolygons.Manager
     public class RaceManager : TemporalSingleton<RaceManager>
     {
         public List<DriverData> m_currentData;
-        public List<GameObject> m_currentCheckpoints;
+        public List<GameObject> m_AllCheckpoints;
 
         public Text lapCountTxt;
         public Text timeLapTxt;
@@ -22,50 +23,40 @@ namespace FastPolygons.Manager
 
         [HideInInspector] public float timeLap, lastTime, realTime;
         [HideInInspector] public float m_fHours, m_fMinutes, m_fSeconds;
-        [HideInInspector] public List<DriverData> m_SortData;
 
         private AudioSource aS;
-
-        public delegate void LoadCars();
-        public event LoadCars OnLoadCars;
+        private readonly float m_minDistance = 10f;
 
         public void Start()
         {
+            GameManager.Instance.OnLoadCars += RaceManager_OnLoadCars;
+
             aS = GetComponent<AudioSource>();
-            if(m_currentCheckpoints.Count == 0)
+            if(m_AllCheckpoints.Count == 0)
             {
                 GameObject GO_Father = transform.GetChild(0).gameObject;
                 for (int i = 0; i < GO_Father.transform.childCount; i++)
                 {
                     GameObject GO_Checkpoint = GO_Father.transform.GetChild(i).gameObject;
-                    m_currentCheckpoints.Add(GO_Checkpoint);
+                    m_AllCheckpoints.Add(GO_Checkpoint);
                 }
                 
             }
         }
 
-        private void RaceManager_OnLoadCars()
+        private void RaceManager_OnLoadCars(object sender, EventArgs e)
         {
-            if(m_currentCheckpoints.Count > 0)
+            GameManager.Instance.OnLoadCars -= RaceManager_OnLoadCars;
+
+            if (m_AllCheckpoints.Count == 0)
+                return;
+
+            m_AllCheckpoints[0].GetComponent<MeshRenderer>().material = matt[1];
+            for (int i = 1; i < m_AllCheckpoints.Count - 1; i++)
             {
-                m_currentCheckpoints[0].GetComponent<MeshRenderer>().material = matt[1];
-                for (int i = 1; i < m_currentCheckpoints.Count - 1; i++)
-                {
-                    m_currentCheckpoints[i].GetComponent<MeshRenderer>().material = matt[0];
-                }
+                MeshRenderer meshRenderer = m_AllCheckpoints[i].GetComponent<MeshRenderer>();
+                meshRenderer.material = matt[0];
             }
-
-            for (int i = 0; i < m_currentData.Count; i++)
-            {
-                m_SortData.Add(m_currentData[i]);
-            }
-
-            OnLoadCars -= RaceManager_OnLoadCars;
-        }
-
-        public void Callback()
-        {
-            OnLoadCars += RaceManager_OnLoadCars;
         }
 
         void Update()
@@ -75,12 +66,12 @@ namespace FastPolygons.Manager
 
         private void RaceUpdate()
         {
-            switch (GameManager.Instance.state)
+            switch (GameManager.Instance.State)
             {
-                case GameManager.States.START:
-                    OnLoadCars?.Invoke();
+                case GameManager.EStates.START:
+                    GameManager.Instance.OnLoadCars?.Invoke(this, EventArgs.Empty);
                 break;
-                case GameManager.States.PLAYING:
+                case GameManager.EStates.PLAYING:
                     UpdateTime();
                     UpdateRanking();
                 break;
@@ -112,12 +103,15 @@ namespace FastPolygons.Manager
             for (int i = 0; i < m_currentData.Count; i++)
             {
                 //Get the next checkpoint distance
-                m_currentData[i].m_nextCheckpointDistance = Vector3.Distance(m_currentData[i].m_CarGO.transform.position,
-                    m_currentData[i].m_Checkpoints[m_currentData[i].m_currentCheckpoint].transform.position);
+                int currentCheckpoint = m_currentData[i].m_currentCheckpoint;
+                Vector3 currentPos = m_currentData[i].m_CarGO.transform.position;
+                Vector3 TargetPosition = m_currentData[i].m_Checkpoints[currentCheckpoint].transform.position;
+
+                m_currentData[i].m_nextCheckpointDistance = Vector3.Distance(currentPos, TargetPosition);
 
                 if (!m_currentData[i].m_CarGO.CompareTag("Player"))
                 {
-                    if (m_currentData[i].m_nextCheckpointDistance < 6)
+                    if (m_currentData[i].m_nextCheckpointDistance < m_minDistance)
                     {
                         if (m_currentData[i].m_currentCheckpoint == m_currentData[i].m_Checkpoints.Count - 1)
                         {
@@ -132,7 +126,7 @@ namespace FastPolygons.Manager
                 }
                 else
                 {
-                    if (m_currentData[i].m_nextCheckpointDistance < 6)
+                    if (m_currentData[i].m_nextCheckpointDistance < m_minDistance)
                     {
                         if (m_currentData[i].m_currentCheckpoint == m_currentData[i].m_Checkpoints.Count - 1)
                         {
@@ -204,7 +198,12 @@ namespace FastPolygons.Manager
                 }
             }
 
-            m_SortData.Sort((r1, r2) =>
+            SortRanking(m_currentData);
+        }
+
+        private void SortRanking(List<DriverData> Cars)
+        {
+            Cars.Sort((r1, r2) =>
             {
                 if (r2.m_currentLap != r1.m_currentLap)
                     return r1.m_currentLap.CompareTo(r2.m_currentLap);
@@ -215,8 +214,8 @@ namespace FastPolygons.Manager
                 return r2.m_nextCheckpointDistance.CompareTo(r1.m_nextCheckpointDistance);
             });
 
-            int index = m_SortData.FindIndex(a => a.m_CarGO.CompareTag("Player"));
-            m_position = (m_SortData.Count - index);
+            int index = Cars.FindIndex(a => a.m_CarGO.CompareTag("Player"));
+            m_position = Cars.Count - index;
             playerPos.text = "Position " + m_position.ToString();
         }
     }

@@ -19,8 +19,6 @@ namespace FastPolygons
         }
         SRespawn m_Respawn;
 
-        [HideInInspector] public int m_ID = -1;
-
         #region Car Sensors
 
         [Header("Car Sensors")]
@@ -276,23 +274,11 @@ namespace FastPolygons
                 rb.useGravity = false;
                 rb.constraints = RigidbodyConstraints.FreezeAll;
 
-                Respawn RespawnData =
-                    Object.GetComponent<Respawn>().GetData(m_ID);
+                Respawn RespawnData = Object.GetComponent<Respawn>().GetData(this.gameObject);
 
-                if (RaceManager.Instance.m_currentData[m_ID].m_currentCheckpoint == 0)
-                {
-                    m_Respawn.newPos = wayPoints[0].transform.position;
-                    m_Respawn.newPos.y += 3;
-
-                    Vector3 DesiredRot = wayPoints[1].position - m_Respawn.newPos;
-                    m_Respawn.newRot = Quaternion.LookRotation(DesiredRot, Vector3.up);
-                }
-                else
-                {
-                    m_Respawn.newPos = RespawnData.RespawnPosition;
-                    m_Respawn.newRot = RespawnData.RespawnRotation;
-                    m_Respawn.newPos.y += 3;
-                }
+                m_Respawn.newPos = RespawnData.RespawnPosition;
+                m_Respawn.newRot = RespawnData.RespawnRotation;
+                m_Respawn.newPos.y += 3;
             }
         }
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 using UnityEngine.UI;
 
 namespace FastPolygons.Manager
@@ -16,31 +17,40 @@ namespace FastPolygons.Manager
         public Text bestTimeLapTxt;
         public Text playerPos;
 
-        public Material[] matt;
+        public List<Material> m_materials;
 
         public float m_position;
         public int m_maxLaps = 3;
 
-        [HideInInspector] public float timeLap, lastTime, realTime;
-        [HideInInspector] public float m_fHours, m_fMinutes, m_fSeconds;
+        private float timeLap = -1f, lastTime;
+        private float m_hours, m_minutes, m_seconds;
 
         private AudioSource aS;
+
+        private readonly int frameInterval = 2;
         private readonly float m_minDistance = 10f;
+        private readonly string FORMAT = "{0:00}:{1:00}:{2:00}";
 
         public void Start()
         {
             GameManager.Instance.OnLoadCars += RaceManager_OnLoadCars;
-
             aS = GetComponent<AudioSource>();
-            if(m_AllCheckpoints.Count == 0)
+            CreateCheckpoints();
+
+            StartCoroutine(IEUpdate());
+            StartCoroutine(IECounter(1f));
+        }
+
+        private void CreateCheckpoints()
+        {
+            if (m_AllCheckpoints.Count > 0)
+                return;
+
+            GameObject GO_Father = transform.GetChild(0).gameObject;
+            for (int i = 0; i < GO_Father.transform.childCount; i++)
             {
-                GameObject GO_Father = transform.GetChild(0).gameObject;
-                for (int i = 0; i < GO_Father.transform.childCount; i++)
-                {
-                    GameObject GO_Checkpoint = GO_Father.transform.GetChild(i).gameObject;
-                    m_AllCheckpoints.Add(GO_Checkpoint);
-                }
-                
+                GameObject GO_Checkpoint = GO_Father.transform.GetChild(i).gameObject;
+                m_AllCheckpoints.Add(GO_Checkpoint);
             }
         }
 
@@ -51,51 +61,92 @@ namespace FastPolygons.Manager
             if (m_AllCheckpoints.Count == 0)
                 return;
 
-            m_AllCheckpoints[0].GetComponent<MeshRenderer>().material = matt[1];
+            m_AllCheckpoints[0].GetComponent<ICheckpoints>()?.Enabled();
             for (int i = 1; i < m_AllCheckpoints.Count - 1; i++)
             {
-                MeshRenderer meshRenderer = m_AllCheckpoints[i].GetComponent<MeshRenderer>();
-                meshRenderer.material = matt[0];
+                m_AllCheckpoints[i].GetComponent<ICheckpoints>().Disabled();
             }
         }
 
-        void Update()
+        private IEnumerator IEUpdate()
         {
-            RaceUpdate();
+            while (true)
+            {
+                for (int i = 0; i < frameInterval; i++) {
+                    yield return new WaitForEndOfFrame();
+                }
+                StateManager();
+            }
         }
 
-        private void RaceUpdate()
+        private IEnumerator IECounter(float interval)
+        {
+            while (true)
+            {
+                yield return new WaitForSecondsRealtime(interval);
+                UpdateTime(interval);
+            }
+        }
+
+        private void StateManager()
         {
             switch (GameManager.Instance.State)
             {
                 case GameManager.EStates.START:
                     GameManager.Instance.OnLoadCars?.Invoke(this, EventArgs.Empty);
-                break;
+                    break;
                 case GameManager.EStates.PLAYING:
-                    UpdateTime();
                     UpdateRanking();
-                break;
+                    break;
             }
         }
 
-        private void UpdateTime()
+        private void UpdateTime(float seconds)
         {
-            timeLap += Time.deltaTime;
-            realTime += Time.deltaTime;
-            m_fSeconds = Mathf.Round(timeLap);
+            if (!GameManager.Instance.State.Equals(GameManager.EStates.PLAYING))
+                return;
 
-            timeLapTxt.text = m_fSeconds switch
-            {
-                < 10 => "TIME: 0" + m_fHours.ToString() + ":0" + m_fMinutes.ToString() + ":0" + m_fSeconds.ToString(),
-                _ => "TIME: 0" + m_fHours.ToString() + ":0" + m_fMinutes.ToString() + ":" + m_fSeconds.ToString(),
-            };
+            timeLap += seconds;
 
-            if (m_fSeconds > 59)
+            TimeSpan ts = TimeSpan.FromSeconds(timeLap);
+
+            m_hours = ts.Hours;
+            m_minutes = ts.Minutes;
+            m_seconds = ts.Seconds;
+
+            timeLapTxt.text = "TIME: " + string.Format(FORMAT, m_hours, m_minutes, m_seconds);
+        }
+
+        private void UpdateBestTime()
+        {
+            if (lastTime < timeLap && lastTime != 0) return;
+            lastTime = timeLap;
+
+            TimeSpan ts = TimeSpan.FromSeconds(lastTime);
+            bestTimeLapTxt.text = "BEST:" + string.Format(FORMAT, ts.Hours, ts.Minutes, ts.Seconds);
+        }
+
+        private void CheckRaceCompleted(int _currentLap)
+        {
+            if (_currentLap != (m_maxLaps + 1))
+                return;
+            GameManager.Instance.State = GameManager.EStates.END;
+        }
+
+        private void UpdateVisualCheckpoint(int _pIndex, bool LastCheckpoint = false)
+        {
+            int cCheckpoint = m_currentData[_pIndex].m_currentCheckpoint;
+            int maxCheckpoint = m_AllCheckpoints.Count;
+
+            if (LastCheckpoint)
             {
-                m_fMinutes++;
-                timeLap = 0;
-                timeLapTxt.text = "TIME: 0" + m_fHours.ToString() + ":0" + m_fMinutes.ToString() + ":" + m_fSeconds.ToString();
+                m_AllCheckpoints[maxCheckpoint - 1].GetComponent<ICheckpoints>()?.Disabled();
+                m_AllCheckpoints[0].GetComponent<ICheckpoints>()?.Enabled();
+                return;
             }
+
+            m_AllCheckpoints[cCheckpoint - 1].GetComponent<ICheckpoints>()?.Disabled();
+            m_AllCheckpoints[cCheckpoint].GetComponent<ICheckpoints>()?.Enabled();
         }
 
         private void UpdateRanking()
@@ -108,94 +159,51 @@ namespace FastPolygons.Manager
                 Vector3 TargetPosition = m_currentData[i].m_Checkpoints[currentCheckpoint].transform.position;
 
                 m_currentData[i].m_nextCheckpointDistance = Vector3.Distance(currentPos, TargetPosition);
+                var sizeCheckpoints = m_AllCheckpoints.Count;
 
-                if (!m_currentData[i].m_CarGO.CompareTag("Player"))
+                bool hasCrossedCheckpoint = m_currentData[i].m_nextCheckpointDistance < m_minDistance;
+                bool isLastCheckpoint = m_currentData[i].m_currentCheckpoint.Equals(sizeCheckpoints - 1);
+
+                //Update bots
+                if (hasCrossedCheckpoint && !m_currentData[i].m_CarGO.CompareTag("Player"))
                 {
-                    if (m_currentData[i].m_nextCheckpointDistance < m_minDistance)
+                    if (!isLastCheckpoint)
                     {
-                        if (m_currentData[i].m_currentCheckpoint == m_currentData[i].m_Checkpoints.Count - 1)
-                        {
-                            m_currentData[i].m_currentCheckpoint = 0;
-                            m_currentData[i].m_currentLap++;
-                        }
-                        else
-                        {
-                            m_currentData[i].m_currentCheckpoint++;
-                        }
+                        m_currentData[i].m_currentCheckpoint++;
+                    }
+                    else
+                    {
+                        m_currentData[i].m_currentCheckpoint = 0;
+                        m_currentData[i].m_currentLap++;
                     }
                 }
-                else
+
+                if (hasCrossedCheckpoint && m_currentData[i].m_CarGO.CompareTag("Player"))
                 {
-                    if (m_currentData[i].m_nextCheckpointDistance < m_minDistance)
+                    int pIndex = i;
+                    if (!isLastCheckpoint)
                     {
-                        if (m_currentData[i].m_currentCheckpoint == m_currentData[i].m_Checkpoints.Count - 1)
-                        {
-                            m_currentData[i].m_currentCheckpoint = 0;
+                        m_currentData[i].m_currentCheckpoint++;
+                        UpdateVisualCheckpoint(pIndex);
 
-                            m_currentData[i].m_Checkpoints[m_currentData[i].m_currentCheckpoint].GetComponent<BoxCollider>().enabled = true;
-                            m_currentData[i].m_Checkpoints[m_currentData[i].m_currentCheckpoint].GetComponent<MeshRenderer>().material = matt[1];
-
-                            m_currentData[i].m_Checkpoints[m_currentData[i].m_Checkpoints.Count - 1].GetComponent<BoxCollider>().enabled = false;
-                            m_currentData[i].m_Checkpoints[m_currentData[i].m_Checkpoints.Count - 1].GetComponent<MeshRenderer>().material = matt[2];
-
-                            aS.Play();
-
-                            if (lastTime > realTime)
-                            {
-                                lastTime = realTime;
-
-                                if (m_fSeconds < 10)
-                                    bestTimeLapTxt.text = "BEST: 0" + m_fHours.ToString() + ":0" + m_fMinutes.ToString() + ":0" + m_fSeconds.ToString();
-                                else
-                                    bestTimeLapTxt.text = "BEST: 0" + m_fHours.ToString() + ":0" + m_fMinutes.ToString() + ":" + m_fSeconds.ToString();
-
-                                timeLap = 0;
-                                m_fMinutes = 0;
-                                m_fHours = 0;
-                                realTime = 0;
-                            }
-                            else
-                            {
-                                if (m_currentData[i].m_currentLap == 0 && lastTime == 0)
-                                {
-                                    lastTime = realTime;
-
-                                    if (m_fSeconds < 10)
-                                        bestTimeLapTxt.text = "BEST: 0" + m_fHours.ToString() + ":0" + m_fMinutes.ToString() + ":0" + m_fSeconds.ToString();
-                                    else
-                                        bestTimeLapTxt.text = "BEST: 0" + m_fHours.ToString() + ":0" + m_fMinutes.ToString() + ":" + m_fSeconds.ToString();
-
-                                    timeLap = 0;
-                                    realTime = 0;
-                                    m_fMinutes = 0;
-                                    m_fHours = 0;
-                                }
-
-                                timeLap = 0;
-                                realTime = 0;
-                                m_fMinutes = 0;
-                                m_fHours = 0;
-                            }
-
-                            m_currentData[i].m_currentLap++;
-                        }
-                        else
-                        {
-                            m_currentData[i].m_currentCheckpoint++;
-
-                            m_currentData[i].m_Checkpoints[m_currentData[i].m_currentCheckpoint - 1].GetComponent<BoxCollider>().enabled = false;
-                            m_currentData[i].m_Checkpoints[m_currentData[i].m_currentCheckpoint - 1].GetComponent<MeshRenderer>().material = matt[0];
-
-                            m_currentData[i].m_Checkpoints[m_currentData[i].m_currentCheckpoint].GetComponent<BoxCollider>().enabled = true;
-                            m_currentData[i].m_Checkpoints[m_currentData[i].m_currentCheckpoint].GetComponent<MeshRenderer>().material = matt[1];
-
-                            aS.Play();
-                        }
+                        aS.Play();
                     }
+                    else
+                    {
+                        m_currentData[i].m_currentCheckpoint = 0;
 
-                    lapCountTxt.text = "Current Lap " +
-                        m_currentData[i].m_currentLap.ToString() + "/" + m_maxLaps.ToString();
+                        UpdateVisualCheckpoint(pIndex, true);
+                        UpdateBestTime();
+                        CheckRaceCompleted(m_currentData[i].m_currentLap++);
+
+                        timeLap = -1f;
+                        aS.Play();
+                    }
                 }
+
+                //Set current lap
+                lapCountTxt.text = "Current Lap " +
+                    m_currentData[i].m_currentLap.ToString() + "/" + m_maxLaps.ToString();
             }
 
             SortRanking(m_currentData);

@@ -47,9 +47,6 @@ namespace FastPolygons.Manager
         public bool isCountDown;
         private int currentResolution;
 
-        [HideInInspector]
-        public List<GameObject> TmpCars;
-
         //Delegate
         public System.EventHandler OnLoadCars;
 
@@ -82,6 +79,7 @@ namespace FastPolygons.Manager
 
             List<GenerateCar_SO> CarSettings = new();
             List<Transform> InitPos = new();
+            List<GameObject> TmpCars = new();
 
             InitPos.AddRange(initPos);
             CarSettings.AddRange(configs);
@@ -94,12 +92,6 @@ namespace FastPolygons.Manager
             int rndPosPlayer = Random.Range(0, InitPos.Count);
             GameObject player = Instantiate(Resources.Load<GameObject>("Prefabs/Player"),
             InitPos[rndPosPlayer].position, Quaternion.Euler(0, 180, 0));
-
-            //Set player ID
-            if (player.GetComponent<CarController>())
-            {
-                player.GetComponent<CarController>().m_ID = 0;
-            }
 
             player.GetComponent<CarController>().car_config = MenuManager.mM.GetConfig();
             TmpCars.Add(player);
@@ -121,7 +113,6 @@ namespace FastPolygons.Manager
             {
                 int rndConfig = Random.Range(0, CarSettings.Count);
                 AI[i].GetComponent<CarAI>().car_config = CarSettings[rndConfig];
-                AI[i].GetComponent<CarAI>().m_ID = i + 1;
                 TmpCars.Add(AI[i]);
                 CarSettings.RemoveAt(rndConfig);
             }
@@ -130,9 +121,12 @@ namespace FastPolygons.Manager
             int Size = TmpCars.Count;
             for (int i = 0; i < Size; i++)
             {
-                RaceManager.Instance.m_currentData.Add(new DriverData());
-                RaceManager.Instance.m_currentData[i].m_CarGO = TmpCars[i];
-                RaceManager.Instance.m_currentData[i].m_Checkpoints = RaceManager.Instance.m_AllCheckpoints;
+                DriverData Data = new()
+                {
+                    m_CarGO = TmpCars[i],
+                    m_Checkpoints = RaceManager.Instance.m_AllCheckpoints
+                };
+                RaceManager.Instance.m_currentData.Add(Data);
             }
 
             TmpCars.Clear();
@@ -280,11 +274,6 @@ namespace FastPolygons.Manager
 
                     Cursor.lockState = CursorLockMode.Locked;
                     Cursor.visible = false;
-
-                    if (RaceManager.Instance.m_currentData[0].m_currentLap == 4)
-                    {
-                        State = EStates.END;
-                    }
 
                     break;
 

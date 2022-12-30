@@ -43,8 +43,6 @@ namespace FastPolygons
         private List<Transform> wayPoints;
         private Transform circuitPath;
 
-        [HideInInspector] public int m_ID = -1;
-
         struct SRespawn
         {
             public Vector3 newPos;
@@ -174,7 +172,10 @@ namespace FastPolygons
         }
         void Controls()
         {
-            if (isMoving && GameManager.Instance.State == GameManager.EStates.PLAYING)
+            if (!GameManager.Instance.State.Equals(GameManager.EStates.PLAYING))
+                return;
+
+            if (isMoving)
             {
                 h = Input.GetAxis("Horizontal");
                 v = Input.GetAxis("Vertical");
@@ -291,20 +292,18 @@ namespace FastPolygons
         }
         public float LocalSpeed()
         {
-            if (isMoving && GameManager.Instance.State == GameManager.EStates.PLAYING)
-            {
-                float dot = Vector3.Dot(transform.forward, rb.velocity);
-                if (Mathf.Abs(dot) > 0.1f)
-                {
-                    float speed = rb.velocity.magnitude;
-                    return dot < 0 ? -(speed / car_config.reverseSpeed) : speed / car_config.maxSpeed;
-                }
+            if (!GameManager.Instance.State.Equals(GameManager.EStates.PLAYING) || !isMoving)
                 return 0f;
-            }
-            else
+
+            float dot = Vector3.Dot(transform.forward, rb.velocity);
+            float result = float.Epsilon;
+            if (Mathf.Abs(dot) > 0.1f)
             {
-                return 0;
+                float speed = rb.velocity.magnitude;
+                result = dot < 0 ? -(speed / car_config.reverseSpeed) : speed / car_config.maxSpeed;
             }
+
+            return result;
         }
         private void CheckCollision(GameObject Object)
         {
@@ -320,7 +319,7 @@ namespace FastPolygons
                 rb.useGravity = false;
                 rb.constraints = RigidbodyConstraints.FreezeAll;
 
-                Respawn RespawnData = Object.GetComponent<Respawn>().GetData(m_ID);
+                Respawn RespawnData = Object.GetComponent<Respawn>().GetData(this.gameObject);
 
                 m_Respawn.newPos = RespawnData.RespawnPosition;
                 m_Respawn.newRot = RespawnData.RespawnRotation;

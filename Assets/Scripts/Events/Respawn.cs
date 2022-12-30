@@ -50,11 +50,11 @@ namespace FastPolygons
             return new(vCurrentCheckpoint, CalcRot(vCurrentCheckpoint, vTargetCheckpoint));
         }
 
-        private int SearchID(List<DriverData> Data, GameObject Car)
+        private int SearchID(List<RacerData> Data, GameObject Car)
         {
             if (Data == null) return -1;
 
-            int index = Data.FindIndex(a => a.m_CarGO.Equals(Car));
+            int index = Data.FindIndex(a => a.m_carObject.Equals(Car));
             return index;
         }
 

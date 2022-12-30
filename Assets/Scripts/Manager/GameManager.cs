@@ -121,9 +121,9 @@ namespace FastPolygons.Manager
             int Size = TmpCars.Count;
             for (int i = 0; i < Size; i++)
             {
-                DriverData Data = new()
+                RacerData Data = new()
                 {
-                    m_CarGO = TmpCars[i],
+                    m_carObject = TmpCars[i],
                     m_Checkpoints = RaceManager.Instance.m_AllCheckpoints
                 };
                 RaceManager.Instance.m_currentData.Add(Data);

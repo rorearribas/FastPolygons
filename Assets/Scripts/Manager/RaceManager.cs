@@ -9,7 +9,7 @@ namespace FastPolygons.Manager
 {
     public class RaceManager : TemporalSingleton<RaceManager>
     {
-        public List<DriverData> m_currentData;
+        public List<RacerData> m_currentData;
         public List<GameObject> m_AllCheckpoints;
 
         public Text lapCountTxt;
@@ -151,22 +151,22 @@ namespace FastPolygons.Manager
 
         private void UpdateRanking()
         {
+            //Iterate all cars
             for (int i = 0; i < m_currentData.Count; i++)
             {
                 //Get the next checkpoint distance
                 int currentCheckpoint = m_currentData[i].m_currentCheckpoint;
-                Vector3 currentPos = m_currentData[i].m_CarGO.transform.position;
+                Vector3 currentPos = m_currentData[i].m_carObject.transform.position;
                 Vector3 TargetPosition = m_currentData[i].m_Checkpoints[currentCheckpoint].transform.position;
 
                 m_currentData[i].m_nextCheckpointDistance = Vector3.Distance(currentPos, TargetPosition);
-                var sizeCheckpoints = m_AllCheckpoints.Count;
 
-                bool hasCrossedCheckpoint = m_currentData[i].m_nextCheckpointDistance < m_minDistance;
-                bool isLastCheckpoint = m_currentData[i].m_currentCheckpoint.Equals(sizeCheckpoints - 1);
+                var sizeCheckpoints = m_AllCheckpoints.Count;
+                var hasCrossedCheckpoint = m_currentData[i].m_nextCheckpointDistance < m_minDistance;
+                var isLastCheckpoint = m_currentData[i].m_currentCheckpoint.Equals(sizeCheckpoints - 1);
 
                 //Update bots
-                if (hasCrossedCheckpoint && !m_currentData[i].m_CarGO.CompareTag("Player"))
-                {
+                if (hasCrossedCheckpoint && !m_currentData[i].m_carObject.CompareTag("Player")) {
                     if (!isLastCheckpoint)
                     {
                         m_currentData[i].m_currentCheckpoint++;
@@ -178,38 +178,33 @@ namespace FastPolygons.Manager
                     }
                 }
 
-                if (hasCrossedCheckpoint && m_currentData[i].m_CarGO.CompareTag("Player"))
+                //Update player
+                if (hasCrossedCheckpoint && m_currentData[i].m_carObject.CompareTag("Player"))
                 {
-                    int pIndex = i;
                     if (!isLastCheckpoint)
                     {
                         m_currentData[i].m_currentCheckpoint++;
-                        UpdateVisualCheckpoint(pIndex);
-
-                        aS.Play();
+                        UpdateVisualCheckpoint(i);
                     }
                     else
                     {
                         m_currentData[i].m_currentCheckpoint = 0;
 
-                        UpdateVisualCheckpoint(pIndex, true);
+                        UpdateVisualCheckpoint(i, true);
                         UpdateBestTime();
                         CheckRaceCompleted(m_currentData[i].m_currentLap++);
 
                         timeLap = -1f;
-                        aS.Play();
                     }
-                }
 
-                //Set current lap
-                lapCountTxt.text = "Current Lap " +
-                    m_currentData[i].m_currentLap.ToString() + "/" + m_maxLaps.ToString();
+                    aS.Play();
+                }
             }
 
-            SortRanking(m_currentData);
+            SortRace(m_currentData);
         }
 
-        private void SortRanking(List<DriverData> Cars)
+        private void SortRace(List<RacerData> Cars)
         {
             Cars.Sort((r1, r2) =>
             {
@@ -222,9 +217,22 @@ namespace FastPolygons.Manager
                 return r2.m_nextCheckpointDistance.CompareTo(r1.m_nextCheckpointDistance);
             });
 
-            int index = Cars.FindIndex(a => a.m_CarGO.CompareTag("Player"));
+            //Set ranking pos
+            int index = GetPlayerIndex(Cars);
             m_position = Cars.Count - index;
             playerPos.text = "Position " + m_position.ToString();
+
+            //Set current lap
+            int currentLap = m_currentData[index].m_currentLap;
+            lapCountTxt.text = "Current Lap " + currentLap.ToString() + "/" + m_maxLaps.ToString();
+        }
+
+        private int GetPlayerIndex(List<RacerData> Cars)
+        {
+            if (Cars == null)
+                return -1;
+
+            return Cars.FindIndex(a => a.m_carObject.CompareTag("Player"));
         }
     }
 }

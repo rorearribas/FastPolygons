@@ -12,7 +12,7 @@ namespace FastPolygons
             int Size = RaceManager.Instance.m_currentData.Count;
             for (int i = 0; i < Size; i++)
             {
-                GameObject GO = RaceManager.Instance.m_currentData[i].m_CarGO;
+                GameObject GO = RaceManager.Instance.m_currentData[i].m_carObject;
                 GO.GetComponent<IEnableLights>().SwitchLights();
             }
         }

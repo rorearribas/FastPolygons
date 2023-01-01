@@ -13,6 +13,11 @@ namespace FastPolygons
         private int currentCheckpoint;
         private int targetCheckpoint;
 
+        public Respawn(GameObject _Object) 
+        {
+            GetData(_Object);
+        }
+
         public Respawn(Vector3 respawnPosition, Quaternion respawnRotation)
         {
             this.RespawnPosition = respawnPosition;
@@ -22,23 +27,21 @@ namespace FastPolygons
         public Vector3 RespawnPosition { get => respawnPosition; set => respawnPosition = value; }
         public Quaternion RespawnRotation { get => respawnRotation; set => respawnRotation = value; }
 
-        public Respawn GetData(GameObject _Object)
+        private void GetData(GameObject _Object)
         {
             if(RaceManager.Instance == null)
-                return null;
+                return;
 
             int id = SearchID(RaceManager.Instance.m_currentData, _Object);
+
+            this.currentCheckpoint = RaceManager.Instance.m_currentData[id].m_currentCheckpoint;
+            this.targetCheckpoint = currentCheckpoint;
 
             //Reset respawn if the current checkpoint is equal to zero.
             if (currentCheckpoint == 0) 
             {
-                currentCheckpoint = RaceManager.Instance.m_AllCheckpoints.Count;
-                targetCheckpoint = 0;
-            }
-            else
-            {
-                currentCheckpoint = RaceManager.Instance.m_currentData[id].m_currentCheckpoint;
-                targetCheckpoint = currentCheckpoint;
+                this.currentCheckpoint = RaceManager.Instance.m_AllCheckpoints.Count;
+                this.targetCheckpoint = 0;
             }
 
             Vector3 vCurrentCheckpoint = RaceManager.Instance.m_currentData[id].m_Checkpoints
@@ -47,7 +50,10 @@ namespace FastPolygons
             Vector3 vTargetCheckpoint = RaceManager.Instance.m_currentData[id].m_Checkpoints
             [targetCheckpoint].transform.position;
 
-            return new(vCurrentCheckpoint, CalcRot(vCurrentCheckpoint, vTargetCheckpoint));
+            SetPositionAndRotation(
+                vCurrentCheckpoint, 
+                CalcRot(vCurrentCheckpoint, vTargetCheckpoint)
+            );
         }
 
         private int SearchID(List<RacerData> Data, GameObject Car)
@@ -64,5 +70,10 @@ namespace FastPolygons
             return Quaternion.LookRotation(DesiredRot, Vector3.up);
         }
 
+        private void SetPositionAndRotation(Vector3 NewPos, Quaternion NewRot)
+        {
+            this.respawnPosition = NewPos;
+            this.respawnRotation = NewRot;
+        }
     }
 }

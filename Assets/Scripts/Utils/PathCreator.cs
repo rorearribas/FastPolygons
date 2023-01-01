@@ -4,10 +4,10 @@ using UnityEngine;
 
 namespace FastPolygons
 {
-    public class CircuitPath : MonoBehaviour
+    public class PathCreator : MonoBehaviour
     {
         public Color lineColor;
-        public List<Transform> wayPoints = new List<Transform>();
+        public List<Transform> wayPoints = new();
 
         void OnDrawGizmos()
         {

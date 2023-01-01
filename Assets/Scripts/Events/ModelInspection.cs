@@ -7,7 +7,7 @@ namespace FastPolygons
     public class ModelInspection : MonoBehaviour
     {
         public EventHandler ChangeCar;
-        public GenerateCar_SO config;
+        public CarScriptableObject config;
         public MeshRenderer chasisColor;
 
         private void Awake()

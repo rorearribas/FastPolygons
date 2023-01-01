@@ -25,12 +25,12 @@ namespace FastPolygons
         [Tooltip("Maximum Pitch the Reverse sound will be at full Reverse speed")]
         [Range(0.1f, 2.0f)] public float ReverseSoundMaxPitch = 0.6f;
 
-        CarController car;
+        PlayerController car;
 
         void Awake()
         {
             instance = this;
-            car = GetComponentInParent<CarController>();
+            car = GetComponentInParent<PlayerController>();
         }
 
         void Update()

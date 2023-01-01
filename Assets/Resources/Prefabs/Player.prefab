@@ -2414,7 +2414,7 @@ MonoBehaviour:
   isReverse: 0
   isBreaking: 0
   isReverseTrue: 0
-  isMoving: 1
+  bCanMove: 1
   collision: 0
   upSensor: {fileID: 1241768879885808510}
   carLights:
@@ -2434,12 +2434,11 @@ MonoBehaviour:
   - {fileID: 1439978096263953148}
   - {fileID: 1439978098017996754}
   - {fileID: 7110735477436895022, guid: 37af56d3168c2d047aa19377e8446dd5, type: 3}
-  brakeLightColour:
+  brakeLightColours:
   - {fileID: 2100000, guid: aa50894d46e8cb84f87457acceca4df9, type: 2}
   - {fileID: 2100000, guid: 4785edee4996afe4db5255ff92fbd8f7, type: 2}
   centerOfMass: {x: 0, y: 0.2, z: 0}
   brakeObj: {fileID: 1241768881068046455}
-  m_ID: 0
 --- !u!1 &1241768881438464505
 GameObject:
   m_ObjectHideFlags: 0

@@ -5,7 +5,7 @@ using UnityEngine;
 namespace FastPolygons
 {
     [CreateAssetMenu(fileName = "New Car")]
-    public class GenerateCar_SO : ScriptableObject
+    public class CarScriptableObject : ScriptableObject
     {
         public float maxMotorTorque;
         public float maxBrakeTorque;

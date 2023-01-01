@@ -8,16 +8,10 @@ namespace FastPolygons
     public class CarAI : MonoBehaviour, IEnableLights
     {
         [Header("Car Config")]
-        public GenerateCar_SO car_config;
+        public CarScriptableObject car_config;
         public MeshRenderer chasisColor;
         public float currentSpeed;
         public bool isReverse;
-        struct SRespawn
-        {
-            public Vector3 newPos;
-            public Quaternion newRot;
-        }
-        SRespawn m_Respawn;
 
         #region Car Sensors
 
@@ -65,7 +59,7 @@ namespace FastPolygons
         private List<Transform> wayPoints;
         private int currentNode = 0;
         private Animator anim;
-        private float timerDie;
+        private float Delay;
         private Rigidbody rb;
         private Vector3 relativeVector;
         private float newSteer;
@@ -81,12 +75,14 @@ namespace FastPolygons
 
         void Start()
         {
-            GetComponent<Rigidbody>().centerOfMass = centerOfMass;
             anim = GetComponent<Animator>();
             rb = GetComponent<Rigidbody>();
 
+            rb.centerOfMass = centerOfMass;
+            chasisColor.materials[1].color = car_config.chasisColor;
+
             Transform[] pathTransform = circuitPath.GetComponentsInChildren<Transform>();
-            wayPoints = new List<Transform>();
+            wayPoints = new();
 
             for (int i = 0; i < pathTransform.Length; i++)
             {
@@ -99,44 +95,33 @@ namespace FastPolygons
 
         void Update()
         {
-            chasisColor.materials[1].color = car_config.chasisColor;
+            if (!GameManager.Instance.State.Equals(GameManager.EStates.PLAYING))
+                return;
 
             float dot = Vector3.Dot(transform.forward, rb.velocity);
-            if (Mathf.Abs(dot) < 0.1f && !isCollision && GameManager.Instance.State == GameManager.EStates.PLAYING)
+            if (Mathf.Abs(dot) < 0.1f && !isCollision)
             {
-                timerDie += Time.deltaTime;
+                Delay += Time.deltaTime;
 
-                if (timerDie > 1.5f)
+                if (Delay > 1.5f)
                 {
-                    if (currentNode < 1)
-                    {
-                        m_Respawn.newPos = wayPoints[0].position;
-                        m_Respawn.newPos.y += 3;
-
-                        Vector3 DesiredRot = wayPoints[1].position - m_Respawn.newPos;
-                        m_Respawn.newRot = Quaternion.LookRotation(DesiredRot, Vector3.up);
-                    }
-                    else
-                    {
-                        m_Respawn.newPos = wayPoints[currentNode - 1].position;
-                        int lastNode = currentNode;
-                        currentNode -= 1;
-                        m_Respawn.newPos.y += 3;
-
-                        Vector3 DesiredRot = wayPoints[lastNode].position - m_Respawn.newPos;
-                        m_Respawn.newRot = Quaternion.LookRotation(DesiredRot, Vector3.up);
-                    }
+                    anim.SetTrigger("Crash");
+                    isCollision = true;
 
                     ParticleSystem col = Instantiate(effects[2], transform.position, Quaternion.identity);
                     Destroy(col.gameObject, 2);
 
-                    isCollision = true;
-
                     GetComponent<BoxCollider>().enabled = false;
                     rb.useGravity = false;
 
-                    anim.SetTrigger("Crash");
-                    timerDie = 0;
+                    Respawn newRespawn = new(this.gameObject);
+                    transform.SetPositionAndRotation
+                    (
+                        newRespawn.RespawnPosition,
+                        newRespawn.RespawnRotation
+                    );
+
+                    Delay = 0;
                 }
             }
 
@@ -154,6 +139,9 @@ namespace FastPolygons
 
         private void FixedUpdate()
         {
+            if (!GameManager.Instance.State.Equals(GameManager.EStates.PLAYING))
+                return;
+
             currentSpeed = rb.velocity.magnitude * 3.6f;
 
             Sensors();
@@ -164,12 +152,11 @@ namespace FastPolygons
 
         private void CheckWaypointDistance()
         {
-            if (Vector3.Distance(transform.position, wayPoints[currentNode].position) < 10f)
+            float distance = Vector3.Distance(transform.position, wayPoints[currentNode].position);
+            if (distance < 10f)
             {
-                if (currentNode == wayPoints.Count - 1)
-                    currentNode = 0;
-                else
-                    currentNode++;
+                if (currentNode == wayPoints.Count - 1) currentNode = 0;
+                else currentNode++;
             }
         }
 
@@ -223,31 +210,31 @@ namespace FastPolygons
 
         void CarHandler()
         {
-            if (GameManager.Instance.State == GameManager.EStates.PLAYING)
+            if (!GameManager.Instance.State.Equals(GameManager.EStates.PLAYING))
+                return;
+
+            if (wayPoints[currentNode].CompareTag("Curve") && currentSpeed > 30)
             {
-                if (wayPoints[currentNode].CompareTag("Curve") && currentSpeed > 30)
-                {
-                    isBraking = true;
+                isBraking = true;
 
-                    MeshRenderer matObj = brakeObj.GetComponent<MeshRenderer>();
-                    matObj.material = brakeLightColour[1];
+                MeshRenderer matObj = brakeObj.GetComponent<MeshRenderer>();
+                matObj.material = brakeLightColour[1];
 
-                    frontLeftWheelCollider.brakeTorque = car_config.maxBrakeTorque;
-                    frontRightWheelCollider.brakeTorque = car_config.maxBrakeTorque;
+                frontLeftWheelCollider.brakeTorque = car_config.maxBrakeTorque;
+                frontRightWheelCollider.brakeTorque = car_config.maxBrakeTorque;
 
-                    frontLeftWheelCollider.motorTorque = 0;
-                    frontRightWheelCollider.motorTorque = 0;
-                }
+                frontLeftWheelCollider.motorTorque = 0;
+                frontRightWheelCollider.motorTorque = 0;
+            }
 
-                else
-                {
-                    isBraking = false;
+            else
+            {
+                isBraking = false;
 
-                    MeshRenderer matObj = brakeObj.GetComponent<MeshRenderer>();
-                    matObj.material = brakeLightColour[0];
+                MeshRenderer matObj = brakeObj.GetComponent<MeshRenderer>();
+                matObj.material = brakeLightColour[0];
 
-                    Drive();
-                }
+                Drive();
             }
         }
 
@@ -260,6 +247,7 @@ namespace FastPolygons
         {
             CheckCollision(coll.gameObject);
         }
+
         private void CheckCollision(GameObject Object)
         {
             if (Object.GetComponent<Respawn>())
@@ -274,19 +262,21 @@ namespace FastPolygons
                 rb.useGravity = false;
                 rb.constraints = RigidbodyConstraints.FreezeAll;
 
-                Respawn RespawnData = Object.GetComponent<Respawn>().GetData(this.gameObject);
+                Respawn newRespawn = new(this.gameObject);
 
-                m_Respawn.newPos = RespawnData.RespawnPosition;
-                m_Respawn.newRot = RespawnData.RespawnRotation;
-                m_Respawn.newPos.y += 3;
+                transform.SetPositionAndRotation
+                (
+                    newRespawn.RespawnPosition,
+                    newRespawn.RespawnRotation
+                );
             }
         }
 
         public void SwitchLights()
         {
-            for (int i = 0; i < carLights.Length; i++)
+            foreach (Light light in carLights)
             {
-                carLights[i].enabled = !carLights[i].enabled;
+                light.enabled = !light.enabled;
             }
         }
 
@@ -508,13 +498,11 @@ namespace FastPolygons
 
         public void Respawn()
         {
-            transform.SetPositionAndRotation(m_Respawn.newPos, m_Respawn.newRot);
-
             rb.useGravity = true;
             rb.constraints = RigidbodyConstraints.None;
 
             isCollision = false;
-            timerDie = -2f;
+            Delay = -2f;
 
             GetComponent<BoxCollider>().enabled = true;
         }

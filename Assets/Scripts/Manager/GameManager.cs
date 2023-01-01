@@ -5,6 +5,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.Rendering.PostProcessing;
+using System;
 
 namespace FastPolygons.Manager
 {
@@ -38,7 +39,7 @@ namespace FastPolygons.Manager
         public Animator fadeAnimator;
         public Text countDownText, positionText, bestTimeText;
         public RectTransform countDownRect;
-        public List<GenerateCar_SO> configs;
+        public List<CarScriptableObject> configs;
 
         [Header("Settings")]
         public Dropdown[] drops;
@@ -47,14 +48,17 @@ namespace FastPolygons.Manager
         public bool isCountDown;
         private int currentResolution;
 
+        private GameObject m_currentPlayer = null;
+
         //Delegate
-        public System.EventHandler OnLoadCars;
+        public EventHandler OnLoadCars;
 
         //Event system
         public static EventSystem EventSystem => EventSystem.current;
 
         //States
         public EStates State { get => state; set => state = value; }
+        public GameObject CurrentPlayer { get => m_currentPlayer; set => m_currentPlayer = value; }
 
         private void OnEnable()
         {
@@ -77,7 +81,7 @@ namespace FastPolygons.Manager
             if (RaceManager.Instance == null)
                 return;
 
-            List<GenerateCar_SO> CarSettings = new();
+            List<CarScriptableObject> CarSettings = new();
             List<Transform> InitPos = new();
             List<GameObject> TmpCars = new();
 
@@ -89,20 +93,21 @@ namespace FastPolygons.Manager
                 InitPos[i] = GameObject.Find("LapPos_" + i).transform;
             }
 
-            int rndPosPlayer = Random.Range(0, InitPos.Count);
+            int rnd = UnityEngine.Random.Range(0, InitPos.Count);
             GameObject player = Instantiate(Resources.Load<GameObject>("Prefabs/Player"),
-            InitPos[rndPosPlayer].position, Quaternion.Euler(0, 180, 0));
+            InitPos[rnd].position, Quaternion.Euler(0, 180, 0));
+            m_currentPlayer = player;
 
-            player.GetComponent<CarController>().car_config = MenuManager.mM.GetConfig();
+            player.GetComponent<PlayerController>().car_config = MenuManager.mM.GetConfig();
             TmpCars.Add(player);
 
             CarSettings.RemoveAt(MenuManager.mM.indexConfig);
-            InitPos.RemoveAt(rndPosPlayer);
+            InitPos.RemoveAt(rnd);
 
             GameObject[] AI = new GameObject[5];
             for (int i = 0; i < 5; i++)
             {
-                int rndPos = Random.Range(0, InitPos.Count);
+                int rndPos = UnityEngine.Random.Range(0, InitPos.Count);
                 AI[i] = Instantiate(Resources.Load<GameObject>("Prefabs/Car_IA"), 
                 InitPos[rndPos].position, Quaternion.Euler(0, 180, 0));
                 InitPos.RemoveAt(rndPos);
@@ -111,7 +116,7 @@ namespace FastPolygons.Manager
             //Set settings and id
             for (int i = 0; i < AI.Length; i++)
             {
-                int rndConfig = Random.Range(0, CarSettings.Count);
+                int rndConfig = UnityEngine.Random.Range(0, CarSettings.Count);
                 AI[i].GetComponent<CarAI>().car_config = CarSettings[rndConfig];
                 TmpCars.Add(AI[i]);
                 CarSettings.RemoveAt(rndConfig);
@@ -136,6 +141,11 @@ namespace FastPolygons.Manager
         private void Update()
         {
             GameStates(State);
+        }
+
+        public void SetGameMode(EStates NewState)
+        {
+            State = NewState;
         }
 
         #region GameStates

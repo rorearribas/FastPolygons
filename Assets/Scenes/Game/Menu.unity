@@ -8297,7 +8297,7 @@ MonoBehaviour:
   drops:
   - {fileID: 40471742}
   - {fileID: 1021690359}
-  TmpCars: []
+  isCountDown: 0
 --- !u!114 &1472595124
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11345,7 +11345,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a033627dcc7e644591fc9e38b40bc39, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  estados: 0
   pages:
   - {fileID: 553600901}
   - {fileID: 1833369344}

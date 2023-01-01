@@ -37,7 +37,7 @@ namespace FastPolygons.Manager
 
             if (!isLoading)
             {
-                StartCoroutine(NextLevelLoading());
+                StartCoroutine(LoadingOperation());
             }
 
             if (loadLevel)
@@ -61,7 +61,7 @@ namespace FastPolygons.Manager
             }
         }
 
-        IEnumerator NextLevelLoading()
+        IEnumerator LoadingOperation()
         {
             isLoading = true;
             fillLoading.fillAmount = 0;

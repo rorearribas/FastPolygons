@@ -24,7 +24,7 @@ namespace FastPolygons.Manager
         public Text stateName;
 
         [Header("Car configs")]
-        public GenerateCar_SO[] carConfigs;
+        public CarScriptableObject[] carConfigs;
         public Slider[] sliderConfigs;
         public int indexConfig;
 
@@ -168,7 +168,7 @@ namespace FastPolygons.Manager
             }
         }
 
-        public GenerateCar_SO GetConfig()
+        public CarScriptableObject GetConfig()
         {
             return carConfigs[indexConfig];
         }

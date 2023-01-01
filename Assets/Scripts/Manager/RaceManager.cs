@@ -128,7 +128,7 @@ namespace FastPolygons.Manager
 
         private void CheckRaceCompleted(int _currentLap)
         {
-            if (_currentLap != (m_maxLaps + 1))
+            if (_currentLap != m_maxLaps)
                 return;
             GameManager.Instance.State = GameManager.EStates.END;
         }

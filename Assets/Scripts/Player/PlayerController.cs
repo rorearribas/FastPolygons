@@ -10,7 +10,7 @@ namespace FastPolygons
     {
         [Header("Car Config")]
         public CarScriptableObject car_config;
-        public MeshRenderer chasisColor;
+        public MeshRenderer meshRenderer;
 
         private float h, v;
         Rigidbody rb;
@@ -63,7 +63,7 @@ namespace FastPolygons
             anim = GetComponent<Animator>();
 
             rb.centerOfMass = centerOfMass;
-            chasisColor.materials[1].color = car_config.chasisColor;
+            meshRenderer.materials[1].color = car_config.chasisColor;
 
             Transform[] pathTransform = circuitPath.GetComponentsInChildren<Transform>();
             wayPoints = new();
@@ -274,9 +274,15 @@ namespace FastPolygons
             else rb.constraints = RigidbodyConstraints.FreezeAll;
         }
 
-        private void OnCollisionEnter(Collision collision)
+        private void OnCollisionEnter(Collision coll)
         {
-            CheckCollision(collision.gameObject);
+            CheckCollision(coll.gameObject);
+
+            if (!coll.gameObject.layer.Equals(LayerMask.NameToLayer("IgnoreColl")))
+                return;
+
+            bool ignore = Physics.GetIgnoreCollision(coll.collider, GetComponent<Collider>());
+            Physics.IgnoreCollision(coll.collider, GetComponent<Collider>(), !ignore);
         }
 
         private void OnTriggerEnter(Collider collider)
@@ -299,7 +305,9 @@ namespace FastPolygons
                 newRespawn.RespawnRotation
             );
 
+
             OnAccident += CarController_OnAccident;
+            StartCoroutine(RaceManager.Instance?.GodMode(this.gameObject));
         }
 
         public float LocalSpeed()

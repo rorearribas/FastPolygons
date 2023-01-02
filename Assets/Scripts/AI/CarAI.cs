@@ -9,7 +9,7 @@ namespace FastPolygons
     {
         [Header("Car Config")]
         public CarScriptableObject car_config;
-        public MeshRenderer chasisColor;
+        public MeshRenderer meshRenderer;
         public float currentSpeed;
         public bool isReverse;
 
@@ -79,7 +79,7 @@ namespace FastPolygons
             rb = GetComponent<Rigidbody>();
 
             rb.centerOfMass = centerOfMass;
-            chasisColor.materials[1].color = car_config.chasisColor;
+            meshRenderer.materials[1].color = car_config.chasisColor;
 
             Transform[] pathTransform = circuitPath.GetComponentsInChildren<Transform>();
             wayPoints = new();
@@ -248,6 +248,12 @@ namespace FastPolygons
         private void OnCollisionEnter(Collision coll)
         {
             CheckCollision(coll.gameObject);
+
+            if (!coll.gameObject.layer.Equals(LayerMask.NameToLayer("IgnoreColl")))
+                return;
+
+            bool ignore = Physics.GetIgnoreCollision(coll.collider, GetComponent<Collider>());
+            Physics.IgnoreCollision(coll.collider, GetComponent<Collider>(), !ignore);
         }
 
         private void OnTriggerEnter(Collider coll)
@@ -268,14 +274,6 @@ namespace FastPolygons
                 GetComponent<BoxCollider>().enabled = false;
                 rb.useGravity = false;
                 rb.constraints = RigidbodyConstraints.FreezeAll;
-
-                Respawn newRespawn = new(this.gameObject);
-
-                transform.SetPositionAndRotation
-                (
-                    newRespawn.RespawnPosition,
-                    newRespawn.RespawnRotation
-                );
             }
         }
 
@@ -512,6 +510,16 @@ namespace FastPolygons
             Delay = -2f;
 
             GetComponent<BoxCollider>().enabled = true;
+
+            Respawn newRespawn = new(this.gameObject);
+
+            transform.SetPositionAndRotation
+            (
+                newRespawn.RespawnPosition,
+                newRespawn.RespawnRotation
+            );
+
+            StartCoroutine(RaceManager.Instance?.GodMode(this.gameObject));
         }
     }
 }

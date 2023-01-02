@@ -22,11 +22,6 @@ namespace FastPolygons
             PlayerCameraHelpers.Cam = GetComponent<Camera>();
         }
 
-        private void Start()
-        {
-            UnityEngine.Random.InitState(42);
-        }
-
         private void PlayerCamera_FindPlayer(object sender, EventArgs e)
         {
             if (GameManager.Instance.CurrentPlayer == null)

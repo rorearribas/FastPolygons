@@ -2334,8 +2334,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1241768881247993782}
-  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: 45, y: 0.1, z: 71.78}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2347,7 +2347,7 @@ Transform:
   - {fileID: 6891339239203980527}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &1241768881247993674
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2410,7 +2410,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   car_config: {fileID: 11400000, guid: b23e5bd47742fff4095a279eda8a349f, type: 2}
-  chasisColor: {fileID: 1241768880195464147}
+  meshRenderer: {fileID: 1241768880195464147}
   isReverse: 0
   isBreaking: 0
   isReverseTrue: 0
@@ -3172,7 +3172,7 @@ GameObject:
   m_Component:
   - component: {fileID: 599650980902356159}
   - component: {fileID: 8441457752785162382}
-  m_Layer: 2
+  m_Layer: 0
   m_Name: engine-reverse
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3301,7 +3301,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7444360661554247181}
   - component: {fileID: 7951634607585750422}
-  m_Layer: 2
+  m_Layer: 0
   m_Name: Drift
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3430,7 +3430,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6891339238777057952}
   - component: {fileID: 6891339238777057953}
-  m_Layer: 2
+  m_Layer: 0
   m_Name: engine-idle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3559,7 +3559,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6891339238806645728}
   - component: {fileID: 6891339238806645729}
-  m_Layer: 2
+  m_Layer: 0
   m_Name: engine-running
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3688,7 +3688,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6891339239203980527}
   - component: {fileID: 6891339239203980525}
-  m_Layer: 2
+  m_Layer: 0
   m_Name: ArcadeEngineAudio
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3746,7 +3746,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6891339240304697667}
   - component: {fileID: 6891339240304697664}
-  m_Layer: 2
+  m_Layer: 0
   m_Name: engine_start
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3876,6 +3876,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Fire1
       objectReference: {fileID: 0}
+    - target: {fileID: 1682439711449256, guid: ab22dfee5ddd2634f991aee1f95f050f, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4228550296906564, guid: ab22dfee5ddd2634f991aee1f95f050f, type: 3}
       propertyPath: m_RootOrder
       value: 0
@@ -3954,6 +3958,10 @@ PrefabInstance:
     - target: {fileID: 1682439711449256, guid: ab22dfee5ddd2634f991aee1f95f050f, type: 3}
       propertyPath: m_Name
       value: Fire2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1682439711449256, guid: ab22dfee5ddd2634f991aee1f95f050f, type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4228550296906564, guid: ab22dfee5ddd2634f991aee1f95f050f, type: 3}
       propertyPath: m_RootOrder

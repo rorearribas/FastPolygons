@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using FastPolygons.Manager;
+using static UnityEngine.GraphicsBuffer;
 
 namespace FastPolygons
 {
@@ -9,9 +10,7 @@ namespace FastPolygons
     {
         private Vector3 respawnPosition;
         private Quaternion respawnRotation;
-
         private int currentCheckpoint;
-        private int targetCheckpoint;
 
         public Respawn(GameObject _Object) 
         {
@@ -33,27 +32,21 @@ namespace FastPolygons
                 return;
 
             int id = SearchID(RaceManager.Instance.m_currentData, _Object);
-
             this.currentCheckpoint = RaceManager.Instance.m_currentData[id].m_currentCheckpoint;
-            this.targetCheckpoint = currentCheckpoint;
 
             //Reset respawn if the current checkpoint is equal to zero.
             if (currentCheckpoint == 0) 
             {
                 this.currentCheckpoint = RaceManager.Instance.m_AllCheckpoints.Count;
-                this.targetCheckpoint = 0;
             }
 
-            Vector3 vCurrentCheckpoint = RaceManager.Instance.m_currentData[id].m_Checkpoints
-            [currentCheckpoint - 1].transform.position;
+            GameObject pCheckpoint = RaceManager.Instance.m_currentData[id].m_Checkpoints[currentCheckpoint - 1];
+            Vector3 vCheckpoint = pCheckpoint.transform.position;
 
-            Vector3 vTargetCheckpoint = RaceManager.Instance.m_currentData[id].m_Checkpoints
-            [targetCheckpoint].transform.position;
+            Vector3 vUp = pCheckpoint.transform.up;
+            Vector3 Target = vCheckpoint - (vUp * 5f);
 
-            SetPositionAndRotation(
-                vCurrentCheckpoint, 
-                CalcRot(vCurrentCheckpoint, vTargetCheckpoint)
-            );
+            SetPositionAndRotation(vCheckpoint, CalcRot(vCheckpoint, Target));
         }
 
         private int SearchID(List<RacerData> Data, GameObject Car)
@@ -67,7 +60,7 @@ namespace FastPolygons
         private Quaternion CalcRot(Vector3 Start, Vector3 End)
         {
             Vector3 DesiredRot = End - Start;
-            return Quaternion.LookRotation(DesiredRot, Vector3.up);
+            return Quaternion.LookRotation(DesiredRot);
         }
 
         private void SetPositionAndRotation(Vector3 NewPos, Quaternion NewRot)

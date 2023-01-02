@@ -234,5 +234,32 @@ namespace FastPolygons.Manager
 
             return Cars.FindIndex(a => a.m_carObject.CompareTag("Player"));
         }
+        public IEnumerator GodMode(GameObject pCar)
+        {
+            if (!pCar.TryGetComponent<MeshRenderer>(out var meshRenderer))
+                yield return null;
+
+            //Material pMat = meshRenderer.materials[1];
+            //if (pMat == null)
+            //    yield return null;
+
+            //MaterialUtils.SetupBlendMode(pMat, MaterialUtils.BlendMode.Transparent);
+            pCar.layer = LayerMask.NameToLayer("IgnoreColl");
+
+            float maxTime = 5f;
+            float elapsed = 0;
+
+            while (elapsed < maxTime)
+            {
+                yield return new WaitForSecondsRealtime(1f);
+                elapsed++;
+            }
+
+            //MaterialUtils.SetupBlendMode(pMat, MaterialUtils.BlendMode.Opaque);
+            pCar.layer = LayerMask.NameToLayer("Default");
+
+            yield return null;
+        }
+
     }
 }

@@ -18,7 +18,7 @@ namespace FastPolygons
 
         public bool isReverse, isBreaking, isReverseTrue, bCanMove = true, collision;
         private float currentSteerAngle;
-        private float realSpeed;
+        private float Velocity;
 
         [Header("Car Sensors")]
         public Transform upSensor;
@@ -127,7 +127,7 @@ namespace FastPolygons
 
                 //Clamp max reverse velocity
                 float maxVel = 30.0f;
-                realSpeed = Mathf.Clamp(realSpeed, 0.0f, maxVel);
+                Velocity = Mathf.Clamp(Velocity, 0.0f, maxVel);
 
                 for (int i = 0; i < effects.Length; i++)
                 {
@@ -145,8 +145,11 @@ namespace FastPolygons
             frontLeftWheelCollider.motorTorque = v * car_config.maxMotorTorque;
             frontRightWheelCollider.motorTorque = v * car_config.maxMotorTorque;
 
-            float maxVel = car_config.maxSpeed;
-            realSpeed = Mathf.Clamp(realSpeed, 0.0f, maxVel);
+            //Clamp
+            if (rb.velocity.magnitude > (car_config.maxSpeed / 2.5f))
+            {
+                rb.velocity *= 0.99f;
+            }
         }
 
         void CastFire()
@@ -247,6 +250,10 @@ namespace FastPolygons
             OnAccident -= CarController_OnAccident;
 
             anim.SetTrigger("Crash");
+
+            float result = (rb.velocity.sqrMagnitude * 100) / car_config.maxSpeed;
+            float shake = result / car_config.maxSpeed;
+            
             AllowCollisions(false);
 
             collision = true;
@@ -255,13 +262,7 @@ namespace FastPolygons
             ParticleSystem col = Instantiate(effects[2], transform.position, Quaternion.identity);
             Destroy(col.gameObject, 2);
 
-            Respawn newRespawn = new(this.gameObject);
-
-            transform.SetPositionAndRotation
-            (
-                newRespawn.RespawnPosition, 
-                newRespawn.RespawnRotation
-            );
+            StartCoroutine(PlayerCamera.Shake(0.3f, 1f));
         }
 
         private void AllowCollisions(bool status)
@@ -290,12 +291,20 @@ namespace FastPolygons
             bCanMove = true;
             collision = false;
 
+            Respawn newRespawn = new(this.gameObject);
+
+            transform.SetPositionAndRotation
+            (
+                newRespawn.RespawnPosition,
+                newRespawn.RespawnRotation
+            );
+
             OnAccident += CarController_OnAccident;
         }
 
         public float LocalSpeed()
         {
-            if (!GameManager.Instance.State.Equals(GameManager.EStates.PLAYING) || !bCanMove)
+            if (!bCanMove)
                 return 0f;
 
             float dot = Vector3.Dot(transform.forward, rb.velocity);
@@ -303,7 +312,7 @@ namespace FastPolygons
             if (Mathf.Abs(dot) > 0.1f)
             {
                 float speed = rb.velocity.magnitude;
-                result = dot < 0 ? -(speed / car_config.reverseSpeed) : speed / car_config.maxSpeed;
+                result = dot < 0 ? -(speed / (car_config.reverseSpeed / 2f)) : speed / (car_config.maxSpeed / 2f);
             }
 
             return result;

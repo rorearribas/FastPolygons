@@ -142,6 +142,11 @@ namespace FastPolygons
             if (!GameManager.Instance.State.Equals(GameManager.EStates.PLAYING))
                 return;
 
+            if (rb.velocity.magnitude > (car_config.maxSpeed / 2.5f))
+            {
+                rb.velocity *= 0.99f;
+            }
+
             currentSpeed = rb.velocity.magnitude * 3.6f;
 
             Sensors();
@@ -162,7 +167,9 @@ namespace FastPolygons
 
         private void Drive()
         {
-            if (currentSpeed < car_config.maxSpeed && !isCollision)
+            if (isCollision) return;
+
+            if (currentSpeed < car_config.maxSpeed)
             {
                 if (isReverse)
                 {

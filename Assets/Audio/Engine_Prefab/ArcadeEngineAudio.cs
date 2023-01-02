@@ -35,27 +35,25 @@ namespace FastPolygons
 
         void Update()
         {
-            float carSpeed = 0.0f;
-            if (car != null)
-            {
-                carSpeed = car.LocalSpeed();
-            }
+            if (car == null)
+                return;
 
-            IdleSound.volume = Mathf.Lerp(0.6f, 0.0f, carSpeed * 4);
+            float speed = car.LocalSpeed();
+            IdleSound.volume = Mathf.Lerp(0.6f, 0.0f, speed * 4);
 
-            if (carSpeed < 0.0f)
+            if (speed < 0.0f)
             {
                 // In reverse
                 RunningSound.volume = 0.0f;
-                ReverseSound.volume = Mathf.Lerp(0.1f, ReverseSoundMaxVolume, -carSpeed * 1.2f);
-                ReverseSound.pitch = Mathf.Lerp(0.1f, ReverseSoundMaxPitch, -carSpeed + Mathf.Sin(Time.time) * .1f);
+                ReverseSound.volume = Mathf.Lerp(0.1f, ReverseSoundMaxVolume, -speed * 1.2f);
+                ReverseSound.pitch = Mathf.Lerp(0.1f, ReverseSoundMaxPitch, -speed + Mathf.Sin(Time.time) * .1f);
             }
             else
             {
                 // Moving forward
                 ReverseSound.volume = 0.0f;
-                RunningSound.volume = Mathf.Lerp(0.1f, RunningSoundMaxVolume, carSpeed * 1.2f);
-                RunningSound.pitch = Mathf.Lerp(0.3f, RunningSoundMaxPitch, carSpeed + Mathf.Sin(Time.time) * .1f);
+                RunningSound.volume = Mathf.Lerp(0.1f, RunningSoundMaxVolume, speed * 1.2f);
+                RunningSound.pitch = Mathf.Lerp(0.3f, RunningSoundMaxPitch, speed + Mathf.Sin(Time.time) * .1f);
             }
 
 

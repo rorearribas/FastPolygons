@@ -56,6 +56,9 @@ namespace FastPolygons.Manager
         //Event system
         public static EventSystem EventSystem => EventSystem.current;
 
+        //Get current camera
+        public Camera CurrentCamera => Camera.current;
+
         //States
         public EStates State { get => state; set => state = value; }
         public GameObject CurrentPlayer { get => m_currentPlayer; set => m_currentPlayer = value; }

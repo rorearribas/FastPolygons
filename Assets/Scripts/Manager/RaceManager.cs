@@ -28,7 +28,7 @@ namespace FastPolygons.Manager
         private AudioSource aS;
 
         private readonly int frameInterval = 2;
-        private readonly float m_minDistance = 10f;
+        private readonly float m_minDistance = 7f;
         private readonly string FORMAT = "{0:00}:{1:00}:{2:00}";
 
         public void Start()

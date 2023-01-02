@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxMotorTorque: 450
   maxBrakeTorque: 550
-  maxSpeed: 65
+  maxSpeed: 70
   maxSteerAngle: 45
   reverseSpeed: -300
   chasisColor: {r: 0.9607843, g: 0.8938142, b: 0, a: 1}

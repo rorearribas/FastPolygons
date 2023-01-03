@@ -16,7 +16,7 @@ namespace FastPolygons
         Rigidbody rb;
         Animator anim;
 
-        public bool isReverse, isBreaking, isReverseTrue, bCanMove = true, collision;
+        public bool isReverse, isBreaking, isReverseTrue, bCanMove = true, isCollision;
         private float currentSteerAngle;
         private float Velocity;
 
@@ -63,7 +63,7 @@ namespace FastPolygons
             anim = GetComponent<Animator>();
 
             rb.centerOfMass = centerOfMass;
-            meshRenderer.materials[1].color = car_config.chasisColor;
+            meshRenderer.materials[1].color = car_config.color;
 
             Transform[] pathTransform = circuitPath.GetComponentsInChildren<Transform>();
             wayPoints = new();
@@ -90,7 +90,7 @@ namespace FastPolygons
                 rearLeftWheelCollider.brakeTorque = 0;
             }
 
-            if (isBreaking && !collision)
+            if (isBreaking && !isCollision)
             {
                 BrakeMotor();
                 frontLeftWheelCollider.motorTorque = 0;
@@ -256,7 +256,7 @@ namespace FastPolygons
             
             AllowCollisions(false);
 
-            collision = true;
+            isCollision = true;
             bCanMove = false;
 
             ParticleSystem col = Instantiate(effects[2], transform.position, Quaternion.identity);
@@ -277,12 +277,6 @@ namespace FastPolygons
         private void OnCollisionEnter(Collision coll)
         {
             CheckCollision(coll.gameObject);
-
-            if (!coll.gameObject.layer.Equals(LayerMask.NameToLayer("IgnoreColl")))
-                return;
-
-            bool ignore = Physics.GetIgnoreCollision(coll.collider, GetComponent<Collider>());
-            Physics.IgnoreCollision(coll.collider, GetComponent<Collider>(), !ignore);
         }
 
         private void OnTriggerEnter(Collider collider)
@@ -292,12 +286,16 @@ namespace FastPolygons
 
         public void Respawn()
         {
+            if (RaceManager.Instance == null)
+                return;
+
             AllowCollisions(true);
 
             bCanMove = true;
-            collision = false;
+            isCollision = false;
 
-            Respawn newRespawn = new(this.gameObject);
+            Respawn newRespawn = new(gameObject);
+            StartCoroutine(RaceManager.Instance.Invincible(gameObject));
 
             transform.SetPositionAndRotation
             (
@@ -305,9 +303,7 @@ namespace FastPolygons
                 newRespawn.RespawnRotation
             );
 
-
             OnAccident += CarController_OnAccident;
-            StartCoroutine(RaceManager.Instance?.GodMode(this.gameObject));
         }
 
         public float LocalSpeed()

@@ -13986,7 +13986,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   config: {fileID: 11400000, guid: 9a43c520b12f28c4185b3d131652691b, type: 2}
-  chasisColor: {fileID: 1588303527413119512}
+  pMeshRenderer: {fileID: 1588303527413119512}
 --- !u!4 &1588303528507584128
 Transform:
   m_ObjectHideFlags: 0

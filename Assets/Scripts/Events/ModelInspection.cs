@@ -8,7 +8,7 @@ namespace FastPolygons
     {
         public EventHandler ChangeCar;
         public CarScriptableObject config;
-        public MeshRenderer chasisColor;
+        public MeshRenderer pMeshRenderer;
 
         private void Awake()
         {
@@ -18,7 +18,7 @@ namespace FastPolygons
 
         public void OnChangeCar(object sender, EventArgs e)
         {
-            chasisColor.materials[1].color = config.chasisColor;
+            pMeshRenderer.materials[1].color = config.color;
         }
     }
 }

@@ -17,7 +17,7 @@ namespace FastPolygons
         public event EventHandler OnFollowCar;
 
         private void Awake()
-        {    
+        {
             OnFollowCar += PlayerCamera_FindPlayer;
             PlayerCameraHelpers.Cam = GetComponent<Camera>();
         }

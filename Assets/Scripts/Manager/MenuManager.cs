@@ -48,7 +48,7 @@ namespace FastPolygons.Manager
 
             for (int i = 0; i < sliderConfigs.Length; i++)
             {
-                sliderConfigs[i].fillRect.GetComponent<Image>().color = carConfigs[indexConfig].chasisColor;
+                sliderConfigs[i].fillRect.GetComponent<Image>().color = carConfigs[indexConfig].color;
             }
 
             OnSelectorCar += MenuManager_OnSelectorCar;
@@ -137,7 +137,7 @@ namespace FastPolygons.Manager
             for (int i = 0; i < sliderConfigs.Length; i++)
             {
                 sliderConfigs[i].fillRect.GetComponent<Image>().color = 
-                    carConfigs[indexConfig].chasisColor;
+                    carConfigs[indexConfig].color;
             }
         }
 
@@ -164,7 +164,7 @@ namespace FastPolygons.Manager
 
             for (int i = 0; i < sliderConfigs.Length; i++)
             {
-                sliderConfigs[i].fillRect.GetComponent<Image>().color = carConfigs[indexConfig].chasisColor;
+                sliderConfigs[i].fillRect.GetComponent<Image>().color = carConfigs[indexConfig].color;
             }
         }
 

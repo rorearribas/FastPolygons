@@ -17,4 +17,4 @@ MonoBehaviour:
   maxSpeed: 75
   maxSteerAngle: 45
   reverseSpeed: -300
-  chasisColor: {r: 0.9607843, g: 0.0670706, b: 0, a: 1}
+  color: {r: 0.78431374, g: 0, b: 0, a: 1}

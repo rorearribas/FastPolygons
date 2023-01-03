@@ -12,6 +12,6 @@ namespace FastPolygons
         public float maxSpeed;
         public float maxSteerAngle;
         public float reverseSpeed;
-        public Color chasisColor;
+        public Color color;
     }
 }

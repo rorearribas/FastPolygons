@@ -79,7 +79,7 @@ namespace FastPolygons
             rb = GetComponent<Rigidbody>();
 
             rb.centerOfMass = centerOfMass;
-            meshRenderer.materials[1].color = car_config.chasisColor;
+            meshRenderer.materials[1].color = car_config.color;
 
             Transform[] pathTransform = circuitPath.GetComponentsInChildren<Transform>();
             wayPoints = new();
@@ -248,12 +248,6 @@ namespace FastPolygons
         private void OnCollisionEnter(Collision coll)
         {
             CheckCollision(coll.gameObject);
-
-            if (!coll.gameObject.layer.Equals(LayerMask.NameToLayer("IgnoreColl")))
-                return;
-
-            bool ignore = Physics.GetIgnoreCollision(coll.collider, GetComponent<Collider>());
-            Physics.IgnoreCollision(coll.collider, GetComponent<Collider>(), !ignore);
         }
 
         private void OnTriggerEnter(Collider coll)
@@ -271,9 +265,7 @@ namespace FastPolygons
                 ParticleSystem col = Instantiate(effects[2], transform.position, Quaternion.identity);
                 Destroy(col.gameObject, 2);
 
-                GetComponent<BoxCollider>().enabled = false;
-                rb.useGravity = false;
-                rb.constraints = RigidbodyConstraints.FreezeAll;
+                AllowCollisions(false);
             }
         }
 
@@ -501,25 +493,32 @@ namespace FastPolygons
             }
         }
 
+        private void AllowCollisions(bool status)
+        {
+            GetComponent<BoxCollider>().enabled = status;
+            rb.useGravity = status;
+
+            if (status) rb.constraints = RigidbodyConstraints.None;
+            else rb.constraints = RigidbodyConstraints.FreezeAll;
+        }
+
         public void Respawn()
         {
-            rb.useGravity = true;
-            rb.constraints = RigidbodyConstraints.None;
+            if (RaceManager.Instance == null)
+                return;
 
             isCollision = false;
             Delay = -2f;
 
-            GetComponent<BoxCollider>().enabled = true;
+            AllowCollisions(true);
+            StartCoroutine(RaceManager.Instance.Invincible(gameObject));
 
-            Respawn newRespawn = new(this.gameObject);
-
+            Respawn newRespawn = new(gameObject);
             transform.SetPositionAndRotation
             (
                 newRespawn.RespawnPosition,
                 newRespawn.RespawnRotation
             );
-
-            StartCoroutine(RaceManager.Instance?.GodMode(this.gameObject));
         }
     }
 }

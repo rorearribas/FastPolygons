@@ -234,19 +234,14 @@ namespace FastPolygons.Manager
 
             return Cars.FindIndex(a => a.m_carObject.CompareTag("Player"));
         }
-        public IEnumerator GodMode(GameObject pCar)
+
+        public IEnumerator Invincible(GameObject pCar)
         {
-            if (!pCar.TryGetComponent<MeshRenderer>(out var meshRenderer))
+            if (!pCar.GetComponent<MeshRenderer>())
                 yield return null;
 
-            //Material pMat = meshRenderer.materials[1];
-            //if (pMat == null)
-            //    yield return null;
-
-            //MaterialUtils.SetupBlendMode(pMat, MaterialUtils.BlendMode.Transparent);
             pCar.layer = LayerMask.NameToLayer("IgnoreColl");
-
-            float maxTime = 5f;
+            float maxTime = 3f;
             float elapsed = 0;
 
             while (elapsed < maxTime)
@@ -254,10 +249,7 @@ namespace FastPolygons.Manager
                 yield return new WaitForSecondsRealtime(1f);
                 elapsed++;
             }
-
-            //MaterialUtils.SetupBlendMode(pMat, MaterialUtils.BlendMode.Opaque);
             pCar.layer = LayerMask.NameToLayer("Default");
-
             yield return null;
         }
 

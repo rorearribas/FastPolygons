@@ -6,7 +6,7 @@ namespace FastPolygons.Manager
     {
         public void LoadLevel()
         {
-            GameManager.Instance.State = GameManager.EStates.LOADSCREEN;
+            GameManager.Instance.OnChangedState.Invoke(GameManager.EStates.LOADSCREEN);
             AudioManager.Instance.musicChanged?.Invoke(GameManager.Instance.State);
         }
     }

@@ -32,7 +32,9 @@ namespace FastPolygons
                 return;
 
             int id = SearchID(RaceManager.Instance.m_currentData, _Object);
-            this.currentCheckpoint = RaceManager.Instance.m_currentData[id].m_currentCheckpoint;
+            GameObject _carObject = RaceManager.Instance.m_currentData[id].m_carObject;
+
+            currentCheckpoint = RaceManager.Instance.m_currentData[id].m_currentCheckpoint;
 
             //Reset respawn if the current checkpoint is equal to zero.
             if (currentCheckpoint == 0) 
@@ -42,6 +44,12 @@ namespace FastPolygons
 
             GameObject pCheckpoint = RaceManager.Instance.m_currentData[id].m_Checkpoints[currentCheckpoint - 1];
             Vector3 vCheckpoint = pCheckpoint.transform.position;
+
+            if (_carObject.GetComponent<CarAI>())
+            {
+                CarAI AI = _carObject.GetComponent<CarAI>();
+                AI.CurrentNode = AI.GetClosestNode(vCheckpoint);
+            }
 
             Vector3 vUp = pCheckpoint.transform.up;
             Vector3 Target = vCheckpoint - (vUp * 5f);

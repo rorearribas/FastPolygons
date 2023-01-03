@@ -11,6 +11,7 @@ namespace FastPolygons.Manager
     {
         public List<RacerData> m_currentData;
         public List<GameObject> m_AllCheckpoints;
+        public List<Transform> m_startPositions;
 
         public Text lapCountTxt;
         public Text timeLapTxt;
@@ -35,7 +36,6 @@ namespace FastPolygons.Manager
         {
             GameManager.Instance.OnLoadCars += RaceManager_OnLoadCars;
             aS = GetComponent<AudioSource>();
-            CreateCheckpoints();
 
             StartCoroutine(IEUpdate());
             StartCoroutine(IECounter(1f));
@@ -54,10 +54,8 @@ namespace FastPolygons.Manager
             }
         }
 
-        private void RaceManager_OnLoadCars(object sender, EventArgs e)
+        private void InitCheckpoints()
         {
-            GameManager.Instance.OnLoadCars -= RaceManager_OnLoadCars;
-
             if (m_AllCheckpoints.Count == 0)
                 return;
 
@@ -66,6 +64,61 @@ namespace FastPolygons.Manager
             {
                 m_AllCheckpoints[i].GetComponent<ICheckpoints>().Disabled();
             }
+        }
+
+        private void RaceManager_OnLoadCars(object sender, EventArgs e)
+        {
+            if (GameManager.Instance == null)
+                return;
+
+            CreateCheckpoints();
+            InitCheckpoints();
+
+            List<GameObject> tmpData = new();
+            List<Transform> position = m_startPositions;
+            List<CarScriptableObject> carSettings = GameManager.Instance.configs;
+
+            int rnd = UnityEngine.Random.Range(0, position.Count);
+            GameObject pPlayer = Instantiate(Resources.Load<GameObject>("Prefabs/Player"), position[rnd].position, AssignRot(position[rnd]));
+            GameManager.Instance.CurrentPlayer = pPlayer;
+
+            pPlayer.GetComponent<PlayerController>().car_config = MenuManager.Instance.GetConfig();
+            tmpData.Add(pPlayer);
+
+            carSettings.RemoveAt(MenuManager.Instance.indexConfig);
+            position.RemoveAt(rnd);
+
+            int size = position.Count;
+            for (int i = 0; i < size; i++)
+            {
+                rnd = UnityEngine.Random.Range(0, position.Count);
+                int rndConfig = UnityEngine.Random.Range(0, carSettings.Count);
+
+                GameObject IA = Instantiate(
+                    Resources.Load<GameObject>("Prefabs/Car_IA"), 
+                    position[rnd].position, AssignRot(position[rnd])
+                    );
+
+                IA.GetComponent<CarAI>().car_config = carSettings[rndConfig];
+                tmpData.Add(IA);
+
+                position.RemoveAt(rnd);
+                carSettings.RemoveAt(rndConfig);
+            }
+
+            //Send all these data to the RaceManager
+            for (int i = 0; i < tmpData.Count; i++)
+            {
+                RacerData Data = new()
+                {
+                    m_carObject = tmpData[i],
+                    m_Checkpoints = m_AllCheckpoints
+                };
+                m_currentData.Add(Data);
+            }
+
+            tmpData.Clear();
+            GameManager.Instance.OnLoadCars -= RaceManager_OnLoadCars;
         }
 
         private IEnumerator IEUpdate()
@@ -130,7 +183,7 @@ namespace FastPolygons.Manager
         {
             if (_currentLap != m_maxLaps)
                 return;
-            GameManager.Instance.State = GameManager.EStates.END;
+            GameManager.Instance.OnChangedState.Invoke(GameManager.EStates.END);
         }
 
         private void UpdateVisualCheckpoint(int _pIndex, bool LastCheckpoint = false)
@@ -237,9 +290,6 @@ namespace FastPolygons.Manager
 
         public IEnumerator Invincible(GameObject pCar)
         {
-            if (!pCar.GetComponent<MeshRenderer>())
-                yield return null;
-
             pCar.layer = LayerMask.NameToLayer("IgnoreColl");
             float maxTime = 3f;
             float elapsed = 0;
@@ -249,8 +299,16 @@ namespace FastPolygons.Manager
                 yield return new WaitForSecondsRealtime(1f);
                 elapsed++;
             }
+
             pCar.layer = LayerMask.NameToLayer("Default");
             yield return null;
+        }
+
+        private Quaternion AssignRot(Transform Start)
+        {
+            Vector3 Target = Start.transform.position - Start.forward;
+            Vector3 DesiredRot = Start.transform.position - Target;
+            return Quaternion.LookRotation(DesiredRot);
         }
 
     }

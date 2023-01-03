@@ -53,7 +53,7 @@ namespace FastPolygons.Manager
                     {
                         asyncOperation.allowSceneActivation = true;
                         textToContinueObj.SetActive(false);
-                        GameManager.Instance.State = GameManager.EStates.START;
+                        GameManager.Instance.OnChangedState.Invoke(GameManager.EStates.START);
                         GameManager.Instance.fadeAnimator.SetTrigger("FadeOut");
                         reset = false;
                     }

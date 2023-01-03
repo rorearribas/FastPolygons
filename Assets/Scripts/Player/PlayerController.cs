@@ -191,17 +191,17 @@ namespace FastPolygons
 
             for (int i = 0; i < 5; i++)
             {
-                ArcadeEngineAudio pArcadeEngine = GetComponentInChildren<ArcadeEngineAudio>();
+                AudioEngine pArcadeEngine = GetComponentInChildren<AudioEngine>();
                 AudioSource aS = pArcadeEngine.transform.GetChild(i).GetComponent<AudioSource>();
                 aS.UnPause();
             }
 
             if (isPause)
             {
-                GameManager.Instance.SetGameMode(GameManager.EStates.PAUSE);
+                GameManager.Instance.OnChangedState?.Invoke(GameManager.EStates.PAUSE);
                 for (int i = 0; i < 5; i++)
                 {
-                    ArcadeEngineAudio pArcadeEngine = GetComponentInChildren<ArcadeEngineAudio>();
+                    AudioEngine pArcadeEngine = GetComponentInChildren<AudioEngine>();
                     AudioSource aS = pArcadeEngine.transform.GetChild(i).GetComponent<AudioSource>();
                     aS.Pause();
                 }

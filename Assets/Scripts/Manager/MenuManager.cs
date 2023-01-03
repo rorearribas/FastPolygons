@@ -11,12 +11,12 @@ namespace FastPolygons.Manager
     {
         public enum EStates 
         { 
-            MainMenu, 
-            CarSelector,
-            Settings
+            MAIN_MENU,
+            CARSELECTOR,
+            SETTINGS
         }
 
-        public static MenuManager mM;
+        public static MenuManager Instance;
 
         [Header("Menu States and Components")]
         private EStates state;
@@ -33,14 +33,20 @@ namespace FastPolygons.Manager
 
         public EStates State { get => state; set => state = value; }
 
+        public delegate void ChangeState(EStates state);
+        public ChangeState OnChangedState;
+
         private delegate void SelectorCar();
         private event SelectorCar OnSelectorCar;
 
         private void Awake()
         {
-            mM = this;
+            Instance = this;
             aS = GetComponent<AudioSource>();
             anim = GetComponent<Animator>();
+
+            OnChangedState += MenuManager_OnStateChanged;
+            OnChangedState?.Invoke(EStates.MAIN_MENU);
 
             sliderConfigs[0].value = carConfigs[indexConfig].maxSpeed;
             sliderConfigs[1].value = carConfigs[indexConfig].maxMotorTorque;
@@ -52,7 +58,6 @@ namespace FastPolygons.Manager
             }
 
             OnSelectorCar += MenuManager_OnSelectorCar;
-            GameManager.Instance.OnLoadCars += GameManager.Instance.GameManager_OnLoadCars;
             StopAllCoroutines();
         }
 
@@ -61,11 +66,6 @@ namespace FastPolygons.Manager
             GameObject car = GameObject.Find("CarExp");
             car.GetComponent<ModelInspection>().config = carConfigs[indexConfig];
             car.GetComponent<ModelInspection>().OnChangeCar(this, EventArgs.Empty);
-        }
-
-        private void Update()
-        {
-            GameStates(State);
         }
 
         public void PlayGame()
@@ -86,23 +86,25 @@ namespace FastPolygons.Manager
             Application.Quit();
         }
 
-        public void GameStates(EStates states)
+        private void MenuManager_OnStateChanged(EStates states)
         {
-            switch (states)
+            State = states;
+
+            switch (State)
             {
-                case EStates.MainMenu:
+                case EStates.MAIN_MENU:
                     pages[0].SetActive(true);
                     pages[1].SetActive(false);
                     stateName.text = "FAST POLYGONS";
                     break;
 
-                case EStates.Settings:
+                case EStates.SETTINGS:
                     pages[0].SetActive(false);
                     pages[1].SetActive(false);
                     stateName.text = "";
                     break;
 
-                case EStates.CarSelector:
+                case EStates.CARSELECTOR:
                     pages[0].SetActive(false);
                     pages[1].SetActive(true);
                     OnSelectorCar?.Invoke();
@@ -180,14 +182,15 @@ namespace FastPolygons.Manager
             aS.Play();
             GameManager.Instance.LoadLevel();
 
-            GameObject currentGO = GameManager.EventSystem.currentSelectedGameObject;
-            if (currentGO.GetComponent<Button>() != null)
-                currentGO.GetComponent<Button>().enabled = false;
+            GameObject currentGO = GameManager.Instance.EventSystem.currentSelectedGameObject;
+            if (currentGO.GetComponent<Button>() == null)
+                return;
+            currentGO.GetComponent<Button>().enabled = false;
         }
 
         public void ChangeToSelector()
         {
-            State = EStates.CarSelector;
+            OnChangedState?.Invoke(EStates.CARSELECTOR);
         }
 
         public void BackToMainMenu()
@@ -199,7 +202,7 @@ namespace FastPolygons.Manager
         public void BackToBackToMainMenu_Part2()
         {
             anim.SetTrigger("Back");
-            State = EStates.MainMenu;
+            OnChangedState?.Invoke(EStates.MAIN_MENU);
         }
     }
 }

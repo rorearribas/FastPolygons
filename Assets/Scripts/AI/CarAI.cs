@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using FastPolygons.Manager;
+using System.Linq;
 
 namespace FastPolygons
 {
@@ -56,39 +57,44 @@ namespace FastPolygons
 
         #region Extra
 
-        private List<Transform> wayPoints;
-        private int currentNode = 0;
-        private Animator anim;
-        private float Delay;
-        private Rigidbody rb;
-        private Vector3 relativeVector;
-        private float newSteer;
-        private float stopReverseTime;
-        private Transform circuitPath;
+        private int m_currentNode;
+        private float m_delay;
+        private float m_newSteer;
+        private float m_stopReverseTime;
+
+        private List<Transform> m_wayPoints;
+        private Animator m_anim;
+        private Rigidbody m_rb;
+        private Vector3 m_relativeVector;
+        private Transform m_circuitPath;
 
         #endregion
 
+        //Utils
+        public int CurrentNode { get => m_currentNode; set => m_currentNode = value; }
+        public List<Transform> WayPoints { get => m_wayPoints; set => m_wayPoints = value; }
+
         private void Awake()
         {
-            circuitPath = GameObject.FindGameObjectWithTag("Path").transform;
+            m_circuitPath = GameObject.FindGameObjectWithTag("Path").transform;
         }
 
         void Start()
         {
-            anim = GetComponent<Animator>();
-            rb = GetComponent<Rigidbody>();
+            m_anim = GetComponent<Animator>();
+            m_rb = GetComponent<Rigidbody>();
 
-            rb.centerOfMass = centerOfMass;
+            m_rb.centerOfMass = centerOfMass;
             meshRenderer.materials[1].color = car_config.color;
 
-            Transform[] pathTransform = circuitPath.GetComponentsInChildren<Transform>();
-            wayPoints = new();
+            Transform[] pathTransform = m_circuitPath.GetComponentsInChildren<Transform>();
+            WayPoints = new();
 
             for (int i = 0; i < pathTransform.Length; i++)
             {
-                if (pathTransform[i] != circuitPath.transform)
+                if (pathTransform[i] != m_circuitPath.transform)
                 {
-                    wayPoints.Add(pathTransform[i]);
+                    WayPoints.Add(pathTransform[i]);
                 }
             }
         }
@@ -98,21 +104,21 @@ namespace FastPolygons
             if (!GameManager.Instance.State.Equals(GameManager.EStates.PLAYING))
                 return;
 
-            float dot = Vector3.Dot(transform.forward, rb.velocity);
+            float dot = Vector3.Dot(transform.forward, m_rb.velocity);
             if (Mathf.Abs(dot) < 0.1f && !isCollision)
             {
-                Delay += Time.deltaTime;
+                m_delay += Time.deltaTime;
 
-                if (Delay > 1.5f)
+                if (m_delay > 1.5f)
                 {
-                    anim.SetTrigger("Crash");
+                    m_anim.SetTrigger("Crash");
                     isCollision = true;
 
                     ParticleSystem col = Instantiate(effects[2], transform.position, Quaternion.identity);
                     Destroy(col.gameObject, 2);
 
                     GetComponent<BoxCollider>().enabled = false;
-                    rb.useGravity = false;
+                    m_rb.useGravity = false;
 
                     Respawn newRespawn = new(this.gameObject);
                     transform.SetPositionAndRotation
@@ -121,20 +127,22 @@ namespace FastPolygons
                         newRespawn.RespawnRotation
                     );
 
-                    Delay = 0;
+                    m_delay = 0;
                 }
             }
 
             if (isReverse)
             {
-                stopReverseTime += Time.deltaTime;
+                m_stopReverseTime += Time.deltaTime;
 
-                if (stopReverseTime >= 2.5f)
+                if (m_stopReverseTime >= 2.5f)
                 {
                     isReverse = false;
-                    stopReverseTime = 0;
+                    m_stopReverseTime = 0;
                 }
             }
+
+            CheckWaypointDistance();
         }
 
         private void FixedUpdate()
@@ -142,26 +150,25 @@ namespace FastPolygons
             if (!GameManager.Instance.State.Equals(GameManager.EStates.PLAYING))
                 return;
 
-            if (rb.velocity.magnitude > (car_config.maxSpeed / 2.5f))
+            if (m_rb.velocity.magnitude > (car_config.maxSpeed / 2.5f))
             {
-                rb.velocity *= 0.99f;
+                m_rb.velocity *= 0.99f;
             }
 
-            currentSpeed = rb.velocity.magnitude * 3.6f;
+            currentSpeed = m_rb.velocity.magnitude * 3.6f;
 
             Sensors();
             WheelsDirection();
-            CheckWaypointDistance();
             CarHandler();
         }
 
         private void CheckWaypointDistance()
         {
-            float distance = Vector3.Distance(transform.position, wayPoints[currentNode].position);
+            float distance = Vector3.Distance(transform.position, WayPoints[CurrentNode].position);
             if (distance < 10f)
             {
-                if (currentNode == wayPoints.Count - 1) currentNode = 0;
-                else currentNode++;
+                if (CurrentNode == WayPoints.Count - 1) CurrentNode = 0;
+                else CurrentNode++;
             }
         }
 
@@ -208,11 +215,11 @@ namespace FastPolygons
         {
             if (isAvoiding || isReverse) return;
 
-            relativeVector = transform.InverseTransformPoint(wayPoints[currentNode].position);
-            newSteer = relativeVector.x / relativeVector.magnitude * car_config.maxSteerAngle;
+            m_relativeVector = transform.InverseTransformPoint(WayPoints[CurrentNode].position);
+            m_newSteer = m_relativeVector.x / m_relativeVector.magnitude * car_config.maxSteerAngle;
 
-            frontLeftWheelCollider.steerAngle = newSteer;
-            frontRightWheelCollider.steerAngle = newSteer;
+            frontLeftWheelCollider.steerAngle = m_newSteer;
+            frontRightWheelCollider.steerAngle = m_newSteer;
         }
 
         void CarHandler()
@@ -220,7 +227,7 @@ namespace FastPolygons
             if (!GameManager.Instance.State.Equals(GameManager.EStates.PLAYING))
                 return;
 
-            if (wayPoints[currentNode].CompareTag("Curve") && currentSpeed > 30)
+            if (WayPoints[CurrentNode].CompareTag("Curve") && currentSpeed > (car_config.maxSpeed / 3))
             {
                 isBraking = true;
 
@@ -259,7 +266,7 @@ namespace FastPolygons
         {
             if (Object.GetComponent<Respawn>())
             {
-                anim.SetTrigger("Crash");
+                m_anim.SetTrigger("Crash");
                 isCollision = true;
 
                 ParticleSystem col = Instantiate(effects[2], transform.position, Quaternion.identity);
@@ -290,7 +297,7 @@ namespace FastPolygons
             {
                 if (!hit.collider.CompareTag("Untagged"))
                 {
-                    float v = Vector3.Dot(transform.forward, Vector3.Normalize(rb.velocity));
+                    float v = Vector3.Dot(transform.forward, Vector3.Normalize(m_rb.velocity));
 
                     if (v > 0.5f)
                     {
@@ -312,7 +319,7 @@ namespace FastPolygons
             {
                 if (!hit.collider.CompareTag("Untagged"))
                 {
-                    float v = Vector3.Dot(transform.forward, Vector3.Normalize(rb.velocity));
+                    float v = Vector3.Dot(transform.forward, Vector3.Normalize(m_rb.velocity));
 
                     if (v > 0.5f)
                     {
@@ -337,7 +344,7 @@ namespace FastPolygons
             {
                 if (!hit.collider.CompareTag("Untagged"))
                 {
-                    float v = Vector3.Dot(transform.forward, Vector3.Normalize(rb.velocity));
+                    float v = Vector3.Dot(transform.forward, Vector3.Normalize(m_rb.velocity));
 
                     if (v > 0.5f)
                     {
@@ -359,7 +366,7 @@ namespace FastPolygons
             {
                 if (!hit.collider.CompareTag("Untagged"))
                 {
-                    float v = Vector3.Dot(transform.forward, Vector3.Normalize(rb.velocity));
+                    float v = Vector3.Dot(transform.forward, Vector3.Normalize(m_rb.velocity));
 
                     if (v > 0.5f)
                     {
@@ -389,7 +396,7 @@ namespace FastPolygons
                     if (!hit.collider.CompareTag("Untagged"))
                     {
                         Debug.Log(hit.collider.name);
-                        float v = Vector3.Dot(transform.forward, Vector3.Normalize(rb.velocity));
+                        float v = Vector3.Dot(transform.forward, Vector3.Normalize(m_rb.velocity));
 
                         if (v > 0.5f)
                         {
@@ -426,7 +433,7 @@ namespace FastPolygons
                 if (!hit.collider.CompareTag("Untagged"))
                 {
                     isReverse = false;
-                    stopReverseTime = 0;
+                    m_stopReverseTime = 0;
                 }
             }
 
@@ -436,7 +443,7 @@ namespace FastPolygons
                 if (!hit.collider.CompareTag("Untagged"))
                 {
                     isReverse = false;
-                    stopReverseTime = 0;
+                    m_stopReverseTime = 0;
                 }
             }
 
@@ -449,7 +456,7 @@ namespace FastPolygons
                 if (!hit.collider.CompareTag("Untagged"))
                 {
                     isReverse = false;
-                    stopReverseTime = 0;
+                    m_stopReverseTime = 0;
                 }
             }
 
@@ -459,7 +466,7 @@ namespace FastPolygons
                 if (!hit.collider.CompareTag("Untagged"))
                 {
                     isReverse = false;
-                    stopReverseTime = 0;
+                    m_stopReverseTime = 0;
                 }
             }
 
@@ -476,7 +483,7 @@ namespace FastPolygons
                     if (!hit.collider.CompareTag("Untagged"))
                     {
                         isReverse = false;
-                        stopReverseTime = 0;
+                        m_stopReverseTime = 0;
                     }
                 }
             }
@@ -496,10 +503,10 @@ namespace FastPolygons
         private void AllowCollisions(bool status)
         {
             GetComponent<BoxCollider>().enabled = status;
-            rb.useGravity = status;
+            m_rb.useGravity = status;
 
-            if (status) rb.constraints = RigidbodyConstraints.None;
-            else rb.constraints = RigidbodyConstraints.FreezeAll;
+            if (status) m_rb.constraints = RigidbodyConstraints.None;
+            else m_rb.constraints = RigidbodyConstraints.FreezeAll;
         }
 
         public void Respawn()
@@ -508,7 +515,7 @@ namespace FastPolygons
                 return;
 
             isCollision = false;
-            Delay = -2f;
+            m_delay = -2f;
 
             AllowCollisions(true);
             StartCoroutine(RaceManager.Instance.Invincible(gameObject));
@@ -519,6 +526,27 @@ namespace FastPolygons
                 newRespawn.RespawnPosition,
                 newRespawn.RespawnRotation
             );
+        }
+
+        public int GetClosestNode(Vector3 _Position)
+        {
+            if (WayPoints.Count == 0)
+                return -1;
+
+            float Distance = float.MaxValue;
+            int index = 0;
+
+            for (int i = 0; i < WayPoints.Count; i++)
+            {
+                float dist = Vector3.Distance(WayPoints[i].position, _Position);
+                if(Distance > dist)
+                {
+                    Distance = dist;
+                    index = i;
+                }
+            }
+
+            return index;
         }
     }
 }

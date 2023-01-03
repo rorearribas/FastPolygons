@@ -13,7 +13,7 @@ namespace FastPolygons
         private void Awake()
         {
             ChangeCar += OnChangeCar;
-            config = MenuManager.mM.carConfigs[MenuManager.mM.indexConfig];
+            config = MenuManager.Instance.carConfigs[MenuManager.Instance.indexConfig];
         }
 
         public void OnChangeCar(object sender, EventArgs e)

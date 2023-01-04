@@ -12,8 +12,7 @@ namespace FastPolygons
 
     public class PlayerCamera : MonoBehaviour
     {
-        private GameObject Target;
-
+        private Player Target;
         public event EventHandler OnFollowCar;
 
         private void Awake()

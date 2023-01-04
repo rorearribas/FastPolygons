@@ -2319,6 +2319,7 @@ GameObject:
   - component: {fileID: 1241768881247993674}
   - component: {fileID: 1241768881247993673}
   - component: {fileID: 1241768881247993672}
+  - component: {fileID: -5835660537247174555}
   - component: {fileID: 1241768881247993783}
   m_Layer: 0
   m_Name: Player
@@ -2397,6 +2398,18 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &-5835660537247174555
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1241768881247993782}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9668b41f08cd624dae6d2b7e4ba67d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &1241768881247993783
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2409,7 +2422,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 403ee1f51ab2cb244a17622b17981c87, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  car_config: {fileID: 11400000, guid: b23e5bd47742fff4095a279eda8a349f, type: 2}
+  m_currentConfig: {fileID: 0}
   meshRenderer: {fileID: 1241768880195464147}
   isReverse: 0
   isBreaking: 0
@@ -2417,11 +2430,12 @@ MonoBehaviour:
   bCanMove: 1
   isCollision: 0
   upSensor: {fileID: 1241768879885808510}
-  carLights:
+  m_lights:
   - {fileID: 1241768880351178343}
   - {fileID: 1241768879616535562}
   - {fileID: 1241768880792221583}
   - {fileID: 1241768881542473079}
+  m_audioEngine: {fileID: 6891339239203980525}
   frontLeftWheelCollider: {fileID: 1241768881078294217}
   frontRightWheelCollider: {fileID: 1241768881669265910}
   rearLeftWheelCollider: {fileID: 1241768880982959467}
@@ -2430,11 +2444,10 @@ MonoBehaviour:
   frontRightWheelTransform: {fileID: 1241768879656974638}
   rearLeftWheelTransform: {fileID: 1241768881637579933}
   rearRightWheelTransform: {fileID: 1241768879894851204}
-  effects:
+  m_currentParticles:
   - {fileID: 1439978096263953148}
   - {fileID: 1439978098017996754}
-  - {fileID: 7110735477436895022, guid: 37af56d3168c2d047aa19377e8446dd5, type: 3}
-  brakeLightColours:
+  m_brakeMaterials:
   - {fileID: 2100000, guid: aa50894d46e8cb84f87457acceca4df9, type: 2}
   - {fileID: 2100000, guid: 4785edee4996afe4db5255ff92fbd8f7, type: 2}
   centerOfMass: {x: 0, y: 0.2, z: 0}
@@ -3727,13 +3740,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4945bee8921d0c043b91ffaeae96c45b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  StartSound: {fileID: 6891339240304697664}
-  IdleSound: {fileID: 6891339238777057953}
-  RunningSound: {fileID: 6891339238806645729}
-  Drift: {fileID: 7951634607585750422}
+  m_sources:
+  - {fileID: 6891339238777057953}
+  - {fileID: 6891339240304697664}
+  - {fileID: 6891339238806645729}
+  - {fileID: 8441457752785162382}
+  - {fileID: 7951634607585750422}
   RunningSoundMaxVolume: 1
   RunningSoundMaxPitch: 1.8
-  ReverseSound: {fileID: 8441457752785162382}
   ReverseSoundMaxVolume: 0.5
   ReverseSoundMaxPitch: 0.6
 --- !u!1 &6891339240304697666
@@ -3934,6 +3948,11 @@ PrefabInstance:
       propertyPath: lengthInSec
       value: 0.1
       objectReference: {fileID: 0}
+    - target: {fileID: 199660628750992368, guid: ab22dfee5ddd2634f991aee1f95f050f,
+        type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ab22dfee5ddd2634f991aee1f95f050f, type: 3}
 --- !u!4 &1239796046757160902 stripped
@@ -4016,6 +4035,11 @@ PrefabInstance:
         type: 3}
       propertyPath: lengthInSec
       value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 199660628750992368, guid: ab22dfee5ddd2634f991aee1f95f050f,
+        type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ab22dfee5ddd2634f991aee1f95f050f, type: 3}

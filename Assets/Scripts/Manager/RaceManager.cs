@@ -76,13 +76,18 @@ namespace FastPolygons.Manager
 
             List<GameObject> tmpData = new();
             List<Transform> position = m_startPositions;
-            List<CarScriptableObject> carSettings = GameManager.Instance.configs;
+
+            List<CarScriptableObject> carSettings = new();
+            carSettings.AddRange(GameManager.Instance.configs);
 
             int rnd = UnityEngine.Random.Range(0, position.Count);
-            GameObject pPlayer = Instantiate(Resources.Load<GameObject>("Prefabs/Player"), position[rnd].position, AssignRot(position[rnd]));
-            GameManager.Instance.CurrentPlayer = pPlayer;
+            GameObject pPlayer = Instantiate(
+                Resources.Load<GameObject>("Prefabs/Player"), 
+                position[rnd].position, AssignRot(position[rnd]));
 
-            pPlayer.GetComponent<PlayerController>().car_config = MenuManager.Instance.GetConfig();
+            GameManager.Instance.CurrentPlayer = pPlayer.GetComponent<Player>();
+
+            pPlayer.GetComponent<Player>().m_currentConfig = MenuManager.Instance.GetConfig();
             tmpData.Add(pPlayer);
 
             carSettings.RemoveAt(MenuManager.Instance.indexConfig);

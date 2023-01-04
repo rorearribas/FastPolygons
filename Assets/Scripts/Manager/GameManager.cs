@@ -52,7 +52,7 @@ namespace FastPolygons.Manager
         public bool isCountDown;
         private int currentResolution;
 
-        private GameObject m_currentPlayer = null;
+        private Player m_currentPlayer = null;
 
         //Delegate
         public EventHandler OnLoadCars;
@@ -67,7 +67,7 @@ namespace FastPolygons.Manager
 
         //States
         public EStates State { get => state; set => state = value; }
-        public GameObject CurrentPlayer { get => m_currentPlayer; set => m_currentPlayer = value; }
+        public Player CurrentPlayer { get => m_currentPlayer; set => m_currentPlayer = value; }
 
         private void OnEnable()
         {
@@ -313,6 +313,7 @@ namespace FastPolygons.Manager
             inGame.enabled = true;
 
             OnChangedState?.Invoke(EStates.PLAYING);
+            CurrentPlayer.AudioEngine.SetUnPause();
         }
 
         public void RestartGame()

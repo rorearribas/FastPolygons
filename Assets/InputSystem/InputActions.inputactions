@@ -1,26 +1,26 @@
 {
-    "name": "PlayerInputActions",
+    "name": "InputActions",
     "maps": [
         {
             "name": "Player",
             "id": "cf13f28c-b5ae-4d62-83ce-ab7dfa01db68",
             "actions": [
                 {
-                    "name": "Move",
+                    "name": "VehicleMovement",
                     "type": "PassThrough",
-                    "id": "61077bc1-edf1-4dbe-bd3c-74c47c372936",
-                    "expectedControlType": "Axis",
+                    "id": "895be884-2d89-42e1-a128-1e7e023afe75",
+                    "expectedControlType": "Vector2",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
                 },
                 {
                     "name": "Brake",
-                    "type": "Button",
+                    "type": "PassThrough",
                     "id": "3e6960e0-d71d-41d5-acb0-7203adf7bf0b",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "Axis",
                     "processors": "",
-                    "interactions": "",
+                    "interactions": "Press(behavior=2)",
                     "initialStateCheck": false
                 },
                 {
@@ -38,7 +38,7 @@
                     "name": "",
                     "id": "17ce0fd7-a9a9-4190-8c78-2b005f042b1f",
                     "path": "<Keyboard>/space",
-                    "interactions": "Hold",
+                    "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Brake",
@@ -57,35 +57,57 @@
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "1D Axis",
-                    "id": "e3eb6f11-f7b2-42c0-8954-d774b8f25845",
-                    "path": "1DAxis",
+                    "name": "2D Vector",
+                    "id": "20389388-63ef-479d-96e1-6c9c524549bf",
+                    "path": "2DVector",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Move",
+                    "action": "VehicleMovement",
                     "isComposite": true,
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "Negative",
-                    "id": "63397ee0-7c62-4762-81da-dabe31e0e7c8",
-                    "path": "<Keyboard>/a",
+                    "name": "up",
+                    "id": "f1e85769-fe58-4389-8531-1e0b93556f3b",
+                    "path": "<Keyboard>/w",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Move",
+                    "action": "VehicleMovement",
                     "isComposite": false,
                     "isPartOfComposite": true
                 },
                 {
-                    "name": "Positive",
-                    "id": "9774d790-675e-4195-a573-c69cc8919a90",
+                    "name": "down",
+                    "id": "6ee1cbc9-a667-41d1-a7db-bb4b443b45d2",
+                    "path": "<Keyboard>/s",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "VehicleMovement",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "left",
+                    "id": "567405bd-2853-407e-a671-6fefc5aec464",
+                    "path": "<Keyboard>/a",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "VehicleMovement",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "right",
+                    "id": "a874c10b-8ea6-43c8-8737-427000ea05ca",
                     "path": "<Keyboard>/d",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Move",
+                    "action": "VehicleMovement",
                     "isComposite": false,
                     "isPartOfComposite": true
                 }

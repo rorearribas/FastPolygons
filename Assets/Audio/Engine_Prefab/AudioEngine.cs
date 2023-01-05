@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 
@@ -22,27 +23,37 @@ namespace FastPolygons
             car = GetComponentInParent<Player>();
         }
 
-        void Update()
+        private void Start()
+        {
+            StartCoroutine(UpdateEngine());
+        }
+
+        private IEnumerator UpdateEngine()
         {
             if (car == null)
-                return;
+                yield return null;
 
-            float speed = car.LocalSpeed();
-            m_sources[0].volume = Mathf.Lerp(0.6f, 0.0f, speed * 4);
+            while (true)
+            {
+                yield return new WaitForSeconds(0.1f);
 
-            if (speed < 0.0f)
-            {
-                // In reverse
-                m_sources[3].volume = 0.0f;
-                m_sources[3].volume = Mathf.Lerp(0.1f, ReverseSoundMaxVolume, -speed * 1.2f);
-                m_sources[3].pitch = Mathf.Lerp(0.1f, ReverseSoundMaxPitch, -speed + Mathf.Sin(Time.time) * .1f);
-            }
-            else
-            {
-                // Moving forward
-                m_sources[2].volume = 0.0f;
-                m_sources[2].volume = Mathf.Lerp(0.1f, RunningSoundMaxVolume, speed * 1.2f);
-                m_sources[2].pitch = Mathf.Lerp(0.3f, RunningSoundMaxPitch, speed + Mathf.Sin(Time.time) * .1f);
+                float speed = car.LocalSpeed();
+                m_sources[0].volume = Mathf.Lerp(0.6f, 0.0f, speed * 4);
+
+                if (speed < 0.0f)
+                {
+                    // In reverse
+                    m_sources[3].volume = 0.0f;
+                    m_sources[3].volume = Mathf.Lerp(0.1f, ReverseSoundMaxVolume, -speed * 1.2f);
+                    m_sources[3].pitch = Mathf.Lerp(0.1f, ReverseSoundMaxPitch, -speed + Mathf.Sin(Time.time) * .1f);
+                }
+                else
+                {
+                    // Moving forward
+                    m_sources[2].volume = 0.0f;
+                    m_sources[2].volume = Mathf.Lerp(0.1f, RunningSoundMaxVolume, speed * 1.2f);
+                    m_sources[2].pitch = Mathf.Lerp(0.3f, RunningSoundMaxPitch, speed + Mathf.Sin(Time.time) * .1f);
+                }
             }
         }
 

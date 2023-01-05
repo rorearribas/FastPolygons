@@ -83,6 +83,9 @@ namespace FastPolygons.Manager
             AudioManager.Instance.musicChanged?.Invoke(State);
             AudioSource aS = transform.GetChild(0).GetComponent<AudioSource>();
             aS.Stop();
+
+            if (InputManager.Instance == null) return;
+            InputManager.Instance.OnScapeEvent += OnPause;
         }
 
         #region GameStates
@@ -356,6 +359,14 @@ namespace FastPolygons.Manager
             {
                 MenuManager.Instance.OnChangedState?.Invoke(MenuManager.EStates.SETTINGS);
             }
+        }
+
+        public void OnPause()
+        {
+            if (!State.Equals(EStates.PLAYING)) return;
+
+            OnChangedState?.Invoke(EStates.PAUSE);
+            CurrentPlayer.AudioEngine.SetPause();
         }
 
         public void ExitSetings()

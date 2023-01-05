@@ -1,5 +1,6 @@
 ﻿using FastPolygons.Manager;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,13 +12,12 @@ namespace FastPolygons
         public CarScriptableObject m_currentConfig;
         public MeshRenderer meshRenderer;
 
-        private float h, v;
-        Rigidbody m_currentRigidbody;
+        Rigidbody m_rigidbody;
         Animator m_currentAnimator;
 
-        public bool isReverse, isBreaking, isReverseTrue, bCanMove = true, isCollision;
-        private float currentSteerAngle;
-        private float Velocity;
+        public bool isReverse;
+        public bool isBraking;
+        public bool bCanMove = true;
 
         [Header("Car Sensors")]
         public Transform upSensor;
@@ -64,10 +64,10 @@ namespace FastPolygons
 
         private void Start()
         {
-            m_currentRigidbody = GetComponent<Rigidbody>();
+            m_rigidbody = GetComponent<Rigidbody>();
             m_currentAnimator = GetComponent<Animator>();
 
-            m_currentRigidbody.centerOfMass = centerOfMass;
+            m_rigidbody.centerOfMass = centerOfMass;
             meshRenderer.materials[1].color = m_currentConfig.color;
 
             Transform[] pathTransform = circuitPath.GetComponentsInChildren<Transform>();
@@ -83,67 +83,43 @@ namespace FastPolygons
 
             MeshRenderer matObj = brakeObj.GetComponent<MeshRenderer>();
             matObj.material = m_brakeMaterials[0];
+
+            StartCoroutine(IUpsideDown());
+            StartCoroutine(IUpdateWheels());
+
+            if (InputManager.Instance == null) return;
+            InputManager.Instance.OnBrakeEvent += OnBrake;
+            InputManager.Instance.OnTurnEvent += OnTurn;
+            InputManager.Instance.OnForwardEvent += OnHandleCar;
+            InputManager.Instance.OnForwardEvent += OnCastFire;
         }
 
-        private void Update()
+        private void OnHandleCar(float value)
         {
-            Inputs();
-            CheckUpsideDown();
-
-            if (m_currentRigidbody.velocity.magnitude > 0 && m_currentRigidbody.velocity.magnitude < 0.1f)
-            {
-                frontLeftWheelCollider.brakeTorque = 0;
-                frontRightWheelCollider.brakeTorque = 0;
-                rearRightWheelCollider.brakeTorque = 0;
-                rearLeftWheelCollider.brakeTorque = 0;
-            }
-
-            OnMove();
-        }
-
-        private void FixedUpdate()
-        {
-            HandleMotor();
-            //DirectionCar();
-            UpdateWheels();
-            CastFire();
-
-            if (isReverse)
-            {
-                frontLeftWheelCollider.motorTorque = m_currentConfig.reverseSpeed;
-                frontRightWheelCollider.motorTorque = m_currentConfig.reverseSpeed;
-
-                //Clamp max reverse velocity
-                float maxVel = 30.0f;
-                Velocity = Mathf.Clamp(Velocity, 0.0f, maxVel);
-
-                for (int i = 0; i < m_currentParticles.Count; i++)
-                {
-                    m_currentParticles[i].Stop();
-                }
-            }
-        }
-
-        void HandleMotor()
-        {
-            if (isBreaking || isReverse)
+            if (isBraking || !bCanMove)
                 return;
 
             //Apply force to front wheels
-            frontLeftWheelCollider.motorTorque = v * m_currentConfig.maxMotorTorque;
-            frontRightWheelCollider.motorTorque = v * m_currentConfig.maxMotorTorque;
+            frontLeftWheelCollider.motorTorque = value * m_currentConfig.maxMotorTorque;
+            frontRightWheelCollider.motorTorque = value * m_currentConfig.maxMotorTorque;
 
-            //Clamp
-            if (m_currentRigidbody.velocity.magnitude > (m_currentConfig.maxSpeed / 2.5f))
-            {
-                m_currentRigidbody.velocity *= 0.99f;
-            }
+            frontLeftWheelCollider.brakeTorque = 0f;
+            frontRightWheelCollider.brakeTorque = 0f;
+
+            MeshRenderer matObj = brakeObj.GetComponent<MeshRenderer>();
+            matObj.material = m_brakeMaterials[0];
+
+            //Limit max speed
+            float magnitude = m_rigidbody.velocity.magnitude;
+            float maxSpeed = m_currentConfig.maxSpeed / 2.5f;
+
+            if (magnitude <= maxSpeed) return;
+            m_rigidbody.velocity *= 0.99f;
         }
 
-        void CastFire()
+        private void OnCastFire(float value)
         {
-            if (v.Equals(0f))
-                return;
+            if (value.Equals(0) || isBraking) return;
 
             foreach (ParticleSystem particle in m_currentParticles)
             {
@@ -151,24 +127,7 @@ namespace FastPolygons
             }
         }
 
-        public void OnMove()
-        {
-            if (!GameManager.Instance.State.Equals(GameManager.EStates.PLAYING) || !bCanMove)
-                return;
-
-            frontLeftWheelCollider.motorTorque = m_currentConfig.maxMotorTorque;
-            frontRightWheelCollider.motorTorque = m_currentConfig.maxMotorTorque;
-
-            MeshRenderer matObj = brakeObj.GetComponent<MeshRenderer>();
-            matObj.material = m_brakeMaterials[0];
-
-            frontLeftWheelCollider.brakeTorque = 0;
-            frontRightWheelCollider.brakeTorque = 0;
-            rearRightWheelCollider.brakeTorque = 0;
-            rearLeftWheelCollider.brakeTorque = 0;
-        }
-
-        public void OnBrake()
+        private void OnBrake(bool _isBraking)
         {
             if (!GameManager.Instance.State.Equals(GameManager.EStates.PLAYING) || !bCanMove)
                 return;
@@ -176,36 +135,21 @@ namespace FastPolygons
             frontLeftWheelCollider.brakeTorque = m_currentConfig.maxBrakeTorque;
             frontRightWheelCollider.brakeTorque = m_currentConfig.maxBrakeTorque;
 
-            frontLeftWheelCollider.motorTorque = 0;
-            frontRightWheelCollider.motorTorque = 0;
+            frontLeftWheelCollider.motorTorque = 0f;
+            frontRightWheelCollider.motorTorque = 0f;
 
-            for (int i = 0; i < m_currentParticles.Count - 1; i++)
+            foreach (ParticleSystem particle in m_currentParticles)
             {
-                m_currentParticles[i].Stop();
+                particle.Stop();
             }
 
             MeshRenderer matObj = brakeObj.GetComponent<MeshRenderer>();
             matObj.material = m_brakeMaterials[1];
+
+            isBraking = _isBraking;
         }
 
-        public void OnPause()
-        {
-            if (!GameManager.Instance.State.Equals(GameManager.EStates.PLAYING))
-                return;
-
-            GameManager.Instance.OnChangedState?.Invoke(GameManager.EStates.PAUSE);
-            AudioEngine.SetPause();
-        }
-
-        void Inputs()
-        {
-            if (!GameManager.Instance.State.Equals(GameManager.EStates.PLAYING) || !bCanMove)
-                return;
-
-            h = Input.GetAxis("Horizontal");
-            v = Input.GetAxis("Vertical");
-        }
-
+        //Interface
         public void SwitchLights()
         {
             foreach (Light light in m_lights)
@@ -214,11 +158,10 @@ namespace FastPolygons
             }
         }
 
-        private void DirectionCar()
+        private void OnTurn(float value)
         {
-            currentSteerAngle = m_currentConfig.maxSteerAngle * h;
-            frontLeftWheelCollider.steerAngle = currentSteerAngle;
-            frontRightWheelCollider.steerAngle = currentSteerAngle;
+            frontLeftWheelCollider.steerAngle = m_currentConfig.maxSteerAngle * value;
+            frontRightWheelCollider.steerAngle = m_currentConfig.maxSteerAngle * value;
         }
 
         private void UpdateWheels()
@@ -250,9 +193,6 @@ namespace FastPolygons
             m_currentAnimator.SetTrigger("Crash");
             AllowCollisions(false);
 
-            isCollision = true;
-            bCanMove = false;
-
             ParticleSystem col = Instantiate(m_currentParticles[2], transform.position, Quaternion.identity);
             Destroy(col.gameObject, 2);
 
@@ -262,10 +202,11 @@ namespace FastPolygons
         private void AllowCollisions(bool status)
         {
             GetComponent<BoxCollider>().enabled = status;
-            m_currentRigidbody.useGravity = status;
+            m_rigidbody.useGravity = status;
+            bCanMove = status;
 
-            if (status) m_currentRigidbody.constraints = RigidbodyConstraints.None;
-            else m_currentRigidbody.constraints = RigidbodyConstraints.FreezeAll;
+            if (status) m_rigidbody.constraints = RigidbodyConstraints.None;
+            else m_rigidbody.constraints = RigidbodyConstraints.FreezeAll;
         }
 
         private void OnCollisionEnter(Collision coll)
@@ -285,9 +226,6 @@ namespace FastPolygons
 
             AllowCollisions(true);
 
-            bCanMove = true;
-            isCollision = false;
-
             Respawn newRespawn = new(gameObject);
             StartCoroutine(RaceManager.Instance.Invincible(this.gameObject));
 
@@ -305,11 +243,11 @@ namespace FastPolygons
             if (!bCanMove)
                 return 0f;
 
-            float dot = Vector3.Dot(transform.forward, m_currentRigidbody.velocity);
+            float dot = Vector3.Dot(transform.forward, m_rigidbody.velocity);
             float result = float.Epsilon;
             if (Mathf.Abs(dot) > 0.1f)
             {
-                float speed = m_currentRigidbody.velocity.magnitude;
+                float speed = m_rigidbody.velocity.magnitude;
                 result = dot < 0 ? -(speed / (m_currentConfig.reverseSpeed / 2f)) : speed / (m_currentConfig.maxSpeed / 2f);
             }
 
@@ -321,6 +259,30 @@ namespace FastPolygons
             if (Object.GetComponent<Respawn>())
             {
                 OnAccident?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
+        private IEnumerator IUpsideDown()
+        {
+            while (true)
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    yield return new WaitForEndOfFrame();
+                }
+                CheckUpsideDown();
+            }
+        }
+
+        private IEnumerator IUpdateWheels()
+        {
+            while (true)
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    yield return new WaitForFixedUpdate();
+                }
+                UpdateWheels();
             }
         }
     }

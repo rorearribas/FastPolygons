@@ -2319,7 +2319,6 @@ GameObject:
   - component: {fileID: 1241768881247993674}
   - component: {fileID: 1241768881247993673}
   - component: {fileID: 1241768881247993672}
-  - component: {fileID: -5835660537247174555}
   - component: {fileID: 1241768881247993783}
   m_Layer: 0
   m_Name: Player
@@ -2398,18 +2397,6 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
---- !u!114 &-5835660537247174555
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1241768881247993782}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a9668b41f08cd624dae6d2b7e4ba67d7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1241768881247993783
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2425,7 +2412,7 @@ MonoBehaviour:
   m_currentConfig: {fileID: 0}
   meshRenderer: {fileID: 1241768880195464147}
   isReverse: 0
-  isBreaking: 0
+  isBraking: 0
   isReverseTrue: 0
   bCanMove: 1
   isCollision: 0
@@ -2447,6 +2434,7 @@ MonoBehaviour:
   m_currentParticles:
   - {fileID: 1439978096263953148}
   - {fileID: 1439978098017996754}
+  - {fileID: 7110735477436895022, guid: 37af56d3168c2d047aa19377e8446dd5, type: 3}
   m_brakeMaterials:
   - {fileID: 2100000, guid: aa50894d46e8cb84f87457acceca4df9, type: 2}
   - {fileID: 2100000, guid: 4785edee4996afe4db5255ff92fbd8f7, type: 2}

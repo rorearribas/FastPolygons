@@ -378,7 +378,7 @@ namespace FastPolygons.Manager
                 currentCanvas.enabled = false;
 
                 OnChangedState?.Invoke(EStates.MENU);
-                MenuManager.Instance.OnChangedState?.Invoke(MenuManager.EStates.MAIN_MENU);
+                MenuManager.Instance.OnChangedState?.Invoke(MenuManager.EStates.MENU);
             }
 
             else

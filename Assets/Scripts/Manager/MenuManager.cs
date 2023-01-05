@@ -11,7 +11,7 @@ namespace FastPolygons.Manager
     {
         public enum EStates 
         { 
-            MAIN_MENU,
+            MENU,
             CARSELECTOR,
             SETTINGS
         }
@@ -19,9 +19,10 @@ namespace FastPolygons.Manager
         public static MenuManager Instance;
 
         [Header("Menu States and Components")]
-        private EStates state;
+        public EStates state;
         public GameObject[] pages;
         public Text stateName;
+        [SerializeField] GameObject CarInspection;
 
         [Header("Car configs")]
         public CarScriptableObject[] carConfigs;
@@ -46,7 +47,7 @@ namespace FastPolygons.Manager
             anim = GetComponent<Animator>();
 
             OnChangedState += MenuManager_OnStateChanged;
-            OnChangedState?.Invoke(EStates.MAIN_MENU);
+            OnChangedState?.Invoke(EStates.MENU);
 
             sliderConfigs[0].value = carConfigs[indexConfig].maxSpeed;
             sliderConfigs[1].value = carConfigs[indexConfig].maxMotorTorque;
@@ -92,7 +93,7 @@ namespace FastPolygons.Manager
 
             switch (State)
             {
-                case EStates.MAIN_MENU:
+                case EStates.MENU:
                     pages[0].SetActive(true);
                     pages[1].SetActive(false);
                     stateName.text = "FAST POLYGONS";
@@ -119,18 +120,11 @@ namespace FastPolygons.Manager
         {
             aS.Play();
 
-            if (indexConfig == carConfigs.Length - 1)
-            {
-                indexConfig = 0;
-            }
-            else
-            {
-                indexConfig++;
-            }
+            if (indexConfig == carConfigs.Length - 1) indexConfig = 0;
+            else indexConfig++;
 
-            GameObject car = GameObject.Find("CarExp");
-            car.GetComponent<ModelInspection>().config = carConfigs[indexConfig];
-            car.GetComponent<ModelInspection>().OnChangeCar(this, EventArgs.Empty);
+            CarInspection.GetComponent<ModelInspection>().config = carConfigs[indexConfig];
+            CarInspection.GetComponent<ModelInspection>().OnChangeCar(this, EventArgs.Empty);
 
             sliderConfigs[0].value = carConfigs[indexConfig].maxSpeed;
             sliderConfigs[1].value = carConfigs[indexConfig].maxMotorTorque;
@@ -148,17 +142,12 @@ namespace FastPolygons.Manager
             aS.Play();
 
             if (indexConfig <= 0)
-            {
                 indexConfig = carConfigs.Length - 1;
-            }
             else
-            {
                 indexConfig--;
-            }
 
-            GameObject car = GameObject.Find("CarExp");
-            car.GetComponent<ModelInspection>().config = carConfigs[indexConfig];
-            car.GetComponent<ModelInspection>().OnChangeCar(this, EventArgs.Empty);
+            CarInspection.GetComponent<ModelInspection>().config = carConfigs[indexConfig];
+            CarInspection.GetComponent<ModelInspection>().OnChangeCar(this, EventArgs.Empty);
 
             sliderConfigs[0].value = carConfigs[indexConfig].maxSpeed;
             sliderConfigs[1].value = carConfigs[indexConfig].maxMotorTorque;
@@ -202,7 +191,7 @@ namespace FastPolygons.Manager
         public void BackToBackToMainMenu_Part2()
         {
             anim.SetTrigger("Back");
-            OnChangedState?.Invoke(EStates.MAIN_MENU);
+            OnChangedState?.Invoke(EStates.MENU);
         }
     }
 }

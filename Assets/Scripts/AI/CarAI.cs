@@ -50,17 +50,16 @@ namespace FastPolygons
         [SerializeField] Material[] brakeLightColour;
         [SerializeField] GameObject brakeObj;
         [SerializeField] ParticleSystem[] effects;
-        [SerializeField] bool isBraking = false;
-        [SerializeField] bool isCollision;
 
         #endregion
-
         #region Extra
 
         private int m_currentNode;
         private float m_delay;
         private float m_newSteer;
         private float m_stopReverseTime;
+        private bool isCollision;
+        private bool isBraking = false;
 
         private List<Transform> m_wayPoints;
         private Animator m_anim;
@@ -73,6 +72,7 @@ namespace FastPolygons
         //Utils
         public int CurrentNode { get => m_currentNode; set => m_currentNode = value; }
         public List<Transform> WayPoints { get => m_wayPoints; set => m_wayPoints = value; }
+        public bool IsBraking { get => isBraking; set => isBraking = value; }
 
         private void Awake()
         {
@@ -120,7 +120,7 @@ namespace FastPolygons
                     GetComponent<BoxCollider>().enabled = false;
                     m_rb.useGravity = false;
 
-                    Respawn newRespawn = new(this.gameObject);
+                    Respawn newRespawn = new(gameObject);
                     transform.SetPositionAndRotation
                     (
                         newRespawn.RespawnPosition,

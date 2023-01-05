@@ -13,14 +13,17 @@ namespace FastPolygons
 
         //Delegates
         public delegate void ParamBoolean(bool value);
-        public ParamBoolean OnBrakeEvent;
 
         public delegate void ParamFloat(float value);
-        public ParamFloat OnTurnEvent;
-        public ParamFloat OnForwardEvent;
+        public ParamFloat OnSteeringAngleEvent;
+        public ParamFloat OnAccelerationEvent;
 
         public delegate void NoParam();
         public NoParam OnScapeEvent;
+        public NoParam OnNoAccelerationEvent;
+
+        public NoParam OnBrakeEvent;
+        public NoParam OnStopBrakeEvent;
 
         public override void Awake()
         {
@@ -30,31 +33,42 @@ namespace FastPolygons
 
             m_inputActions.Player.Brake.performed += OnBrakePressed;
             m_inputActions.Player.Brake.canceled += OnBrakeReleased;
+
             m_inputActions.Player.Pause.performed += OnPausePressed;
+            m_inputActions.Player.SteeringAngle.performed += OnSteeringAnglePressed;
+
+            m_inputActions.Player.Acceleration.performed += OnAccelerationPerformed;
+            m_inputActions.Player.Acceleration.canceled += OnAccelerationCanceled;
         }
 
-        private void Update()
+        private void OnSteeringAnglePressed(InputAction.CallbackContext ctx)
         {
-            if (!GameManager.Instance.State.Equals(GameManager.EStates.PLAYING))
-                return;
-
-            Vector2 value = m_inputActions.Player.VehicleMovement.ReadValue<Vector2>();
-            OnTurnEvent?.Invoke(value.x);
-            OnForwardEvent?.Invoke(value.y);
+            float value = ctx.ReadValue<float>();
+            OnSteeringAngleEvent?.Invoke(value);
         }
 
-        private void OnBrakeReleased(InputAction.CallbackContext obj)
+        private void OnAccelerationPerformed(InputAction.CallbackContext ctx)
         {
-            OnBrakeEvent?.Invoke(false);
+            float value = ctx.ReadValue<float>();
+            OnAccelerationEvent?.Invoke(value);
         }
 
-        private void OnBrakePressed(InputAction.CallbackContext context) 
+        private void OnAccelerationCanceled(InputAction.CallbackContext ctx)
         {
-            OnBrakeEvent?.Invoke(true);
-            Debug.Log(context);
+            OnNoAccelerationEvent?.Invoke();
         }
 
-        private void OnPausePressed(InputAction.CallbackContext context)
+        private void OnBrakePressed(InputAction.CallbackContext ctx)
+        {
+            OnBrakeEvent?.Invoke();
+        }
+
+        private void OnBrakeReleased(InputAction.CallbackContext ctx)
+        {
+            OnStopBrakeEvent?.Invoke();
+        }
+
+        private void OnPausePressed(InputAction.CallbackContext ctx)
         {
             OnScapeEvent?.Invoke();
         }

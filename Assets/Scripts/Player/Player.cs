@@ -89,15 +89,16 @@ namespace FastPolygons
 
             if (InputManager.Instance == null) return;
             InputManager.Instance.OnBrakeEvent += OnBrake;
-            InputManager.Instance.OnTurnEvent += OnTurn;
-            InputManager.Instance.OnForwardEvent += OnHandleCar;
-            InputManager.Instance.OnForwardEvent += OnCastFire;
+            InputManager.Instance.OnStopBrakeEvent += OnNoBrake;
+            InputManager.Instance.OnSteeringAngleEvent += OnTurn;
+            InputManager.Instance.OnAccelerationEvent += OnHandleCar;
+            InputManager.Instance.OnNoAccelerationEvent += OnNoCastFire;
         }
 
         private void OnHandleCar(float value)
         {
-            if (isBraking || !bCanMove)
-                return;
+            if (!GameManager.Instance.State.Equals(GameManager.EStates.PLAYING)) return;
+            if (isBraking || !bCanMove) return;
 
             //Apply force to front wheels
             frontLeftWheelCollider.motorTorque = value * m_currentConfig.maxMotorTorque;
@@ -109,6 +110,8 @@ namespace FastPolygons
             MeshRenderer matObj = brakeObj.GetComponent<MeshRenderer>();
             matObj.material = m_brakeMaterials[0];
 
+            OnCastFire();
+
             //Limit max speed
             float magnitude = m_rigidbody.velocity.magnitude;
             float maxSpeed = m_currentConfig.maxSpeed / 2.5f;
@@ -117,17 +120,23 @@ namespace FastPolygons
             m_rigidbody.velocity *= 0.99f;
         }
 
-        private void OnCastFire(float value)
+        private void OnCastFire()
         {
-            if (value.Equals(0) || isBraking) return;
-
             foreach (ParticleSystem particle in m_currentParticles)
             {
                 particle.Play();
             }
         }
 
-        private void OnBrake(bool _isBraking)
+        private void OnNoCastFire()
+        {
+            foreach (ParticleSystem particle in m_currentParticles)
+            {
+                particle.Stop();
+            }
+        }
+
+        private void OnBrake()
         {
             if (!GameManager.Instance.State.Equals(GameManager.EStates.PLAYING) || !bCanMove)
                 return;
@@ -138,15 +147,23 @@ namespace FastPolygons
             frontLeftWheelCollider.motorTorque = 0f;
             frontRightWheelCollider.motorTorque = 0f;
 
-            foreach (ParticleSystem particle in m_currentParticles)
-            {
-                particle.Stop();
-            }
+            OnNoCastFire();
 
             MeshRenderer matObj = brakeObj.GetComponent<MeshRenderer>();
             matObj.material = m_brakeMaterials[1];
 
-            isBraking = _isBraking;
+            isBraking = true;
+        }
+
+        private void OnNoBrake()
+        {
+            frontLeftWheelCollider.brakeTorque = 0f;
+            frontRightWheelCollider.brakeTorque = 0f;
+
+            MeshRenderer matObj = brakeObj.GetComponent<MeshRenderer>();
+            matObj.material = m_brakeMaterials[0];
+
+            isBraking = false;
         }
 
         //Interface

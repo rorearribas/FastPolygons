@@ -286,14 +286,13 @@ namespace FastPolygons
 
         private void Sensors()
         {
-            RaycastHit hit;
             float avoidMultiplier = 0;
             isAvoiding = false;
 
             #region FrontSensors
 
             //FrontRight
-            if (Physics.Raycast(sensorPos[1].position, transform.forward, out hit, sensorLenght))
+            if (Physics.Raycast(sensorPos[1].position, transform.forward, out RaycastHit hit, sensorLenght))
             {
                 if (!hit.collider.CompareTag("Untagged"))
                 {
@@ -388,7 +387,6 @@ namespace FastPolygons
             Debug.DrawRay(sensorPos[2].position, transform.forward * sensorLenght);
 
             //FrontCenter
-
             if (avoidMultiplier == 0)
             {
                 if (Physics.Raycast(sensorPos[0].position, transform.forward, out hit, sensorLenght))

@@ -28,19 +28,28 @@ public partial class @InputActions : IInputActionCollection2, IDisposable
             ""id"": ""cf13f28c-b5ae-4d62-83ce-ab7dfa01db68"",
             ""actions"": [
                 {
-                    ""name"": ""VehicleMovement"",
-                    ""type"": ""PassThrough"",
-                    ""id"": ""895be884-2d89-42e1-a128-1e7e023afe75"",
-                    ""expectedControlType"": ""Vector2"",
+                    ""name"": ""SteeringAngle"",
+                    ""type"": ""Value"",
+                    ""id"": ""2d02e344-1d67-4f85-9019-17fc7cfa7ed6"",
+                    ""expectedControlType"": ""Digital"",
                     ""processors"": """",
                     ""interactions"": """",
-                    ""initialStateCheck"": false
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Acceleration"",
+                    ""type"": ""Value"",
+                    ""id"": ""895be884-2d89-42e1-a128-1e7e023afe75"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": ""Press(behavior=2)"",
+                    ""initialStateCheck"": true
                 },
                 {
                     ""name"": ""Brake"",
-                    ""type"": ""PassThrough"",
+                    ""type"": ""Button"",
                     ""id"": ""3e6960e0-d71d-41d5-acb0-7203adf7bf0b"",
-                    ""expectedControlType"": ""Axis"",
+                    ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": ""Press(behavior=2)"",
                     ""initialStateCheck"": false
@@ -79,57 +88,68 @@ public partial class @InputActions : IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 },
                 {
-                    ""name"": ""2D Vector"",
-                    ""id"": ""20389388-63ef-479d-96e1-6c9c524549bf"",
-                    ""path"": ""2DVector"",
+                    ""name"": ""1D Axis"",
+                    ""id"": ""5a43e109-0581-4d04-9719-daba32e036f4"",
+                    ""path"": ""1DAxis"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""VehicleMovement"",
+                    ""action"": ""SteeringAngle"",
                     ""isComposite"": true,
                     ""isPartOfComposite"": false
                 },
                 {
-                    ""name"": ""up"",
-                    ""id"": ""f1e85769-fe58-4389-8531-1e0b93556f3b"",
-                    ""path"": ""<Keyboard>/w"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""VehicleMovement"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": true
-                },
-                {
-                    ""name"": ""down"",
-                    ""id"": ""6ee1cbc9-a667-41d1-a7db-bb4b443b45d2"",
-                    ""path"": ""<Keyboard>/s"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""VehicleMovement"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": true
-                },
-                {
-                    ""name"": ""left"",
-                    ""id"": ""567405bd-2853-407e-a671-6fefc5aec464"",
+                    ""name"": ""negative"",
+                    ""id"": ""703f034d-665f-4288-9e3c-da64cba5083f"",
                     ""path"": ""<Keyboard>/a"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""VehicleMovement"",
+                    ""action"": ""SteeringAngle"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
                 },
                 {
-                    ""name"": ""right"",
-                    ""id"": ""a874c10b-8ea6-43c8-8737-427000ea05ca"",
+                    ""name"": ""positive"",
+                    ""id"": ""33847b47-7cff-471d-97c1-8d42c5fe92c9"",
                     ""path"": ""<Keyboard>/d"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""VehicleMovement"",
+                    ""action"": ""SteeringAngle"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""1D Axis"",
+                    ""id"": ""83261d0a-1ad1-4d15-b03d-489b3d762004"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Acceleration"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""908f9745-e3cd-446a-8567-b4b688a32c52"",
+                    ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Acceleration"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""c04bdb22-4eba-4dd5-915c-da288e705ad6"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Acceleration"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
                 }
@@ -140,7 +160,8 @@ public partial class @InputActions : IInputActionCollection2, IDisposable
 }");
         // Player
         m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
-        m_Player_VehicleMovement = m_Player.FindAction("VehicleMovement", throwIfNotFound: true);
+        m_Player_SteeringAngle = m_Player.FindAction("SteeringAngle", throwIfNotFound: true);
+        m_Player_Acceleration = m_Player.FindAction("Acceleration", throwIfNotFound: true);
         m_Player_Brake = m_Player.FindAction("Brake", throwIfNotFound: true);
         m_Player_Pause = m_Player.FindAction("Pause", throwIfNotFound: true);
     }
@@ -202,14 +223,16 @@ public partial class @InputActions : IInputActionCollection2, IDisposable
     // Player
     private readonly InputActionMap m_Player;
     private IPlayerActions m_PlayerActionsCallbackInterface;
-    private readonly InputAction m_Player_VehicleMovement;
+    private readonly InputAction m_Player_SteeringAngle;
+    private readonly InputAction m_Player_Acceleration;
     private readonly InputAction m_Player_Brake;
     private readonly InputAction m_Player_Pause;
     public struct PlayerActions
     {
         private @InputActions m_Wrapper;
         public PlayerActions(@InputActions wrapper) { m_Wrapper = wrapper; }
-        public InputAction @VehicleMovement => m_Wrapper.m_Player_VehicleMovement;
+        public InputAction @SteeringAngle => m_Wrapper.m_Player_SteeringAngle;
+        public InputAction @Acceleration => m_Wrapper.m_Player_Acceleration;
         public InputAction @Brake => m_Wrapper.m_Player_Brake;
         public InputAction @Pause => m_Wrapper.m_Player_Pause;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
@@ -221,9 +244,12 @@ public partial class @InputActions : IInputActionCollection2, IDisposable
         {
             if (m_Wrapper.m_PlayerActionsCallbackInterface != null)
             {
-                @VehicleMovement.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnVehicleMovement;
-                @VehicleMovement.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnVehicleMovement;
-                @VehicleMovement.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnVehicleMovement;
+                @SteeringAngle.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSteeringAngle;
+                @SteeringAngle.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSteeringAngle;
+                @SteeringAngle.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSteeringAngle;
+                @Acceleration.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnAcceleration;
+                @Acceleration.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnAcceleration;
+                @Acceleration.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnAcceleration;
                 @Brake.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnBrake;
                 @Brake.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnBrake;
                 @Brake.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnBrake;
@@ -234,9 +260,12 @@ public partial class @InputActions : IInputActionCollection2, IDisposable
             m_Wrapper.m_PlayerActionsCallbackInterface = instance;
             if (instance != null)
             {
-                @VehicleMovement.started += instance.OnVehicleMovement;
-                @VehicleMovement.performed += instance.OnVehicleMovement;
-                @VehicleMovement.canceled += instance.OnVehicleMovement;
+                @SteeringAngle.started += instance.OnSteeringAngle;
+                @SteeringAngle.performed += instance.OnSteeringAngle;
+                @SteeringAngle.canceled += instance.OnSteeringAngle;
+                @Acceleration.started += instance.OnAcceleration;
+                @Acceleration.performed += instance.OnAcceleration;
+                @Acceleration.canceled += instance.OnAcceleration;
                 @Brake.started += instance.OnBrake;
                 @Brake.performed += instance.OnBrake;
                 @Brake.canceled += instance.OnBrake;
@@ -249,7 +278,8 @@ public partial class @InputActions : IInputActionCollection2, IDisposable
     public PlayerActions @Player => new PlayerActions(this);
     public interface IPlayerActions
     {
-        void OnVehicleMovement(InputAction.CallbackContext context);
+        void OnSteeringAngle(InputAction.CallbackContext context);
+        void OnAcceleration(InputAction.CallbackContext context);
         void OnBrake(InputAction.CallbackContext context);
         void OnPause(InputAction.CallbackContext context);
     }

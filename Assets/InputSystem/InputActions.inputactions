@@ -6,19 +6,28 @@
             "id": "cf13f28c-b5ae-4d62-83ce-ab7dfa01db68",
             "actions": [
                 {
-                    "name": "VehicleMovement",
-                    "type": "PassThrough",
-                    "id": "895be884-2d89-42e1-a128-1e7e023afe75",
-                    "expectedControlType": "Vector2",
+                    "name": "SteeringAngle",
+                    "type": "Value",
+                    "id": "2d02e344-1d67-4f85-9019-17fc7cfa7ed6",
+                    "expectedControlType": "Digital",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Acceleration",
+                    "type": "Value",
+                    "id": "895be884-2d89-42e1-a128-1e7e023afe75",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "Press(behavior=2)",
+                    "initialStateCheck": true
                 },
                 {
                     "name": "Brake",
-                    "type": "PassThrough",
+                    "type": "Button",
                     "id": "3e6960e0-d71d-41d5-acb0-7203adf7bf0b",
-                    "expectedControlType": "Axis",
+                    "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "Press(behavior=2)",
                     "initialStateCheck": false
@@ -57,57 +66,68 @@
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "2D Vector",
-                    "id": "20389388-63ef-479d-96e1-6c9c524549bf",
-                    "path": "2DVector",
+                    "name": "1D Axis",
+                    "id": "5a43e109-0581-4d04-9719-daba32e036f4",
+                    "path": "1DAxis",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "VehicleMovement",
+                    "action": "SteeringAngle",
                     "isComposite": true,
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "up",
-                    "id": "f1e85769-fe58-4389-8531-1e0b93556f3b",
-                    "path": "<Keyboard>/w",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "VehicleMovement",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "down",
-                    "id": "6ee1cbc9-a667-41d1-a7db-bb4b443b45d2",
-                    "path": "<Keyboard>/s",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "VehicleMovement",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "left",
-                    "id": "567405bd-2853-407e-a671-6fefc5aec464",
+                    "name": "negative",
+                    "id": "703f034d-665f-4288-9e3c-da64cba5083f",
                     "path": "<Keyboard>/a",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "VehicleMovement",
+                    "action": "SteeringAngle",
                     "isComposite": false,
                     "isPartOfComposite": true
                 },
                 {
-                    "name": "right",
-                    "id": "a874c10b-8ea6-43c8-8737-427000ea05ca",
+                    "name": "positive",
+                    "id": "33847b47-7cff-471d-97c1-8d42c5fe92c9",
                     "path": "<Keyboard>/d",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "VehicleMovement",
+                    "action": "SteeringAngle",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "1D Axis",
+                    "id": "83261d0a-1ad1-4d15-b03d-489b3d762004",
+                    "path": "1DAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Acceleration",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "positive",
+                    "id": "908f9745-e3cd-446a-8567-b4b688a32c52",
+                    "path": "<Keyboard>/w",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Acceleration",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "negative",
+                    "id": "c04bdb22-4eba-4dd5-915c-da288e705ad6",
+                    "path": "<Keyboard>/s",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Acceleration",
                     "isComposite": false,
                     "isPartOfComposite": true
                 }

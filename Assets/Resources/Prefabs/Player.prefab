@@ -2413,9 +2413,7 @@ MonoBehaviour:
   meshRenderer: {fileID: 1241768880195464147}
   isReverse: 0
   isBraking: 0
-  isReverseTrue: 0
   bCanMove: 1
-  isCollision: 0
   upSensor: {fileID: 1241768879885808510}
   m_lights:
   - {fileID: 1241768880351178343}
@@ -3929,12 +3927,17 @@ PrefabInstance:
     - target: {fileID: 198284022246258302, guid: ab22dfee5ddd2634f991aee1f95f050f,
         type: 3}
       propertyPath: looping
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 198284022246258302, guid: ab22dfee5ddd2634f991aee1f95f050f,
         type: 3}
       propertyPath: lengthInSec
       value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 198284022246258302, guid: ab22dfee5ddd2634f991aee1f95f050f,
+        type: 3}
+      propertyPath: playOnAwake
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 199660628750992368, guid: ab22dfee5ddd2634f991aee1f95f050f,
         type: 3}
@@ -4017,12 +4020,17 @@ PrefabInstance:
     - target: {fileID: 198284022246258302, guid: ab22dfee5ddd2634f991aee1f95f050f,
         type: 3}
       propertyPath: looping
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 198284022246258302, guid: ab22dfee5ddd2634f991aee1f95f050f,
         type: 3}
       propertyPath: lengthInSec
       value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 198284022246258302, guid: ab22dfee5ddd2634f991aee1f95f050f,
+        type: 3}
+      propertyPath: playOnAwake
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 199660628750992368, guid: ab22dfee5ddd2634f991aee1f95f050f,
         type: 3}

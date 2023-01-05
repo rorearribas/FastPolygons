@@ -383,8 +383,8 @@ namespace FastPolygons
                 }
             }
 
-            Debug.DrawRay(sensorPos[3].position, Quaternion.AngleAxis(-sensorAngle, transform.up) * transform.forward * sensorLenght);
-            Debug.DrawRay(sensorPos[2].position, transform.forward * sensorLenght);
+            //Debug.DrawRay(sensorPos[3].position, Quaternion.AngleAxis(-sensorAngle, transform.up) * transform.forward * sensorLenght);
+            //Debug.DrawRay(sensorPos[2].position, transform.forward * sensorLenght);
 
             //FrontCenter
             if (avoidMultiplier == 0)
@@ -393,7 +393,7 @@ namespace FastPolygons
                 {
                     if (!hit.collider.CompareTag("Untagged"))
                     {
-                        Debug.Log(hit.collider.name);
+                        //Debug.Log(hit.collider.name);
                         float v = Vector3.Dot(transform.forward, Vector3.Normalize(m_rb.velocity));
 
                         if (v > 0.5f)

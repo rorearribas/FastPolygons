@@ -2,68 +2,53 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.Video;
 
 namespace FastPolygons.Manager
 {
     public class LoadScreen : MonoBehaviour
     {
-        [SerializeField] GameObject fillObj;
-        [SerializeField] Image fillLoading;
-        [SerializeField] GameObject textToContinueObj;
+        [SerializeField] private GameObject fillObj;
+        [SerializeField] private Image fillLoading;
+        [SerializeField] private GameObject textToContinueObj;
+
         private AsyncOperation asyncOperation;
-        public static LoadScreen instance;
-        public static bool isLoading;
-        public static bool loadLevel;
-        public static float timer;
-        private bool reset;
+        private bool isLoaded = false;
 
-        private void Awake()
+        private void Start()
         {
-            instance = this;
-        }
-        void Start()
-        {
+            if (InputManager.Instance == null) return;
+            InputManager.Instance.OnInteractPressedEvent += OnPressContinue;
+
             fillLoading.fillAmount = 0;
+            StartCoroutine(ILoader());
+
+            if (!TryGetComponent<RectTransform>(out var rectTransform)) return;
+            rectTransform.localPosition = Vector3.zero;
+            rectTransform.localScale = Vector3.one;
         }
 
-        // Update is called once per frame
-        void Update()
+        private void OnDestroy()
         {
-            if (!reset)
-            {
-                Reset();
-                reset = true;
-            }
-
-            if (!isLoading)
-            {
-                StartCoroutine(LoadingOperation());
-            }
-
-            if (loadLevel)
-            {
-                timer += Time.deltaTime;
-
-                if (timer >= 1)
-                {
-                    textToContinueObj.SetActive(true);
-                    fillObj.SetActive(false);
-
-                    if (Input.GetKeyDown(KeyCode.E))
-                    {
-                        asyncOperation.allowSceneActivation = true;
-                        textToContinueObj.SetActive(false);
-                        GameManager.Instance.OnChangedState.Invoke(GameManager.EStates.START);
-                        GameManager.Instance.fadeAnimator.SetTrigger("FadeOut");
-                        reset = false;
-                    }
-                }
-            }
+            if (InputManager.Instance == null) return;
+            InputManager.Instance.OnInteractPressedEvent -= OnPressContinue;
         }
 
-        IEnumerator LoadingOperation()
+        private void OnPressContinue()
         {
-            isLoading = true;
+            if (!isLoaded) return;
+
+            asyncOperation.allowSceneActivation = true;
+            textToContinueObj.SetActive(false);
+
+            GameManager.Instance.OnChangedState.Invoke(GameManager.EStates.START);
+            GameManager.Instance.fadeAnimator.SetTrigger("FadeOut");
+
+            Destroy(this.gameObject);
+        }
+
+        private IEnumerator ILoader()
+        {
             fillLoading.fillAmount = 0;
             yield return new WaitForSeconds(0.5f);
 
@@ -73,32 +58,22 @@ namespace FastPolygons.Manager
 
             while (!asyncOperation.isDone)
             {
-                fillLoading.fillAmount = Mathf.Lerp(fillLoading.fillAmount, asyncOperation.progress, Time.deltaTime / 2);
+                fillLoading.fillAmount = Mathf.Lerp(fillLoading.fillAmount, 
+                    asyncOperation.progress, Time.deltaTime / 2);
 
-                if (fillLoading.fillAmount >= 0.8)
-                {
-                    break;
-                }
-
+                if (fillLoading.fillAmount >= 0.8) break;
                 yield return new WaitForEndOfFrame();
             }
 
-            yield return new WaitForSeconds(1);
+            yield return new WaitForSeconds(0.5f);
 
             fillLoading.fillAmount = 100;
 
             yield return new WaitForSeconds(1);
 
-            loadLevel = true;
-        }
-
-        public void Reset()
-        {
-            fillObj.SetActive(true);
-            fillLoading.fillAmount = 0;
-            isLoading = false;
-            loadLevel = false;
-            timer = 0;
+            isLoaded = true;
+            textToContinueObj.SetActive(true);
+            fillObj.SetActive(false);
         }
     }
 }

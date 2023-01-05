@@ -64,9 +64,8 @@ namespace FastPolygons.Manager
 
         private void MenuManager_OnSelectorCar()
         {
-            GameObject car = GameObject.Find("CarExp");
-            car.GetComponent<ModelInspection>().config = carConfigs[indexConfig];
-            car.GetComponent<ModelInspection>().OnChangeCar(this, EventArgs.Empty);
+            CarInspection.GetComponent<ModelInspection>().config = carConfigs[indexConfig];
+            CarInspection.GetComponent<ModelInspection>().OnChangeCar(this, EventArgs.Empty);
         }
 
         public void PlayGame()

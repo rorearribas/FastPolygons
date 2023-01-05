@@ -44,9 +44,6 @@ namespace FastPolygons
         [SerializeField] Vector3 centerOfMass;
         public GameObject brakeObj;
 
-        private List<Transform> wayPoints;
-        private Transform circuitPath;
-
         //Check is upside-down
         bool IsUpsideDown => Vector3.Dot(transform.up, Vector3.down) >= 0.85f;
 
@@ -56,12 +53,6 @@ namespace FastPolygons
         //Delegate
         private event EventHandler OnAccident;
 
-        private void Awake()
-        {
-            circuitPath = GameObject.FindGameObjectWithTag("Path").transform;
-            OnAccident += CarController_OnAccident;
-        }
-
         private void Start()
         {
             m_rigidbody = GetComponent<Rigidbody>();
@@ -70,29 +61,30 @@ namespace FastPolygons
             m_rigidbody.centerOfMass = centerOfMass;
             meshRenderer.materials[1].color = m_currentConfig.color;
 
-            Transform[] pathTransform = circuitPath.GetComponentsInChildren<Transform>();
-            wayPoints = new();
-
-            for (int i = 0; i < pathTransform.Length; i++)
-            {
-                if (pathTransform[i] != circuitPath.transform)
-                {
-                    wayPoints.Add(pathTransform[i]);
-                }
-            }
-
             MeshRenderer matObj = brakeObj.GetComponent<MeshRenderer>();
             matObj.material = m_brakeMaterials[0];
+
+            OnAccident += CarController_OnAccident;
 
             StartCoroutine(IUpsideDown());
             StartCoroutine(IUpdateWheels());
 
             if (InputManager.Instance == null) return;
-            InputManager.Instance.OnBrakeEvent += OnBrake;
-            InputManager.Instance.OnStopBrakeEvent += OnNoBrake;
-            InputManager.Instance.OnSteeringAngleEvent += OnTurn;
-            InputManager.Instance.OnAccelerationEvent += OnHandleCar;
             InputManager.Instance.OnNoAccelerationEvent += OnNoCastFire;
+            InputManager.Instance.OnAccelerationEvent += OnHandleCar;
+            InputManager.Instance.OnSteeringAngleEvent += OnSteeringAngle;
+            InputManager.Instance.OnStopBrakeEvent += OnNoBrake;
+            InputManager.Instance.OnBrakeEvent += OnBrake;
+        }
+
+        private void OnDestroy()
+        {
+            if (InputManager.Instance == null) return;
+            InputManager.Instance.OnNoAccelerationEvent -= OnNoCastFire;
+            InputManager.Instance.OnAccelerationEvent -= OnHandleCar;
+            InputManager.Instance.OnSteeringAngleEvent -= OnSteeringAngle;
+            InputManager.Instance.OnStopBrakeEvent -= OnNoBrake;
+            InputManager.Instance.OnBrakeEvent -= OnBrake;
         }
 
         private void OnHandleCar(float value)
@@ -175,7 +167,7 @@ namespace FastPolygons
             }
         }
 
-        private void OnTurn(float value)
+        private void OnSteeringAngle(float value)
         {
             frontLeftWheelCollider.steerAngle = m_currentConfig.maxSteerAngle * value;
             frontRightWheelCollider.steerAngle = m_currentConfig.maxSteerAngle * value;
@@ -193,14 +185,6 @@ namespace FastPolygons
         {
             wheelCollider.GetWorldPose(out Vector3 pos, out Quaternion rot);
             wheelTransform.SetPositionAndRotation(pos, rot);
-        }
-
-        private void CheckUpsideDown()
-        {
-            if (!IsUpsideDown)
-                return;
-
-            OnAccident?.Invoke(this, EventArgs.Empty);
         }
 
         private void CarController_OnAccident(object sender, EventArgs _eventArgs)
@@ -283,11 +267,9 @@ namespace FastPolygons
         {
             while (true)
             {
-                for (int i = 0; i < 10; i++)
-                {
-                    yield return new WaitForEndOfFrame();
-                }
-                CheckUpsideDown();
+                yield return new WaitUntil(() => IsUpsideDown);
+                OnAccident?.Invoke(this, EventArgs.Empty);
+                yield return new WaitForSeconds(1f);
             }
         }
 

@@ -69,7 +69,7 @@ namespace FastPolygons.Manager
         public EStates State { get => state; set => state = value; }
         public Player CurrentPlayer { get => m_currentPlayer; set => m_currentPlayer = value; }
 
-        private void OnEnable()
+        public void Start()
         {
             fadeAnimator.SetTrigger("FadeOut");
             OnChangedState += GameStates;
@@ -88,6 +88,12 @@ namespace FastPolygons.Manager
             InputManager.Instance.OnScapeEvent += OnPause;
         }
 
+        private void OnDestroy()
+        {
+            if (InputManager.Instance == null) return;
+            InputManager.Instance.OnScapeEvent -= OnPause;
+        }
+
         #region GameStates
         public void GameStates(EStates states)
         {
@@ -104,6 +110,7 @@ namespace FastPolygons.Manager
 
                     Cursor.lockState = CursorLockMode.None;
                     Cursor.visible = true;
+
                     break;
 
                 case EStates.PAUSE:
@@ -111,7 +118,7 @@ namespace FastPolygons.Manager
                     AudioManager.Instance.aS.Pause();
                     Time.timeScale = 0.0f;
 
-                    SetCurrentPage(2);
+                    SetCurrentPage(1);
 
                     currentCanvas.renderMode = RenderMode.ScreenSpaceCamera;
                     currentCanvas.worldCamera = CurrentCamera;
@@ -138,16 +145,17 @@ namespace FastPolygons.Manager
                 case EStates.LOADSCREEN:
 
                     Time.timeScale = 1;
-                    SetCurrentPage(0);
-
                     Cursor.lockState = CursorLockMode.Locked;
                     Cursor.visible = false;
+
+                    GameObject pLoadScreen = Instantiate(Resources.Load<GameObject>("Prefabs/LoadScreen"));
+                    pLoadScreen.transform.parent = currentCanvas.transform;
 
                     break;
 
                 case EStates.SETTINGS:
 
-                    SetCurrentPage(1);
+                    SetCurrentPage(0);
                     currentCanvas.renderMode = RenderMode.ScreenSpaceCamera;
                     currentCanvas.worldCamera = CurrentCamera;
 
@@ -156,7 +164,7 @@ namespace FastPolygons.Manager
                 case EStates.START:
 
                     StartCoroutine(CountDown(4));
-                    SetCurrentPage(4);
+                    SetCurrentPage(3);
 
                     break;
 
@@ -220,7 +228,7 @@ namespace FastPolygons.Manager
                     lensD.enabled.value = true;
                     colorG.enabled.value = false;
 
-                    SetCurrentPage(3);
+                    SetCurrentPage(2);
                     break;
             }
         }
@@ -425,7 +433,6 @@ namespace FastPolygons.Manager
                     && res[i].refreshRate == Screen.currentResolution.refreshRate)
                 {
                     currentResolution = i;
-                    print("True");
                 }
             }
 

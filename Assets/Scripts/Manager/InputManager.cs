@@ -10,7 +10,7 @@ namespace FastPolygons
     public class InputManager : PersistentSingleton<InputManager>
     {
         InputActions m_inputActions;
-        private readonly string FILE_NAME = "InputManager";
+        private const string NAME = "InputManager";
 
         //Delegates
         public delegate void ParamBoolean(bool value);
@@ -26,11 +26,9 @@ namespace FastPolygons
         public NoParam OnStopBrakeEvent;
         public NoParam OnInteractPressedEvent;
 
-        public override void Awake()
+        private void Start()
         {
-            base.Awake();
-            this.gameObject.name = FILE_NAME;
-
+            this.gameObject.name = NAME;
             m_inputActions ??= new InputActions();
             m_inputActions.Player.Enable();
             m_inputActions.Player.Brake.performed += OnBrakePressed;
@@ -40,19 +38,25 @@ namespace FastPolygons
             m_inputActions.Player.Acceleration.performed += OnAccelerationPressed;
             m_inputActions.Player.Acceleration.canceled += OnAccelerationCanceled;
             m_inputActions.Player.Interact.performed += OnInteractPressed;
+
+            print("SE CREA");
         }
 
-        public void OnDestroy()
+        private void OnDestroy()
         {
             if (m_inputActions == null) return;
-            m_inputActions.Player.Disable();
-            m_inputActions.Player.Brake.performed -= OnBrakePressed;
-            m_inputActions.Player.Brake.canceled -= OnBrakeReleased;
-            m_inputActions.Player.Pause.performed -= OnPausePressed;
-            m_inputActions.Player.SteeringAngle.performed -= OnSteeringAnglePressed;
-            m_inputActions.Player.Acceleration.performed -= OnAccelerationPressed;
-            m_inputActions.Player.Acceleration.canceled -= OnAccelerationCanceled;
-            m_inputActions.Player.Interact.performed -= OnInteractPressed;
+
+            if (m_inputActions.Player.enabled)
+            {
+                m_inputActions.Player.Disable();
+                m_inputActions.Player.Brake.performed -= OnBrakePressed;
+                m_inputActions.Player.Brake.canceled -= OnBrakeReleased;
+                m_inputActions.Player.Pause.performed -= OnPausePressed;
+                m_inputActions.Player.SteeringAngle.performed -= OnSteeringAnglePressed;
+                m_inputActions.Player.Acceleration.performed -= OnAccelerationPressed;
+                m_inputActions.Player.Acceleration.canceled -= OnAccelerationCanceled;
+                m_inputActions.Player.Interact.performed -= OnInteractPressed;
+            }
         }
 
         private void OnInteractPressed(InputAction.CallbackContext obj)

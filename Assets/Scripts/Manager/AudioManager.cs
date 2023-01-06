@@ -1,20 +1,38 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using FastPolygons.Manager;
+using UnityEngine.Audio;
 
 namespace FastPolygons.Manager
 {
     public class AudioManager : PersistentSingleton<AudioManager>
     {
-        public AudioSource aS;
-        public delegate void OnMusicChanged(GameManager.EStates estados);
-        public OnMusicChanged musicChanged;
+        [SerializeField] private AudioSource m_musicAudioSource;
+        [SerializeField] private AudioSource m_sfxAudioSource;
+        [SerializeField] private AudioMixer m_audioMixer;
 
-        public void OnEnable()
+        public AudioSource MusicAudioSource { get => m_musicAudioSource; set => m_musicAudioSource = value; }
+        public AudioSource SFXAudioSource { get => m_sfxAudioSource; set => m_sfxAudioSource = value; }
+        public AudioMixer AudioMixer { get => m_audioMixer; set => m_audioMixer = value; }
+
+        public delegate void OnMusicChanged(GameManager.EStates estados);
+        public OnMusicChanged OnMusicChangedEvent;
+        private const string NAME = "AudioManager";
+
+        public override void Awake()
         {
-            aS = GetComponent<AudioSource>();
-            musicChanged += SelectMusic;
+            base.Awake();
+            this.gameObject.name = NAME;
+
+            OnMusicChangedEvent += SelectMusic;
+            MusicAudioSource = gameObject.AddComponent<AudioSource>();
+            SFXAudioSource = gameObject.AddComponent<AudioSource>();
+
+            if (AudioMixer != null) return;
+            AudioMixer = Resources.Load<AudioMixer>("Music/FastPolygonsMixer");
+
+            MusicAudioSource.outputAudioMixerGroup = AudioMixer.FindMatchingGroups("Music")[0];
+            SFXAudioSource.outputAudioMixerGroup = AudioMixer.FindMatchingGroups("SFX")[0];
         }
 
         public void SelectMusic(GameManager.EStates estados)
@@ -22,32 +40,30 @@ namespace FastPolygons.Manager
             switch (estados)
             {
                 case GameManager.EStates.MENU:
-                    AudioManager.Instance.aS.clip = Resources.Load<AudioClip>("Music/Theme01");
-                    aS.Play();
-                    aS.loop = true;
+                    MusicAudioSource.clip = Resources.Load<AudioClip>("Music/Theme01");
+                    MusicAudioSource.Play();
+                    MusicAudioSource.loop = true;
                     break;
 
                 case GameManager.EStates.PAUSE:
-                    Instance.musicChanged += Instance.musicChanged;
-                    aS.Pause();
+                    MusicAudioSource.Pause();
                     break;
 
                 case GameManager.EStates.LOADSCREEN:
-                    aS.Stop();
+                    MusicAudioSource.Stop();
                     break;
 
                 case GameManager.EStates.END:
-                    aS.Stop();
+                    MusicAudioSource.Stop();
                     break;
 
                 case GameManager.EStates.PLAYING:
-                    Instance.musicChanged += Instance.musicChanged;
-                    aS.UnPause();
-                    aS.Play();
-                    aS.loop = true;
+                    MusicAudioSource.UnPause();
+                    MusicAudioSource.loop = true;
                     break;
             }
         }
+
     }
 
 }

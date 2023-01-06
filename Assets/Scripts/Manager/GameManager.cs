@@ -80,7 +80,7 @@ namespace FastPolygons.Manager
             LoadResolutions();
             LoadGraphics();
 
-            AudioManager.Instance.musicChanged?.Invoke(State);
+            AudioManager.Instance.OnMusicChangedEvent?.Invoke(State);
             AudioSource aS = transform.GetChild(0).GetComponent<AudioSource>();
             aS.Stop();
 
@@ -115,7 +115,7 @@ namespace FastPolygons.Manager
 
                 case EStates.PAUSE:
 
-                    AudioManager.Instance.aS.Pause();
+                    AudioManager.Instance.MusicAudioSource.Pause();
                     Time.timeScale = 0.0f;
 
                     SetCurrentPage(1);
@@ -175,8 +175,8 @@ namespace FastPolygons.Manager
                     inGame = GameObject.FindGameObjectWithTag("CanvasInGame").GetComponent<Canvas>();
                     inGame.enabled = true;
 
-                    AudioManager.Instance.aS.UnPause();
-                    AudioManager.Instance.aS.loop = true;
+                    AudioManager.Instance.MusicAudioSource.UnPause();
+                    AudioManager.Instance.MusicAudioSource.loop = true;
 
                     DisableAllPages();
 
@@ -210,7 +210,7 @@ namespace FastPolygons.Manager
                     currentCanvas.renderMode = RenderMode.ScreenSpaceCamera;
                     currentCanvas.worldCamera = CurrentCamera;
 
-                    AudioManager.Instance.aS.Stop();
+                    AudioManager.Instance.MusicAudioSource.Stop();
 
                     if (AudioEngine.instance == null)
                     {
@@ -293,23 +293,23 @@ namespace FastPolygons.Manager
                 time--;
                 countDownText.text = time.ToString();
 
-                AudioManager.Instance.aS.clip = Resources.Load<AudioClip>("Effects/StartSound01");
-                AudioManager.Instance.aS.Play();
+                AudioManager.Instance.MusicAudioSource.clip = Resources.Load<AudioClip>("Effects/StartSound01");
+                AudioManager.Instance.MusicAudioSource.Play();
 
                 yield return new WaitForSeconds(1);
             }
             countDownText.text = "GO!";
 
-            AudioManager.Instance.aS.clip = Resources.Load<AudioClip>("Effects/StartSound02");
-            AudioManager.Instance.aS.Play();
+            AudioManager.Instance.MusicAudioSource.clip = Resources.Load<AudioClip>("Effects/StartSound02");
+            AudioManager.Instance.MusicAudioSource.Play();
 
             yield return new WaitForSeconds(0.5f);
             GameObject.Find("Directional_Light").GetComponent<Animator>().SetTrigger("Cycle");
 
             OnChangedState?.Invoke(EStates.PLAYING);
 
-            AudioManager.Instance.aS.clip = Resources.Load<AudioClip>("Music/Theme01");
-            AudioManager.Instance.aS.Play();
+            AudioManager.Instance.MusicAudioSource.clip = Resources.Load<AudioClip>("Music/Theme01");
+            AudioManager.Instance.MusicAudioSource.Play();
 
             yield return null;
         }
@@ -348,7 +348,7 @@ namespace FastPolygons.Manager
             myCanvas.enabled = false;
 
             OnChangedState?.Invoke(EStates.MENU);
-            AudioManager.Instance.musicChanged?.Invoke(State);
+            AudioManager.Instance.OnMusicChangedEvent?.Invoke(State);
         }
 
         public void OpenSettings()

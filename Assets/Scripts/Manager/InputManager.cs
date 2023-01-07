@@ -1,5 +1,6 @@
 using FastPolygons.Manager;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,57 +10,80 @@ namespace FastPolygons
 {
     public class InputManager : PersistentSingleton<InputManager>
     {
-        InputActions m_inputActions;
+        private InputActions m_inputActions;
         private const string NAME = "InputManager";
 
         //Delegates
-        public delegate void ParamBoolean(bool value);
-
         public delegate void ParamFloat(float value);
-        public ParamFloat OnSteeringAngleEvent;
-        public ParamFloat OnAccelerationEvent;
+        public static event ParamFloat OnSteeringAngleEvent;
+        public static event ParamFloat OnAccelerationEvent;
 
         public delegate void NoParam();
-        public NoParam OnScapeEvent;
-        public NoParam OnNoAccelerationEvent;
-        public NoParam OnBrakeEvent;
-        public NoParam OnStopBrakeEvent;
-        public NoParam OnInteractPressedEvent;
+        public static event NoParam OnScapeEvent;
+        public static event NoParam OnNoAccelerationEvent;
+        public static event NoParam OnBrakeEvent;
+        public static event NoParam OnStopBrakeEvent;
+        public static event NoParam OnInteractPressedEvent;
 
-        private void Start()
+        private bool isValid = false;
+
+        public override void Awake()
         {
+            base.Awake();
+
             this.gameObject.name = NAME;
             m_inputActions ??= new InputActions();
-            m_inputActions.Player.Enable();
-            m_inputActions.Player.Brake.performed += OnBrakePressed;
-            m_inputActions.Player.Brake.canceled += OnBrakeReleased;
-            m_inputActions.Player.Pause.performed += OnPausePressed;
-            m_inputActions.Player.SteeringAngle.performed += OnSteeringAnglePressed;
-            m_inputActions.Player.Acceleration.performed += OnAccelerationPressed;
-            m_inputActions.Player.Acceleration.canceled += OnAccelerationCanceled;
-            m_inputActions.Player.Interact.performed += OnInteractPressed;
 
-            print("SE CREA");
+            if (!isValid)
+            {
+                m_inputActions.Player.Enable();
+                m_inputActions.Player.Brake.performed += OnBrakePressed;
+                m_inputActions.Player.Pause.performed += OnPausePressed;
+                m_inputActions.Player.SteeringAngle.performed += OnSteeringAnglePressed;
+                m_inputActions.Player.Acceleration.performed += OnAccelerationPressed;
+                m_inputActions.Player.Interact.performed += OnInteractPressed;
+                m_inputActions.Player.Acceleration.canceled += OnAccelerationCanceled;
+                m_inputActions.Player.Brake.canceled += OnBrakeCanceled;
+
+                isValid = true;
+            }
         }
 
         private void OnDestroy()
         {
             if (m_inputActions == null) return;
 
-            if (m_inputActions.Player.enabled)
+            if (isValid)
             {
                 m_inputActions.Player.Disable();
-                m_inputActions.Player.Brake.performed -= OnBrakePressed;
-                m_inputActions.Player.Brake.canceled -= OnBrakeReleased;
-                m_inputActions.Player.Pause.performed -= OnPausePressed;
-                m_inputActions.Player.SteeringAngle.performed -= OnSteeringAnglePressed;
-                m_inputActions.Player.Acceleration.performed -= OnAccelerationPressed;
-                m_inputActions.Player.Acceleration.canceled -= OnAccelerationCanceled;
-                m_inputActions.Player.Interact.performed -= OnInteractPressed;
+                m_inputActions.Player.Brake.Reset();
+                m_inputActions.Player.Pause.Reset();
+                m_inputActions.Player.SteeringAngle.Reset();
+                m_inputActions.Player.Acceleration.Reset();
+                m_inputActions.Player.Interact.Reset();
+
+                isValid = false;
             }
         }
 
-        private void OnInteractPressed(InputAction.CallbackContext obj)
+        private void OnDisable()
+        {
+            if (m_inputActions == null) return;
+
+            if (isValid)
+            {
+                m_inputActions.Player.Disable();
+                m_inputActions.Player.Brake.Reset();
+                m_inputActions.Player.Pause.Reset();
+                m_inputActions.Player.SteeringAngle.Reset();
+                m_inputActions.Player.Acceleration.Reset();
+                m_inputActions.Player.Interact.Reset();
+
+                isValid = false;
+            }
+        }
+
+        private void OnInteractPressed(InputAction.CallbackContext ctx)
         {
             OnInteractPressedEvent?.Invoke();
         }
@@ -86,7 +110,7 @@ namespace FastPolygons
             OnBrakeEvent?.Invoke();
         }
 
-        private void OnBrakeReleased(InputAction.CallbackContext ctx)
+        private void OnBrakeCanceled(InputAction.CallbackContext ctx)
         {
             OnStopBrakeEvent?.Invoke();
         }

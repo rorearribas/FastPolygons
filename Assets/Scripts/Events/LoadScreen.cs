@@ -18,7 +18,7 @@ namespace FastPolygons.Manager
         private void Start()
         {
             if (InputManager.Instance == null) return;
-            InputManager.Instance.OnInteractPressedEvent += OnPressContinue;
+            InputManager.OnInteractPressedEvent += OnPressContinue;
 
             fillLoading.fillAmount = 0;
             StartCoroutine(ILoader());
@@ -26,12 +26,12 @@ namespace FastPolygons.Manager
             if (!TryGetComponent<RectTransform>(out var rectTransform)) return;
             rectTransform.localPosition = Vector3.zero;
             rectTransform.localScale = Vector3.one;
+
         }
 
         private void OnDestroy()
         {
-            if (InputManager.Instance == null) return;
-            InputManager.Instance.OnInteractPressedEvent -= OnPressContinue;
+            InputManager.OnInteractPressedEvent -= OnPressContinue;
         }
 
         private void OnPressContinue()

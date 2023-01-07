@@ -70,21 +70,20 @@ namespace FastPolygons
             StartCoroutine(IUpdateWheels());
 
             if (InputManager.Instance == null) return;
-            InputManager.Instance.OnNoAccelerationEvent += OnNoCastFire;
-            InputManager.Instance.OnAccelerationEvent += OnHandleCar;
-            InputManager.Instance.OnSteeringAngleEvent += OnSteeringAngle;
-            InputManager.Instance.OnStopBrakeEvent += OnNoBrake;
-            InputManager.Instance.OnBrakeEvent += OnBrake;
+            InputManager.OnBrakeEvent += OnBrake;
+            InputManager.OnAccelerationEvent += OnHandleCar;
+            InputManager.OnSteeringAngleEvent += OnSteeringAngle;
+            InputManager.OnStopBrakeEvent += OnNoBrake;
+            InputManager.OnNoAccelerationEvent += OnNoCastFire;
         }
 
         private void OnDestroy()
         {
-            if (InputManager.Instance == null) return;
-            InputManager.Instance.OnNoAccelerationEvent -= OnNoCastFire;
-            InputManager.Instance.OnAccelerationEvent -= OnHandleCar;
-            InputManager.Instance.OnSteeringAngleEvent -= OnSteeringAngle;
-            InputManager.Instance.OnStopBrakeEvent -= OnNoBrake;
-            InputManager.Instance.OnBrakeEvent -= OnBrake;
+            InputManager.OnBrakeEvent -= OnBrake;
+            InputManager.OnAccelerationEvent -= OnHandleCar;
+            InputManager.OnSteeringAngleEvent -= OnSteeringAngle;
+            InputManager.OnStopBrakeEvent -= OnNoBrake;
+            InputManager.OnNoAccelerationEvent -= OnNoCastFire;
         }
 
         private void OnHandleCar(float value)

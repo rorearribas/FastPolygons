@@ -85,13 +85,12 @@ namespace FastPolygons.Manager
             aS.Stop();
 
             if (InputManager.Instance == null) return;
-            InputManager.Instance.OnScapeEvent += OnPause;
+            InputManager.OnScapeEvent += OnPause;
         }
 
         private void OnDestroy()
         {
-            if (InputManager.Instance == null) return;
-            InputManager.Instance.OnScapeEvent -= OnPause;
+            InputManager.OnScapeEvent -= OnPause;
         }
 
         #region GameStates
@@ -369,7 +368,7 @@ namespace FastPolygons.Manager
             }
         }
 
-        public void OnPause()
+        private void OnPause()
         {
             if (!State.Equals(EStates.PLAYING)) return;
 

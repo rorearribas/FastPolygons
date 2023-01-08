@@ -51,7 +51,7 @@ namespace FastPolygons
         public AudioEngine AudioEngine { get => m_audioEngine; set => m_audioEngine = value; }
 
         //Delegate
-        private event EventHandler OnAccident;
+        public EventHandler OnAccident;
 
         private void Start()
         {
@@ -264,7 +264,7 @@ namespace FastPolygons
 
         private IEnumerator IUpsideDown()
         {
-            while (true)
+            while (!GameManager.Instance.State.Equals(GameManager.EStates.END))
             {
                 yield return new WaitUntil(() => IsUpsideDown);
                 OnAccident?.Invoke(this, EventArgs.Empty);
@@ -274,7 +274,7 @@ namespace FastPolygons
 
         private IEnumerator IUpdateWheels()
         {
-            while (true)
+            while (!GameManager.Instance.State.Equals(GameManager.EStates.END))
             {
                 for (int i = 0; i < 10; i++)
                 {

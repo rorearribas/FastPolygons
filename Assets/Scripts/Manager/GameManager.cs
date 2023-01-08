@@ -53,6 +53,7 @@ namespace FastPolygons.Manager
         private int currentResolution;
 
         private Player m_currentPlayer = null;
+        private bool m_startCountdown = false;
 
         //Delegate
         public EventHandler OnLoadCars;
@@ -91,6 +92,7 @@ namespace FastPolygons.Manager
         private void OnDestroy()
         {
             InputManager.OnScapeEvent -= OnPause;
+            InputManager.OnInteractPressedEvent -= OnStartCountdown;
         }
 
         #region GameStates
@@ -261,10 +263,16 @@ namespace FastPolygons.Manager
 
         public void DisableAllPages()
         {
-            foreach(var item in pages)
+            foreach (var item in pages)
             {
                 item.SetActive(false);
             }
+        }
+
+        private void OnStartCountdown()
+        {
+            m_startCountdown = true;
+            InputManager.OnInteractPressedEvent -= OnStartCountdown;
         }
 
         #region Countdown
@@ -274,8 +282,8 @@ namespace FastPolygons.Manager
             countDownRect.localScale = new Vector3(1, 1, 1);
 
             yield return new WaitForSeconds(0.5f);
-            string text = "PRESS SPACE TO START!";
 
+            string text = "PRESS E TO START!";
             char[] characters = text.ToCharArray();
 
             for (int i = 0; i < characters.Length; i++)
@@ -284,7 +292,10 @@ namespace FastPolygons.Manager
                 yield return new WaitForSeconds(0.06f);
             }
 
-            yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
+            if (InputManager.Instance) yield return null;
+            InputManager.OnInteractPressedEvent += OnStartCountdown;
+
+            yield return new WaitUntil(() => m_startCountdown);
             countDownRect.localScale = new Vector3(0.2f, 1, 1);
 
             while (time > 1)
@@ -297,7 +308,9 @@ namespace FastPolygons.Manager
 
                 yield return new WaitForSeconds(1);
             }
+
             countDownText.text = "GO!";
+            m_startCountdown = false;
 
             AudioManager.Instance.MusicAudioSource.clip = Resources.Load<AudioClip>("Effects/StartSound02");
             AudioManager.Instance.MusicAudioSource.Play();

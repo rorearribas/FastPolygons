@@ -17,12 +17,6 @@ namespace FastPolygons
             GetData(_Object);
         }
 
-        public Respawn(Vector3 respawnPosition, Quaternion respawnRotation)
-        {
-            this.RespawnPosition = respawnPosition;
-            this.RespawnRotation = respawnRotation;
-        }
-
         public Vector3 RespawnPosition { get => respawnPosition; set => respawnPosition = value; }
         public Quaternion RespawnRotation { get => respawnRotation; set => respawnRotation = value; }
 
@@ -32,8 +26,8 @@ namespace FastPolygons
                 return;
 
             int id = SearchID(RaceManager.Instance.m_currentData, _Object);
-            GameObject _carObject = RaceManager.Instance.m_currentData[id].m_carObject;
 
+            GameObject _carObject = RaceManager.Instance.m_currentData[id].m_carObject;
             currentCheckpoint = RaceManager.Instance.m_currentData[id].m_currentCheckpoint;
 
             //Reset respawn if the current checkpoint is equal to zero.

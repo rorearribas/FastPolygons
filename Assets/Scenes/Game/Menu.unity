@@ -10609,6 +10609,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8200931492734837100, guid: 4ff821c1a85729246a95f925edc7ba72,
         type: 3}
+      propertyPath: isGlobal
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8200931492734837100, guid: 4ff821c1a85729246a95f925edc7ba72,
+        type: 3}
       propertyPath: sharedProfile
       value: 
       objectReference: {fileID: 11400000, guid: deeb3ae1df359014a8222f5558b0a8ef,

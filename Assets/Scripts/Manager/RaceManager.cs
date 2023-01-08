@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 using UnityEngine.UI;
 
 namespace FastPolygons.Manager
@@ -128,7 +127,7 @@ namespace FastPolygons.Manager
 
         private IEnumerator IEUpdate()
         {
-            while (true)
+            while (!GameManager.Instance.State.Equals(GameManager.EStates.END))
             {
                 for (int i = 0; i < frameInterval; i++) {
                     yield return new WaitForEndOfFrame();
@@ -139,7 +138,7 @@ namespace FastPolygons.Manager
 
         private IEnumerator IECounter(float interval)
         {
-            while (true)
+            while (!GameManager.Instance.State.Equals(GameManager.EStates.END))
             {
                 yield return new WaitForSecondsRealtime(interval);
                 UpdateTime(interval);

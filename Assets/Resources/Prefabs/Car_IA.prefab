@@ -12969,13 +12969,33 @@ MonoBehaviour:
   m_GameObject: {fileID: 7978210909253645081}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe921b6410ae77049ab9aada63be4096, type: 3}
+  m_Script: {fileID: 11500000, guid: 2f3db6c39fb52fa49ba7a26f88b04600, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  car_config: {fileID: 11400000, guid: c5c9288d1185fc44698c398efe179ab0, type: 2}
+  frontLeftWheelCollider: {fileID: 7442630299172869038}
+  frontRightWheelCollider: {fileID: 7442630300178157834}
+  rearLeftWheelCollider: {fileID: 3050572215250479806}
+  rearRightWheelCollider: {fileID: 3050572213784726065}
+  frontLeftWheelTransform: {fileID: 7442630299687134546}
+  frontRightWheelTransform: {fileID: 7442630301120505492}
+  rearLeftWheelTransform: {fileID: 7442630299980204973}
+  rearRightWheelTransform: {fileID: 7442630299920115206}
+  m_currentParticles:
+  - {fileID: 7316654599028525852}
+  - {fileID: 7316654598476557679}
+  - {fileID: 7110735477436895022, guid: 37af56d3168c2d047aa19377e8446dd5, type: 3}
+  m_brakeMaterials:
+  - {fileID: 2100000, guid: aa50894d46e8cb84f87457acceca4df9, type: 2}
+  - {fileID: 2100000, guid: 4785edee4996afe4db5255ff92fbd8f7, type: 2}
+  brakeObj: {fileID: 8242973600964910527}
+  m_lights:
+  - {fileID: 7442630300907516610}
+  - {fileID: 3050572214002329457}
+  - {fileID: 7442630299463282415}
+  - {fileID: 7442630299537327067}
+  m_vehicleConfig: {fileID: 0}
   meshRenderer: {fileID: 7751555505928931167}
-  currentSpeed: 0
-  isReverse: 0
+  m_centerOfMass: {x: 0, y: 0, z: 0}
   sensorPos:
   - {fileID: 7442630299375033296}
   - {fileID: 7442630301132765880}
@@ -12989,33 +13009,9 @@ MonoBehaviour:
   - {fileID: 3050572214562997334}
   - {fileID: 3050572215655701274}
   sensorLenght: 3
-  sensorLenghtBack: 2
+  sensorLenghtBack: 3
   sensorAngle: 35
   isAvoiding: 0
-  carLights:
-  - {fileID: 7442630300907516610}
-  - {fileID: 3050572214002329457}
-  - {fileID: 7442630299463282415}
-  - {fileID: 7442630299537327067}
-  frontLeftWheelCollider: {fileID: 7442630299172869038}
-  frontRightWheelCollider: {fileID: 7442630300178157834}
-  rearLeftWheelCollider: {fileID: 3050572215250479806}
-  rearRightWheelCollider: {fileID: 3050572213784726065}
-  frontLeftWheelTransform: {fileID: 7442630299172869039}
-  frontRightWheelTransform: {fileID: 7442630300178157835}
-  rearLeftWheelTransform: {fileID: 3050572215250479807}
-  rearRightWheelTransform: {fileID: 3050572213784726070}
-  centerOfMass: {x: 0, y: 0.2, z: 0}
-  brakeLightColour:
-  - {fileID: 2100000, guid: aa50894d46e8cb84f87457acceca4df9, type: 2}
-  - {fileID: 2100000, guid: 4785edee4996afe4db5255ff92fbd8f7, type: 2}
-  brakeObj: {fileID: 8242973600964910527}
-  effects:
-  - {fileID: 7316654599028525852}
-  - {fileID: 7316654598476557679}
-  - {fileID: 7110735477436895022, guid: 37af56d3168c2d047aa19377e8446dd5, type: 3}
-  isBraking: 0
-  isCollision: 0
 --- !u!1 &8242973600964910527
 GameObject:
   m_ObjectHideFlags: 0

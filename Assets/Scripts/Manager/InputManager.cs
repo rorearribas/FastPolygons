@@ -21,6 +21,7 @@ namespace FastPolygons
 
         private bool isValid = false;
         private float steeringAngle;
+        private readonly float lerpVelocity = 7.5f;
 
         public override void Awake()
         {
@@ -78,7 +79,7 @@ namespace FastPolygons
         private void Update()
         {
             float inputValue = m_inputActions.Player.SteeringAngle.ReadValue<float>();
-            steeringAngle = Mathf.Lerp(steeringAngle, inputValue, 7f * Time.deltaTime);
+            steeringAngle = Mathf.Lerp(steeringAngle, inputValue, lerpVelocity * Time.deltaTime);
             OnSteeringAngleEvent?.Invoke(steeringAngle);
         }
 

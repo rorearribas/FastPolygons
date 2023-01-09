@@ -86,7 +86,7 @@ namespace FastPolygons.Manager
 
             GameManager.Instance.CurrentPlayer = pPlayer.GetComponent<Player>();
 
-            pPlayer.GetComponent<Player>().m_currentConfig = MenuManager.Instance.GetConfig();
+            pPlayer.GetComponent<Player>().m_vehicleConfig = MenuManager.Instance.GetConfig();
             tmpData.Add(pPlayer);
 
             carSettings.RemoveAt(MenuManager.Instance.indexConfig);
@@ -103,7 +103,7 @@ namespace FastPolygons.Manager
                     position[rnd].position, AssignRot(position[rnd])
                     );
 
-                IA.GetComponent<CarAI>().car_config = carSettings[rndConfig];
+                IA.GetComponent<AI>().m_vehicleConfig = carSettings[rndConfig];
                 tmpData.Add(IA);
 
                 position.RemoveAt(rnd);
@@ -209,21 +209,27 @@ namespace FastPolygons.Manager
         private void UpdateRanking()
         {
             //Iterate all cars
-            for (int i = 0; i < m_currentData.Count; i++)
-            {
-                //Get the next checkpoint distance
-                int currentCheckpoint = m_currentData[i].m_currentCheckpoint;
+            for (int i = 0; i < m_currentData.Count; i++) {
+
+                int cCheckpoint = m_currentData[i].m_currentCheckpoint;
                 Vector3 currentPos = m_currentData[i].m_carObject.transform.position;
-                Vector3 TargetPosition = m_currentData[i].m_Checkpoints[currentCheckpoint].transform.position;
+                Vector3 TargetPosition = m_currentData[i].m_Checkpoints[cCheckpoint].transform.position;
 
+                //Get the next checkpoint distance
                 m_currentData[i].m_nextCheckpointDistance = Vector3.Distance(currentPos, TargetPosition);
+                
+                //Check bounds!
+                BoxCollider bCheckpoint = m_currentData[i].m_Checkpoints[cCheckpoint].GetComponent<BoxCollider>();
+                BoxCollider bVehicle = m_currentData[i].m_carObject.GetComponent<BoxCollider>();
 
-                var sizeCheckpoints = m_AllCheckpoints.Count;
-                var hasCrossedCheckpoint = m_currentData[i].m_nextCheckpointDistance < m_minDistance;
-                var isLastCheckpoint = m_currentData[i].m_currentCheckpoint.Equals(sizeCheckpoints - 1);
+                bool hasCrossedCheckpoint = bCheckpoint.bounds.Contains(bVehicle.bounds.max) ||
+                    bCheckpoint.bounds.Contains(bVehicle.bounds.min);
+
+                bool isLastCheckpoint = m_currentData[i].m_currentCheckpoint.Equals(m_AllCheckpoints.Count - 1);
 
                 //Update bots
-                if (hasCrossedCheckpoint && !m_currentData[i].m_carObject.CompareTag("Player")) {
+                if (hasCrossedCheckpoint && m_currentData[i].m_carObject.GetComponent<AI>()) 
+                {
                     if (!isLastCheckpoint)
                     {
                         m_currentData[i].m_currentCheckpoint++;
@@ -236,7 +242,7 @@ namespace FastPolygons.Manager
                 }
 
                 //Update player
-                if (hasCrossedCheckpoint && m_currentData[i].m_carObject.CompareTag("Player"))
+                if (hasCrossedCheckpoint && m_currentData[i].m_carObject.GetComponent<Player>())
                 {
                     if (!isLastCheckpoint)
                     {
@@ -246,14 +252,12 @@ namespace FastPolygons.Manager
                     else
                     {
                         m_currentData[i].m_currentCheckpoint = 0;
-
                         UpdateVisualCheckpoint(i, true);
                         UpdateBestTime();
                         CheckRaceCompleted(m_currentData[i].m_currentLap++);
 
                         timeLap = -1f;
                     }
-
                     aS.Play();
                 }
             }

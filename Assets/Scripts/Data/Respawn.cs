@@ -38,9 +38,9 @@ namespace FastPolygons
             GameObject pCheckpoint = RaceManager.Instance.m_currentData[id].m_Checkpoints[currentCheckpoint - 1];
             Vector3 vCheckpoint = pCheckpoint.transform.position;
 
-            if (_carObject.GetComponent<CarAI>())
+            if (_carObject.GetComponent<AI>())
             {
-                CarAI AI = _carObject.GetComponent<CarAI>();
+                AI AI = _carObject.GetComponent<AI>();
                 AI.CurrentNode = AI.GetClosestNode(vCheckpoint);
             }
 

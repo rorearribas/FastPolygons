@@ -6,43 +6,14 @@ using UnityEngine;
 
 namespace FastPolygons
 {
-    public class Player : MonoBehaviour, IEnableLights
+    public class Player : Vehicle
     {
-        [Header("Car Config")]
-        public CarScriptableObject m_currentConfig;
-        public MeshRenderer meshRenderer;
-
-        Rigidbody m_rigidbody;
-        Animator m_currentAnimator;
+        [Header("Engine")]
+        [SerializeField] private AudioEngine m_audioEngine;
 
         public bool isReverse;
         public bool isBraking;
         public bool bCanMove = true;
-
-        [Header("Car Sensors")]
-        public Transform upSensor;
-
-        [Header("Lights")]
-        public List<Light> m_lights;
-
-        [Header("Engine")]
-        [SerializeField] private AudioEngine m_audioEngine;
-
-        [Header("Components")]
-        [SerializeField] public WheelCollider frontLeftWheelCollider;
-        [SerializeField] public WheelCollider frontRightWheelCollider;
-        [SerializeField] public WheelCollider rearLeftWheelCollider;
-        [SerializeField] public WheelCollider rearRightWheelCollider;
-
-        [SerializeField] Transform frontLeftWheelTransform;
-        [SerializeField] Transform frontRightWheelTransform;
-        [SerializeField] Transform rearLeftWheelTransform;
-        [SerializeField] Transform rearRightWheelTransform;
-
-        [SerializeField] List<ParticleSystem> m_currentParticles;
-        [SerializeField] List<Material> m_brakeMaterials;
-        [SerializeField] Vector3 centerOfMass;
-        public GameObject brakeObj;
 
         //Check is upside-down
         bool IsUpsideDown => Vector3.Dot(transform.up, Vector3.down) >= 0.85f;
@@ -56,10 +27,10 @@ namespace FastPolygons
         private void Start()
         {
             m_rigidbody = GetComponent<Rigidbody>();
-            m_currentAnimator = GetComponent<Animator>();
+            m_animator = GetComponent<Animator>();
 
-            m_rigidbody.centerOfMass = centerOfMass;
-            meshRenderer.materials[1].color = m_currentConfig.color;
+            m_rigidbody.centerOfMass = m_centerOfMass;
+            meshRenderer.materials[1].color = m_vehicleConfig.color;
 
             MeshRenderer matObj = brakeObj.GetComponent<MeshRenderer>();
             matObj.material = m_brakeMaterials[0];
@@ -89,14 +60,16 @@ namespace FastPolygons
             UpdateWheels();
         }
 
-        private void OnHandleCar(float value)
+        public override void OnHandleCar(float value)
         {
             if (!GameManager.Instance.State.Equals(GameManager.EStates.PLAYING)) return;
             if (isBraking || !bCanMove) return;
 
+            base.OnHandleCar(value);
+
             //Apply force to front wheels
-            frontLeftWheelCollider.motorTorque = value * m_currentConfig.maxMotorTorque;
-            frontRightWheelCollider.motorTorque = value * m_currentConfig.maxMotorTorque;
+            frontLeftWheelCollider.motorTorque = value * m_vehicleConfig.maxMotorTorque;
+            frontRightWheelCollider.motorTorque = value * m_vehicleConfig.maxMotorTorque;
 
             frontLeftWheelCollider.brakeTorque = 0f;
             frontRightWheelCollider.brakeTorque = 0f;
@@ -108,7 +81,7 @@ namespace FastPolygons
 
             //Limit max speed
             float magnitude = m_rigidbody.velocity.magnitude;
-            float maxSpeed = m_currentConfig.maxSpeed / 2.5f;
+            float maxSpeed = m_vehicleConfig.maxSpeed / 2.5f;
 
             if (magnitude <= maxSpeed) return;
             m_rigidbody.velocity *= 0.99f;
@@ -130,13 +103,15 @@ namespace FastPolygons
             }
         }
 
-        private void OnBrake()
+        public override void OnBrake()
         {
             if (!GameManager.Instance.State.Equals(GameManager.EStates.PLAYING) || !bCanMove)
                 return;
 
-            frontLeftWheelCollider.brakeTorque = m_currentConfig.maxBrakeTorque;
-            frontRightWheelCollider.brakeTorque = m_currentConfig.maxBrakeTorque;
+            base.OnBrake();
+
+            frontLeftWheelCollider.brakeTorque = m_vehicleConfig.maxBrakeTorque;
+            frontRightWheelCollider.brakeTorque = m_vehicleConfig.maxBrakeTorque;
 
             frontLeftWheelCollider.motorTorque = 0f;
             frontRightWheelCollider.motorTorque = 0f;
@@ -160,40 +135,11 @@ namespace FastPolygons
             isBraking = false;
         }
 
-        //Interface
-        public void SwitchLights()
-        {
-            foreach (Light light in m_lights)
-            {
-                light.enabled = !light.enabled;
-            }
-        }
-
-        private void OnSteeringAngle(float value)
-        {
-            frontLeftWheelCollider.steerAngle = m_currentConfig.maxSteerAngle * value;
-            frontRightWheelCollider.steerAngle = m_currentConfig.maxSteerAngle * value;
-        }
-
-        private void UpdateWheels()
-        {
-            UpdateSingleWheel(frontLeftWheelCollider, frontLeftWheelTransform); //Front Left Wheel
-            UpdateSingleWheel(frontRightWheelCollider, frontRightWheelTransform); //Front Right Wheel
-            UpdateSingleWheel(rearLeftWheelCollider, rearLeftWheelTransform); //Rear Left Wheel
-            UpdateSingleWheel(rearRightWheelCollider, rearRightWheelTransform); //Rear Right Wheel
-        }
-
-        void UpdateSingleWheel(WheelCollider wheelCollider, Transform wheelTransform)
-        {
-            wheelCollider.GetWorldPose(out Vector3 pos, out Quaternion rot);
-            wheelTransform.SetPositionAndRotation(pos, rot);
-        }
-
         private void CarController_OnAccident(object sender, EventArgs _eventArgs)
         {
             OnAccident -= CarController_OnAccident;
 
-            m_currentAnimator.SetTrigger("Crash");
+            m_animator.SetTrigger("Crash");
             AllowCollisions(false);
 
             ParticleSystem col = Instantiate(m_currentParticles[2], transform.position, Quaternion.identity);
@@ -251,7 +197,7 @@ namespace FastPolygons
             if (Mathf.Abs(dot) > 0.1f)
             {
                 float speed = m_rigidbody.velocity.magnitude;
-                result = dot < 0 ? -(speed / (m_currentConfig.reverseSpeed / 2f)) : speed / (m_currentConfig.maxSpeed / 2f);
+                result = dot < 0 ? -(speed / (m_vehicleConfig.reverseSpeed / 2f)) : speed / (m_vehicleConfig.maxSpeed / 2f);
             }
 
             return result;

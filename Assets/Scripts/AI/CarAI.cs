@@ -1,8 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using FastPolygons.Manager;
-using System.Linq;
 
 namespace FastPolygons
 {
@@ -11,7 +9,6 @@ namespace FastPolygons
         [Header("Car Config")]
         public CarScriptableObject car_config;
         public MeshRenderer meshRenderer;
-        public float currentSpeed;
         public bool isReverse;
 
         #region Car Sensors
@@ -52,40 +49,39 @@ namespace FastPolygons
         [SerializeField] ParticleSystem[] effects;
 
         #endregion
-        #region Extra
 
         private int m_currentNode;
         private float m_delay;
         private float m_newSteer;
         private float m_stopReverseTime;
         private bool isCollision;
-        private bool isBraking = false;
 
         private List<Transform> m_wayPoints;
         private Animator m_anim;
         private Rigidbody m_rb;
         private Vector3 m_relativeVector;
         private Transform m_circuitPath;
-
-        #endregion
+        private float m_maxVelocity;
 
         //Utils
         public int CurrentNode { get => m_currentNode; set => m_currentNode = value; }
         public List<Transform> WayPoints { get => m_wayPoints; set => m_wayPoints = value; }
-        public bool IsBraking { get => isBraking; set => isBraking = value; }
 
-        private void Awake()
-        {
-            m_circuitPath = GameObject.FindGameObjectWithTag("Path").transform;
-        }
+        //Getters
+        public float Velocity => Vector3.Dot(transform.forward, Vector3.Normalize(m_rb.velocity));
+        public bool IsStopped => Velocity < 0.1f;
+        public float CurrentSpeed => m_rb.velocity.magnitude;
 
         void Start()
         {
+            m_circuitPath = GameObject.FindGameObjectWithTag("Path").transform;
+
             m_anim = GetComponent<Animator>();
             m_rb = GetComponent<Rigidbody>();
 
             m_rb.centerOfMass = centerOfMass;
             meshRenderer.materials[1].color = car_config.color;
+            m_maxVelocity = car_config.maxSpeed / 2.5f;
 
             Transform[] pathTransform = m_circuitPath.GetComponentsInChildren<Transform>();
             WayPoints = new();
@@ -104,11 +100,9 @@ namespace FastPolygons
             if (!GameManager.Instance.State.Equals(GameManager.EStates.PLAYING))
                 return;
 
-            float dot = Vector3.Dot(transform.forward, m_rb.velocity);
-            if (Mathf.Abs(dot) < 0.1f && !isCollision)
+            if (IsStopped && !isCollision)
             {
                 m_delay += Time.deltaTime;
-
                 if (m_delay > 1.5f)
                 {
                     m_anim.SetTrigger("Crash");
@@ -117,12 +111,10 @@ namespace FastPolygons
                     ParticleSystem col = Instantiate(effects[2], transform.position, Quaternion.identity);
                     Destroy(col.gameObject, 2);
 
-                    GetComponent<BoxCollider>().enabled = false;
-                    m_rb.useGravity = false;
+                    AllowCollisions(false);
 
                     Respawn newRespawn = new(gameObject);
-                    transform.SetPositionAndRotation
-                    (
+                    transform.SetPositionAndRotation (
                         newRespawn.RespawnPosition,
                         newRespawn.RespawnRotation
                     );
@@ -143,6 +135,7 @@ namespace FastPolygons
             }
 
             CheckWaypointDistance();
+            WheelsDirection();
         }
 
         private void FixedUpdate()
@@ -150,65 +143,43 @@ namespace FastPolygons
             if (!GameManager.Instance.State.Equals(GameManager.EStates.PLAYING))
                 return;
 
-            if (m_rb.velocity.magnitude > (car_config.maxSpeed / 2.5f))
-            {
-                m_rb.velocity *= 0.99f;
-            }
-
-            currentSpeed = m_rb.velocity.magnitude * 3.6f;
-
-            Sensors();
-            WheelsDirection();
             CarHandler();
+            Sensors();
         }
 
         private void CheckWaypointDistance()
         {
-            float distance = Vector3.Distance(transform.position, WayPoints[CurrentNode].position);
-            if (distance < 10f)
-            {
-                if (CurrentNode == WayPoints.Count - 1) CurrentNode = 0;
-                else CurrentNode++;
-            }
+            float fDistance = Vector3.Distance(transform.position, WayPoints[CurrentNode].position);
+            if (fDistance > 10f) return;
+            CurrentNode = (CurrentNode + 1) % WayPoints.Count;
         }
 
         private void Drive()
         {
             if (isCollision) return;
 
-            if (currentSpeed < car_config.maxSpeed)
+            if (isReverse)
             {
-                if (isReverse)
-                {
-                    frontLeftWheelCollider.motorTorque = -100;
-                    frontRightWheelCollider.motorTorque = -100;
-                }
-
-                else
-                {
-                    frontLeftWheelCollider.motorTorque = car_config.maxMotorTorque;
-                    frontRightWheelCollider.motorTorque = car_config.maxMotorTorque;
-
-                    frontLeftWheelCollider.brakeTorque = 0;
-                    frontRightWheelCollider.brakeTorque = 0;
-                }
-
-                for (int i = 0; i < effects.Length - 1; i++)
-                {
-                    effects[i].Play();
-                }
+                frontLeftWheelCollider.motorTorque = -200f;
+                frontRightWheelCollider.motorTorque = -200f;
             }
 
             else
             {
-                frontLeftWheelCollider.motorTorque = 0;
-                frontRightWheelCollider.motorTorque = 0;
+                frontLeftWheelCollider.motorTorque = car_config.maxMotorTorque;
+                frontRightWheelCollider.motorTorque = car_config.maxMotorTorque;
 
-                for (int i = 0; i < effects.Length - 1; i++)
-                {
-                    effects[i].Stop();
-                }
+                frontLeftWheelCollider.brakeTorque = 0f;
+                frontRightWheelCollider.brakeTorque = 0f;
             }
+
+            for (int i = 0; i < effects.Length - 1; i++)
+            {
+                effects[i].Play();
+            }
+
+            MeshRenderer matObj = brakeObj.GetComponent<MeshRenderer>();
+            matObj.material = brakeLightColour[0];
         }
 
         private void WheelsDirection()
@@ -227,29 +198,38 @@ namespace FastPolygons
             if (!GameManager.Instance.State.Equals(GameManager.EStates.PLAYING))
                 return;
 
-            if (WayPoints[CurrentNode].CompareTag("Curve") && currentSpeed > (car_config.maxSpeed / 3))
+            if (CurrentSpeed > m_maxVelocity)
             {
-                isBraking = true;
+                m_rb.velocity *= 0.99f;
+                for (int i = 0; i < effects.Length - 1; i++)
+                {
+                    effects[i].Stop();
+                }
+            }
 
-                MeshRenderer matObj = brakeObj.GetComponent<MeshRenderer>();
-                matObj.material = brakeLightColour[1];
-
-                frontLeftWheelCollider.brakeTorque = car_config.maxBrakeTorque;
-                frontRightWheelCollider.brakeTorque = car_config.maxBrakeTorque;
-
-                frontLeftWheelCollider.motorTorque = 0;
-                frontRightWheelCollider.motorTorque = 0;
+            if (WayPoints[CurrentNode].CompareTag("Curve") 
+                && CurrentSpeed >= (m_maxVelocity - 10f))
+            {
+                Brake();
             }
 
             else
             {
-                isBraking = false;
-
-                MeshRenderer matObj = brakeObj.GetComponent<MeshRenderer>();
-                matObj.material = brakeLightColour[0];
-
+                
                 Drive();
             }
+        }
+
+        private void Brake()
+        {
+            MeshRenderer matObj = brakeObj.GetComponent<MeshRenderer>();
+            matObj.material = brakeLightColour[1];
+
+            frontLeftWheelCollider.brakeTorque = car_config.maxBrakeTorque;
+            frontRightWheelCollider.brakeTorque = car_config.maxBrakeTorque;
+
+            frontLeftWheelCollider.motorTorque = 0f;
+            frontRightWheelCollider.motorTorque = 0f;
         }
 
         private void OnCollisionEnter(Collision coll)
@@ -296,9 +276,7 @@ namespace FastPolygons
             {
                 if (!hit.collider.CompareTag("Untagged"))
                 {
-                    float v = Vector3.Dot(transform.forward, Vector3.Normalize(m_rb.velocity));
-
-                    if (v > 0.5f)
+                    if (Velocity > 0.5f)
                     {
                         isAvoiding = true;
                         avoidMultiplier -= 1f;
@@ -306,7 +284,6 @@ namespace FastPolygons
 
                     else
                     {
-                        isBraking = false;
                         isReverse = true;
                         avoidMultiplier += 1f;
                     }
@@ -318,9 +295,7 @@ namespace FastPolygons
             {
                 if (!hit.collider.CompareTag("Untagged"))
                 {
-                    float v = Vector3.Dot(transform.forward, Vector3.Normalize(m_rb.velocity));
-
-                    if (v > 0.5f)
+                    if (Velocity > 0.5f)
                     {
                         isAvoiding = true;
                         avoidMultiplier -= 0.5f;
@@ -328,7 +303,6 @@ namespace FastPolygons
 
                     else
                     {
-                        isBraking = false;
                         isReverse = true;
                         avoidMultiplier += 0.5f;
                     }
@@ -343,9 +317,7 @@ namespace FastPolygons
             {
                 if (!hit.collider.CompareTag("Untagged"))
                 {
-                    float v = Vector3.Dot(transform.forward, Vector3.Normalize(m_rb.velocity));
-
-                    if (v > 0.5f)
+                    if (Velocity > 0.5f)
                     {
                         isAvoiding = true;
                         avoidMultiplier += 1;
@@ -353,7 +325,6 @@ namespace FastPolygons
 
                     else
                     {
-                        isBraking = false;
                         isReverse = true;
                         avoidMultiplier -= 1f;
                     }
@@ -365,9 +336,7 @@ namespace FastPolygons
             {
                 if (!hit.collider.CompareTag("Untagged"))
                 {
-                    float v = Vector3.Dot(transform.forward, Vector3.Normalize(m_rb.velocity));
-
-                    if (v > 0.5f)
+                    if (Velocity > 0.5f)
                     {
                         isAvoiding = true;
                         avoidMultiplier += 0.5f;
@@ -375,7 +344,6 @@ namespace FastPolygons
 
                     else
                     {
-                        isBraking = false;
                         isReverse = true;
                         avoidMultiplier -= 0.5f;
                     }
@@ -383,8 +351,8 @@ namespace FastPolygons
                 }
             }
 
-            //Debug.DrawRay(sensorPos[3].position, Quaternion.AngleAxis(-sensorAngle, transform.up) * transform.forward * sensorLenght);
-            //Debug.DrawRay(sensorPos[2].position, transform.forward * sensorLenght);
+            Debug.DrawRay(sensorPos[3].position, Quaternion.AngleAxis(-sensorAngle, transform.up) * transform.forward * sensorLenght);
+            Debug.DrawRay(sensorPos[2].position, transform.forward * sensorLenght);
 
             //FrontCenter
             if (avoidMultiplier == 0)
@@ -393,18 +361,13 @@ namespace FastPolygons
                 {
                     if (!hit.collider.CompareTag("Untagged"))
                     {
-                        //Debug.Log(hit.collider.name);
-                        float v = Vector3.Dot(transform.forward, Vector3.Normalize(m_rb.velocity));
-
-                        if (v > 0.5f)
+                        if (Velocity > 0.5f)
                         {
                             isAvoiding = true;
-
-                            if (hit.normal.x < 0 && currentSpeed > 1)
+                            if (hit.normal.x < 0 && CurrentSpeed > 1)
                             {
                                 avoidMultiplier = -1f;
                             }
-
                             else
                             {
                                 avoidMultiplier = 1f;
@@ -413,7 +376,6 @@ namespace FastPolygons
 
                         else
                         {
-                            isBraking = false;
                             isReverse = true;
                         }
 

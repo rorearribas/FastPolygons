@@ -65,9 +65,7 @@ namespace FastPolygons
             matObj.material = m_brakeMaterials[0];
 
             OnAccident += CarController_OnAccident;
-
             StartCoroutine(IUpsideDown());
-            StartCoroutine(IUpdateWheels());
 
             if (InputManager.Instance == null) return;
             InputManager.OnBrakeEvent += OnBrake;
@@ -84,6 +82,11 @@ namespace FastPolygons
             InputManager.OnSteeringAngleEvent -= OnSteeringAngle;
             InputManager.OnStopBrakeEvent -= OnNoBrake;
             InputManager.OnNoAccelerationEvent -= OnNoCastFire;
+        }
+
+        private void Update()
+        {
+            UpdateWheels();
         }
 
         private void OnHandleCar(float value)
@@ -269,18 +272,6 @@ namespace FastPolygons
                 yield return new WaitUntil(() => IsUpsideDown);
                 OnAccident?.Invoke(this, EventArgs.Empty);
                 yield return new WaitForSeconds(1f);
-            }
-        }
-
-        private IEnumerator IUpdateWheels()
-        {
-            while (!GameManager.Instance.State.Equals(GameManager.EStates.END))
-            {
-                for (int i = 0; i < 10; i++)
-                {
-                    yield return new WaitForFixedUpdate();
-                }
-                UpdateWheels();
             }
         }
     }

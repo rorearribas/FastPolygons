@@ -10,10 +10,19 @@ namespace FastPolygons
         private PostProcessVolume m_postProcessVolume;
         private BoxCollider m_boxCollider;
 
+        private ChromaticAberration m_chromaticAberration;
+        private Vignette m_vignette;
+        private Grain m_grain;
+
         void Awake()
         {
             m_boxCollider = GetComponent<BoxCollider>();
-            m_postProcessVolume = GameObject.FindObjectOfType<PostProcessVolume>();
+            m_postProcessVolume = FindObjectOfType<PostProcessVolume>();
+
+            if (m_postProcessVolume == null) return;
+            m_chromaticAberration = m_postProcessVolume.profile.GetSetting<ChromaticAberration>();
+            m_vignette = m_postProcessVolume.profile.GetSetting<Vignette>();
+            m_grain = m_postProcessVolume.profile.GetSetting<Grain>();
         }
 
         private void Update()
@@ -22,62 +31,59 @@ namespace FastPolygons
             {
                 Player pPlayer = GameManager.Instance.CurrentPlayer;
 
-                m_postProcessVolume.profile.TryGetSettings(out Vignette vignette);
-                m_postProcessVolume.profile.TryGetSettings(out Grain grain);
-                m_postProcessVolume.profile.TryGetSettings(out ChromaticAberration chromaticAberration);
-
-                float dist = GetClosestDistanceToEdge(pPlayer.transform.position);
+                float currentDist = GetClosestDistanceToEdge(pPlayer.transform.position);
                 float minDistance = 25f;
-                float Value = (minDistance - dist) / minDistance * 1f;
+                float Value = (minDistance - currentDist) / minDistance * 1f;
 
-                vignette.intensity.value = Mathf.Clamp(Value, 0.25f, 0.5f);
-                grain.intensity.value = Mathf.Clamp(Value, 0.1f, 0.5f);
-                chromaticAberration.intensity.value = Mathf.Clamp(Value, 0.05f, 0.8f);
+                m_vignette.intensity.value = Mathf.Clamp(Value, 0.2f, 0.8f);
+                m_grain.intensity.value = Mathf.Clamp(Value, 0.1f, 0.5f);
+                m_chromaticAberration.intensity.value = Mathf.Clamp(Value, 0.05f, 0.8f);
             }
         }
 
-        private List<Vector3> GetCustomEdges()
+        private Vector3[] GetCustomEdges()
         {
-            if (GameManager.Instance == null) return null;
+            if (!GameManager.Instance.CurrentPlayer) 
+                return null;
 
-            Player player = GameManager.Instance.CurrentPlayer;
-            Vector3 vPos = player.transform.position;
+            Player pPlayer = GameManager.Instance.CurrentPlayer;
+            Vector3 vPos = pPlayer.transform.position;
 
-            Vector3 center = m_boxCollider.bounds.center;
-            Vector3 extents = m_boxCollider.bounds.extents;
+            Vector3 vCenter = m_boxCollider.bounds.center;
+            Vector3 vExtents = m_boxCollider.bounds.extents;
 
-            Vector3 vRight = new(center.x + extents.x, vPos.y, vPos.z);
-            Vector3 vLeft = new(center.x - extents.x, vPos.y, vPos.z);
-            Vector3 vUp = new(vPos.x, vPos.y, center.z + extents.z);
-            Vector3 vDown = new(vPos.x, vPos.y, center.z - extents.z);
+            Vector3 vRight = new(vCenter.x + vExtents.x, vPos.y, vPos.z);
+            Vector3 vLeft = new(vCenter.x - vExtents.x, vPos.y, vPos.z);
+            Vector3 vUp = new(vPos.x, vPos.y, vCenter.z + vExtents.z);
+            Vector3 vDown = new(vPos.x, vPos.y, vCenter.z - vExtents.z);
 
-            List<Vector3> Points = new() { vRight, vLeft, vUp, vDown };
-            return Points;
+            Vector3[] vPoints = { vRight, vLeft, vUp, vDown };
+            return vPoints;
         }
 
         private float GetClosestDistanceToEdge(Vector3 _Position)
         {
-            if (GetCustomEdges().Count == 0)
+            if (GetCustomEdges().Length == 0)
                 return -1f;
 
-            float Distance = float.MaxValue;
-            List<Vector3> Points = GetCustomEdges();
+            float fDistance = float.MaxValue;
+            Vector3[] vPoints = GetCustomEdges();
 
-            for (int i = 0; i < Points.Count; i++) {
-                float dist = Vector3.Distance(Points[i], _Position);
-                if (Distance > dist) {
-                    Distance = dist;
+            for (int i = 0; i < vPoints.Length; i++) {
+                float fCurrentDist = Vector3.Distance(vPoints[i], _Position);
+                if (fDistance > fCurrentDist) {
+                    fDistance = fCurrentDist;
                 }
             }
-            return Distance;
+            return fDistance;
         }
 
         private void OnTriggerExit(Collider coll)
         {
             if(coll.GetComponent<Player>())
             {
-                Player p = coll.GetComponent<Player>();
-                p.OnAccident?.Invoke(this, System.EventArgs.Empty);
+                Player pPlayer = coll.GetComponent<Player>();
+                pPlayer.OnAccident?.Invoke(this, System.EventArgs.Empty);
             }
         }
     }

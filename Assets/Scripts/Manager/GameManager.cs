@@ -6,9 +6,6 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.Rendering.PostProcessing;
 using System;
-using System.Reflection;
-using System.Xml.Linq;
-using static UnityEngine.CullingGroup;
 
 namespace FastPolygons.Manager
 {

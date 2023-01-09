@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using FastPolygons.Manager;
-using static UnityEngine.GraphicsBuffer;
 
 namespace FastPolygons
 {
@@ -12,7 +11,7 @@ namespace FastPolygons
         private Quaternion respawnRotation;
         private int currentCheckpoint;
 
-        public Respawn(GameObject _Object) 
+        public Respawn(GameObject _Object)
         {
             GetData(_Object);
         }
@@ -22,7 +21,7 @@ namespace FastPolygons
 
         private void GetData(GameObject _Object)
         {
-            if(RaceManager.Instance == null)
+            if (RaceManager.Instance == null)
                 return;
 
             int id = SearchID(RaceManager.Instance.m_currentData, _Object);
@@ -31,7 +30,7 @@ namespace FastPolygons
             currentCheckpoint = RaceManager.Instance.m_currentData[id].m_currentCheckpoint;
 
             //Reset respawn if the current checkpoint is equal to zero.
-            if (currentCheckpoint == 0) 
+            if (currentCheckpoint == 0)
             {
                 this.currentCheckpoint = RaceManager.Instance.m_AllCheckpoints.Count;
             }

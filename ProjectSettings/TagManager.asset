@@ -10,7 +10,6 @@ TagManager:
   - Circuit
   - Path
   - CanvasInGame
-  - Water
   layers:
   - Default
   - TransparentFX

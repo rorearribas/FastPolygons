@@ -1,8 +1,3 @@
-using FastPolygons.Manager;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -11,7 +6,6 @@ namespace FastPolygons
     public class InputManager : PersistentSingleton<InputManager>
     {
         private InputActions m_inputActions;
-        private const string NAME = "InputManager";
 
         //Delegates
         public delegate void ParamFloat(float value);
@@ -26,12 +20,11 @@ namespace FastPolygons
         public static event NoParam OnInteractPressedEvent;
 
         private bool isValid = false;
+        private float steeringAngle;
 
         public override void Awake()
         {
             base.Awake();
-
-            this.gameObject.name = NAME;
             m_inputActions ??= new InputActions();
 
             if (!isValid)
@@ -39,7 +32,6 @@ namespace FastPolygons
                 m_inputActions.Player.Enable();
                 m_inputActions.Player.Brake.performed += OnBrakePressed;
                 m_inputActions.Player.Pause.performed += OnPausePressed;
-                m_inputActions.Player.SteeringAngle.performed += OnSteeringAnglePressed;
                 m_inputActions.Player.Acceleration.performed += OnAccelerationPressed;
                 m_inputActions.Player.Interact.performed += OnInteractPressed;
                 m_inputActions.Player.Acceleration.canceled += OnAccelerationCanceled;
@@ -83,15 +75,16 @@ namespace FastPolygons
             }
         }
 
+        private void Update()
+        {
+            float inputValue = m_inputActions.Player.SteeringAngle.ReadValue<float>();
+            steeringAngle = Mathf.Lerp(steeringAngle, inputValue, 7f * Time.deltaTime);
+            OnSteeringAngleEvent?.Invoke(steeringAngle);
+        }
+
         private void OnInteractPressed(InputAction.CallbackContext ctx)
         {
             OnInteractPressedEvent?.Invoke();
-        }
-
-        private void OnSteeringAnglePressed(InputAction.CallbackContext ctx)
-        {
-            float value = ctx.ReadValue<float>();
-            OnSteeringAngleEvent?.Invoke(value);
         }
 
         private void OnAccelerationPressed(InputAction.CallbackContext ctx)

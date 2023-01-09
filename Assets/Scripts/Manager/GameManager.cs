@@ -208,16 +208,12 @@ namespace FastPolygons.Manager
                     currentCanvas.renderMode = RenderMode.ScreenSpaceCamera;
                     currentCanvas.worldCamera = CurrentCamera;
 
-                    AudioManager.Instance.MusicAudioSource.Stop();
+                    if(CurrentPlayer != null)
+                    {
+                        CurrentPlayer.AudioEngine.SetPause();
+                    }
 
-                    if (AudioEngine.instance == null)
-                    {
-                        return;
-                    }
-                    else
-                    {
-                        Destroy(AudioEngine.instance.gameObject);
-                    }
+                    AudioManager.Instance.MusicAudioSource.Pause();
 
                     posPo = GameObject.FindObjectOfType<PostProcessVolume>();
                     posPo.profile.TryGetSettings(out LensDistortion lensD);

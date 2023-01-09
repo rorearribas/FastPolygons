@@ -6,7 +6,6 @@ namespace FastPolygons
 {
     public class AudioEngine : MonoBehaviour
     {
-        public static AudioEngine instance;
         public List<AudioSource> m_sources;
 
         [Range(0.1f, 1.0f)] public float RunningSoundMaxVolume = 1.0f;
@@ -18,7 +17,6 @@ namespace FastPolygons
 
         void Awake()
         {
-            instance = this;
             car = GetComponentInParent<Player>();
         }
 

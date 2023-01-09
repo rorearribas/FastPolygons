@@ -1,4 +1,5 @@
 ﻿using FastPolygons.Manager;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -44,6 +45,7 @@ namespace FastPolygons
             InputManager.OnSteeringAngleEvent += OnSteeringAngle;
             InputManager.OnStopBrakeEvent += OnNoBrake;
             InputManager.OnNoAccelerationEvent += OnNoCastFire;
+            InputManager.OnNoAccelerationEvent += OnNoAcceleration;
         }
 
         private void OnDestroy()
@@ -53,6 +55,7 @@ namespace FastPolygons
             InputManager.OnSteeringAngleEvent -= OnSteeringAngle;
             InputManager.OnStopBrakeEvent -= OnNoBrake;
             InputManager.OnNoAccelerationEvent -= OnNoCastFire;
+            InputManager.OnNoAccelerationEvent -= OnNoAcceleration;
         }
 
         private void Update()
@@ -67,17 +70,24 @@ namespace FastPolygons
 
             base.OnHandleCar(value);
 
+            if(value >= 0)
+            {
+                MeshRenderer matObj = brakeObj.GetComponent<MeshRenderer>();
+                matObj.material = m_brakeMaterials[0];
+                OnCastFire();
+            }
+            else
+            {
+                MeshRenderer matObj = brakeObj.GetComponent<MeshRenderer>();
+                matObj.material = m_brakeMaterials[1];
+            }
+
             //Apply force to front wheels
             frontLeftWheelCollider.motorTorque = value * m_vehicleConfig.maxMotorTorque;
             frontRightWheelCollider.motorTorque = value * m_vehicleConfig.maxMotorTorque;
 
             frontLeftWheelCollider.brakeTorque = 0f;
             frontRightWheelCollider.brakeTorque = 0f;
-
-            MeshRenderer matObj = brakeObj.GetComponent<MeshRenderer>();
-            matObj.material = m_brakeMaterials[0];
-
-            OnCastFire();
 
             //Limit max speed
             float magnitude = m_rigidbody.velocity.magnitude;

@@ -50,6 +50,12 @@ namespace FastPolygons
             MeshRenderer matObj = brakeObj.GetComponent<MeshRenderer>();
             matObj.material = m_brakeMaterials[1];
         }
+        public virtual void OnNoAcceleration()
+        {
+            frontLeftWheelCollider.motorTorque = 0f;
+            frontRightWheelCollider.motorTorque = 0f;
+        }
+
 
         public void UpdateWheels()
         {

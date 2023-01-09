@@ -4,7 +4,7 @@ using FastPolygons.Manager;
 
 namespace FastPolygons
 {
-    public class AI : Vehicle, IEnableLights
+    public class AI : Vehicle
     {
         [Header("Car Sensors")]
         public Transform[] sensorPos;

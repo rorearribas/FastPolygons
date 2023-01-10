@@ -167,7 +167,6 @@ namespace FastPolygons.Manager
             if (InputManager.Instance == null) yield return null;
             InputManager.OnReloadEvent += OnReloadCheckpoint;
             m_cooldown = false;
-            fillGameObject.SetActive(true);
         }
 
         private IEnumerator IEUpdate()

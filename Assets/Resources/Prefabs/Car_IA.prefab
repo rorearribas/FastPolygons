@@ -12820,7 +12820,6 @@ ParticleSystemRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 00bedbb82a4cb1847a3dc8ce935f1358, type: 2}
-  - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -12996,6 +12995,8 @@ MonoBehaviour:
   m_vehicleConfig: {fileID: 0}
   meshRenderer: {fileID: 7751555505928931167}
   m_centerOfMass: {x: 0, y: 0, z: 0}
+  m_animator: {fileID: 0}
+  m_rigidbody: {fileID: 0}
   sensorPos:
   - {fileID: 7442630299375033296}
   - {fileID: 7442630301132765880}

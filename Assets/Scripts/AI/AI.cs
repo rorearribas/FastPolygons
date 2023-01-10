@@ -63,10 +63,10 @@ namespace FastPolygons
             if (!GameManager.Instance.State.Equals(GameManager.EStates.PLAYING))
                 return;
 
-            if (IsStopped && !isCollision)
+            if (IsStopped && !isReverse)
             {
                 m_delay += Time.deltaTime;
-                if (m_delay > 1.5f)
+                if (m_delay > 1.5f && !isCollision)
                 {
                     m_animator.SetTrigger("Crash");
                     isCollision = true;
@@ -77,8 +77,7 @@ namespace FastPolygons
                     AllowCollisions(false);
 
                     Respawn newRespawn = new(gameObject);
-                    transform.SetPositionAndRotation 
-                    (
+                    transform.SetPositionAndRotation (
                         newRespawn.RespawnPosition,
                         newRespawn.RespawnRotation
                     );
@@ -90,6 +89,7 @@ namespace FastPolygons
             if (isReverse)
             {
                 m_stopReverseTime += Time.deltaTime;
+                m_delay = 0f;
 
                 if (m_stopReverseTime >= 2.5f)
                 {
@@ -220,11 +220,13 @@ namespace FastPolygons
             #region FrontSensors
 
             //FrontRight
-            if (Physics.Raycast(sensorPos[1].position, transform.forward, out RaycastHit hit, sensorLenght))
+            if (Physics.Raycast(sensorPos[1].position, transform.forward, 
+                out RaycastHit hit, sensorLenght))
             {
-                if (hit.collider.GetComponent<BoxCollider>())
+                if (!hit.collider.TryGetComponent<BoxCollider>(out var bCollider)) return;
+                if (!bCollider.isTrigger)
                 {
-                    if (Velocity > 5f)
+                    if (Velocity > 0.5f)
                     {
                         isAvoiding = true;
                         avoidMultiplier -= 1f;
@@ -239,9 +241,11 @@ namespace FastPolygons
             }
 
             //FrontRight_Angle
-            else if (Physics.Raycast(sensorPos[4].position, Quaternion.AngleAxis(sensorAngle, transform.up) * transform.forward, out hit, sensorLenght))
+            else if (Physics.Raycast(sensorPos[4].position, Quaternion.AngleAxis(sensorAngle, transform.up) * 
+                transform.forward, out hit, sensorLenght))
             {
-                if (hit.collider.GetComponent<BoxCollider>())
+                if (!hit.collider.TryGetComponent<BoxCollider>(out var bCollider)) return;
+                if (!bCollider.isTrigger)
                 {
                     if (Velocity > 10f)
                     {
@@ -263,9 +267,10 @@ namespace FastPolygons
             //FrontLeft
             if (Physics.Raycast(sensorPos[2].position, transform.forward, out hit, sensorLenght))
             {
-                if (hit.collider.GetComponent<BoxCollider>())
+                if (!hit.collider.TryGetComponent<BoxCollider>(out var bCollider)) return;
+                if (!bCollider.isTrigger)
                 {
-                    if (Velocity > 10f)
+                    if (Velocity > 0.5f)
                     {
                         isAvoiding = true;
                         avoidMultiplier += 1;
@@ -280,11 +285,13 @@ namespace FastPolygons
             }
 
             //FrontLeft_Angle
-            else if (Physics.Raycast(sensorPos[3].position, Quaternion.AngleAxis(-sensorAngle, transform.up) * transform.forward, out hit, sensorLenght))
+            else if (Physics.Raycast(sensorPos[3].position, Quaternion.AngleAxis(-sensorAngle, transform.up) 
+                * transform.forward, out hit, sensorLenght))
             {
-                if (hit.collider.GetComponent<BoxCollider>())
+                if (!hit.collider.TryGetComponent<BoxCollider>(out var bCollider)) return;
+                if (!bCollider.GetComponent<BoxCollider>().isTrigger)
                 {
-                    if (Velocity > 10f)
+                    if (Velocity > 0.5f)
                     {
                         isAvoiding = true;
                         avoidMultiplier += 0.5f;
@@ -307,9 +314,10 @@ namespace FastPolygons
             {
                 if (Physics.Raycast(sensorPos[0].position, transform.forward, out hit, sensorLenght))
                 {
-                    if (hit.collider.GetComponent<BoxCollider>())
+                    if (!hit.collider.TryGetComponent<BoxCollider>(out var bCollider)) return;
+                    if (!bCollider.isTrigger)
                     {
-                        if (Velocity > 10f)
+                        if (Velocity > 0.5f)
                         {
                             isAvoiding = true;
                             if (hit.normal.x < 0 && CurrentSpeed > 1)
@@ -338,7 +346,8 @@ namespace FastPolygons
             //BackRight
             if (Physics.Raycast(backSensorPos[1].position, -transform.forward, out hit, sensorLenghtBack))
             {
-                if (hit.collider.GetComponent<BoxCollider>())
+                if (!hit.collider.TryGetComponent<BoxCollider>(out var bCollider)) return;
+                if (!bCollider.isTrigger)
                 {
                     isReverse = false;
                     m_stopReverseTime = 0;
@@ -346,9 +355,11 @@ namespace FastPolygons
             }
 
             //BackRight_Angle
-            else if (Physics.Raycast(backSensorPos[4].position, Quaternion.AngleAxis(-sensorAngle, transform.up) * -transform.forward, out hit, sensorLenghtBack))
+            else if (Physics.Raycast(backSensorPos[4].position, Quaternion.AngleAxis(-sensorAngle, transform.up) 
+                * -transform.forward, out hit, sensorLenghtBack))
             {
-                if (hit.collider.GetComponent<BoxCollider>())
+                if (!hit.collider.TryGetComponent<BoxCollider>(out var bCollider)) return;
+                if (!bCollider.isTrigger)
                 {
                     isReverse = false;
                     m_stopReverseTime = 0;
@@ -361,7 +372,8 @@ namespace FastPolygons
             //BackLeft
             if (Physics.Raycast(backSensorPos[2].position, -transform.forward, out hit, sensorLenghtBack))
             {
-                if (hit.collider.GetComponent<BoxCollider>())
+                if (!hit.collider.TryGetComponent<BoxCollider>(out var bCollider)) return;
+                if (!bCollider.isTrigger)
                 {
                     isReverse = false;
                     m_stopReverseTime = 0;
@@ -369,9 +381,11 @@ namespace FastPolygons
             }
 
             //BackLeft_Angle
-            else if (Physics.Raycast(backSensorPos[3].position, Quaternion.AngleAxis(sensorAngle, transform.up) * -transform.forward, out hit, sensorLenghtBack))
+            else if (Physics.Raycast(backSensorPos[3].position, Quaternion.AngleAxis(sensorAngle, transform.up) 
+                * -transform.forward, out hit, sensorLenghtBack))
             {
-                if (!hit.collider.CompareTag("Untagged"))
+                if (!hit.collider.TryGetComponent<BoxCollider>(out var bCollider)) return;
+                if (!bCollider.isTrigger)
                 {
                     isReverse = false;
                     m_stopReverseTime = 0;
@@ -386,7 +400,8 @@ namespace FastPolygons
             {
                 if (Physics.Raycast(backSensorPos[0].position, -transform.forward, out hit, sensorLenghtBack))
                 {
-                    if (hit.collider.GetComponent<BoxCollider>())
+                    if (!hit.collider.TryGetComponent<BoxCollider>(out var bCollider)) return;
+                    if (!bCollider.isTrigger)
                     {
                         isReverse = false;
                         m_stopReverseTime = 0;

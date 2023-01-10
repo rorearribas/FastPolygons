@@ -2409,18 +2409,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 403ee1f51ab2cb244a17622b17981c87, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_currentConfig: {fileID: 0}
-  meshRenderer: {fileID: 1241768880195464147}
-  isReverse: 0
-  isBraking: 0
-  bCanMove: 1
-  upSensor: {fileID: 1241768879885808510}
-  m_lights:
-  - {fileID: 1241768880351178343}
-  - {fileID: 1241768879616535562}
-  - {fileID: 1241768880792221583}
-  - {fileID: 1241768881542473079}
-  m_audioEngine: {fileID: 6891339239203980525}
   frontLeftWheelCollider: {fileID: 1241768881078294217}
   frontRightWheelCollider: {fileID: 1241768881669265910}
   rearLeftWheelCollider: {fileID: 1241768880982959467}
@@ -2436,8 +2424,21 @@ MonoBehaviour:
   m_brakeMaterials:
   - {fileID: 2100000, guid: aa50894d46e8cb84f87457acceca4df9, type: 2}
   - {fileID: 2100000, guid: 4785edee4996afe4db5255ff92fbd8f7, type: 2}
-  centerOfMass: {x: 0, y: 0.2, z: 0}
   brakeObj: {fileID: 1241768881068046455}
+  m_lights:
+  - {fileID: 1241768880351178343}
+  - {fileID: 1241768879616535562}
+  - {fileID: 1241768880792221583}
+  - {fileID: 1241768881542473079}
+  m_vehicleConfig: {fileID: 0}
+  meshRenderer: {fileID: 1241768880195464147}
+  m_centerOfMass: {x: 0, y: 0, z: 0}
+  m_animator: {fileID: 0}
+  m_rigidbody: {fileID: 0}
+  m_audioEngine: {fileID: 6891339239203980525}
+  isReverse: 0
+  isBraking: 0
+  bCanMove: 1
 --- !u!1 &1241768881438464505
 GameObject:
   m_ObjectHideFlags: 0

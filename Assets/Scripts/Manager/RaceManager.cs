@@ -11,11 +11,15 @@ namespace FastPolygons.Manager
         public List<RacerData> m_currentData;
         public List<GameObject> m_AllCheckpoints;
         public List<Transform> m_startPositions;
+        public Canvas m_canvas;
 
         public Text lapCountTxt;
         public Text timeLapTxt;
         public Text bestTimeLapTxt;
         public Text playerPos;
+
+        public GameObject fillGameObject;
+        public Image reloadFill;
 
         public List<Material> m_materials;
 
@@ -28,8 +32,8 @@ namespace FastPolygons.Manager
         private AudioSource aS;
 
         private readonly int frameInterval = 2;
-        private readonly float m_minDistance = 7f;
         private readonly string FORMAT = "{0:00}:{1:00}:{2:00}";
+        private bool m_cooldown = false;
 
         public void Start()
         {
@@ -38,6 +42,33 @@ namespace FastPolygons.Manager
 
             StartCoroutine(IEUpdate());
             StartCoroutine(IECounter(1f));
+
+            if (InputManager.Instance == null) return;
+            InputManager.OnReloadEvent += OnReloadCheckpoint;
+
+            fillGameObject.SetActive(false);
+        }
+
+        public void OnReloadCheckpoint(float value)
+        {
+            if (!GameManager.Instance.State.Equals(GameManager.EStates.PLAYING)) return;
+            if (m_cooldown) return;
+
+            int index = GetPlayerIndex(m_currentData);
+            Player pPlayer = m_currentData[index].m_carObject.GetComponent<Player>();
+            
+            reloadFill.fillAmount = value;
+
+            if(value != 0) fillGameObject.SetActive(true);
+            else fillGameObject.SetActive(false);
+
+            if (value >= 1f)
+            {
+                pPlayer.OnAccident?.Invoke(this, EventArgs.Empty);
+                reloadFill.fillAmount = 0f;
+                fillGameObject.SetActive(false);
+                StartCoroutine(ICooldown());
+            }
         }
 
         private void CreateCheckpoints()
@@ -123,6 +154,20 @@ namespace FastPolygons.Manager
 
             tmpData.Clear();
             GameManager.Instance.OnLoadCars -= RaceManager_OnLoadCars;
+        }
+
+        public IEnumerator ICooldown()
+        {
+            if (InputManager.Instance == null) yield return null;
+            InputManager.OnReloadEvent -= OnReloadCheckpoint;
+            m_cooldown = true;
+
+            yield return new WaitForSeconds(5f);
+
+            if (InputManager.Instance == null) yield return null;
+            InputManager.OnReloadEvent += OnReloadCheckpoint;
+            m_cooldown = false;
+            fillGameObject.SetActive(true);
         }
 
         private IEnumerator IEUpdate()
@@ -293,7 +338,7 @@ namespace FastPolygons.Manager
             if (Cars == null)
                 return -1;
 
-            return Cars.FindIndex(a => a.m_carObject.CompareTag("Player"));
+            return Cars.FindIndex(a => a.m_carObject.GetComponent<Player>());
         }
 
         public IEnumerator Invincible(GameObject pCar)

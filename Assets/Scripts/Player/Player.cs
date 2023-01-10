@@ -156,6 +156,7 @@ namespace FastPolygons
             Destroy(col.gameObject, 2);
 
             StartCoroutine(PlayerCamera.Shake(0.3f, 1f));
+            StartCoroutine(RaceManager.Instance.ICooldown());
         }
 
         private void AllowCollisions(bool status)

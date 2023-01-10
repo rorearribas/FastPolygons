@@ -11,6 +11,7 @@ namespace FastPolygons
         public delegate void ParamFloat(float value);
         public static event ParamFloat OnSteeringAngleEvent;
         public static event ParamFloat OnAccelerationEvent;
+        public static event ParamFloat OnReloadEvent;
 
         public delegate void NoParam();
         public static event NoParam OnScapeEvent;
@@ -21,6 +22,7 @@ namespace FastPolygons
 
         private bool isValid = false;
         private float steeringAngle;
+        private float reloadValue;
         private readonly float lerpVelocity = 7.5f;
 
         public override void Awake()
@@ -34,9 +36,9 @@ namespace FastPolygons
                 m_inputActions.Player.Brake.performed += OnBrakePressed;
                 m_inputActions.Player.Pause.performed += OnPausePressed;
                 m_inputActions.Player.Acceleration.performed += OnAccelerationPressed;
-                m_inputActions.Player.Interact.performed += OnInteractPressed;
                 m_inputActions.Player.Acceleration.canceled += OnAccelerationCanceled;
                 m_inputActions.Player.Brake.canceled += OnBrakeCanceled;
+                m_inputActions.Player.Interact.performed += OnInteractPressed;
 
                 isValid = true;
             }
@@ -51,11 +53,12 @@ namespace FastPolygons
                 m_inputActions.Player.Disable();
                 m_inputActions.Player.Brake.Reset();
                 m_inputActions.Player.Pause.Reset();
-                m_inputActions.Player.SteeringAngle.Reset();
                 m_inputActions.Player.Acceleration.Reset();
+                m_inputActions.Player.SteeringAngle.Reset();
                 m_inputActions.Player.Interact.Reset();
+                m_inputActions.Player.ReloadCheckpoint.Reset();
 
-                isValid = false;
+               isValid = false;
             }
         }
 
@@ -68,9 +71,10 @@ namespace FastPolygons
                 m_inputActions.Player.Disable();
                 m_inputActions.Player.Brake.Reset();
                 m_inputActions.Player.Pause.Reset();
-                m_inputActions.Player.SteeringAngle.Reset();
                 m_inputActions.Player.Acceleration.Reset();
+                m_inputActions.Player.SteeringAngle.Reset();
                 m_inputActions.Player.Interact.Reset();
+                m_inputActions.Player.ReloadCheckpoint.Reset();
 
                 isValid = false;
             }
@@ -81,6 +85,10 @@ namespace FastPolygons
             float inputValue = m_inputActions.Player.SteeringAngle.ReadValue<float>();
             steeringAngle = Mathf.Lerp(steeringAngle, inputValue, lerpVelocity * Time.deltaTime);
             OnSteeringAngleEvent?.Invoke(steeringAngle);
+
+            float inputReload = m_inputActions.Player.ReloadCheckpoint.ReadValue<float>();
+            reloadValue = Mathf.MoveTowards(reloadValue, inputReload, 1f * Time.deltaTime);
+            OnReloadEvent?.Invoke(reloadValue);
         }
 
         private void OnInteractPressed(InputAction.CallbackContext ctx)

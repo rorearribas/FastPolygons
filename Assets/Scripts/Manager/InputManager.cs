@@ -25,20 +25,22 @@ namespace FastPolygons
         private float reloadValue;
         private readonly float lerpVelocity = 7.5f;
 
+        public InputActions InputActions { get => m_inputActions; set => m_inputActions = value; }
+
         public override void Awake()
         {
             base.Awake();
-            m_inputActions ??= new InputActions();
+            InputActions ??= new InputActions();
 
             if (!isValid)
             {
-                m_inputActions.Player.Enable();
-                m_inputActions.Player.Brake.performed += OnBrakePressed;
-                m_inputActions.Player.Pause.performed += OnPausePressed;
-                m_inputActions.Player.Acceleration.performed += OnAccelerationPressed;
-                m_inputActions.Player.Acceleration.canceled += OnAccelerationCanceled;
-                m_inputActions.Player.Brake.canceled += OnBrakeCanceled;
-                m_inputActions.Player.Interact.performed += OnInteractPressed;
+                InputActions.Player.Enable();
+                InputActions.Player.Brake.performed += OnBrakePressed;
+                InputActions.Player.Pause.performed += OnPausePressed;
+                InputActions.Player.Acceleration.performed += OnAccelerationPressed;
+                InputActions.Player.Acceleration.canceled += OnAccelerationCanceled;
+                InputActions.Player.Brake.canceled += OnBrakeCanceled;
+                InputActions.Player.Interact.performed += OnInteractPressed;
 
                 isValid = true;
             }
@@ -46,17 +48,17 @@ namespace FastPolygons
 
         private void OnDestroy()
         {
-            if (m_inputActions == null) return;
+            if (InputActions == null) return;
 
             if (isValid)
             {
-                m_inputActions.Player.Disable();
-                m_inputActions.Player.Brake.Reset();
-                m_inputActions.Player.Pause.Reset();
-                m_inputActions.Player.Acceleration.Reset();
-                m_inputActions.Player.SteeringAngle.Reset();
-                m_inputActions.Player.Interact.Reset();
-                m_inputActions.Player.ReloadCheckpoint.Reset();
+                InputActions.Player.Disable();
+                InputActions.Player.Brake.Reset();
+                InputActions.Player.Pause.Reset();
+                InputActions.Player.Acceleration.Reset();
+                InputActions.Player.SteeringAngle.Reset();
+                InputActions.Player.Interact.Reset();
+                InputActions.Player.ReloadCheckpoint.Reset();
 
                isValid = false;
             }
@@ -64,17 +66,17 @@ namespace FastPolygons
 
         private void OnDisable()
         {
-            if (m_inputActions == null) return;
+            if (InputActions == null) return;
 
             if (isValid)
             {
-                m_inputActions.Player.Disable();
-                m_inputActions.Player.Brake.Reset();
-                m_inputActions.Player.Pause.Reset();
-                m_inputActions.Player.Acceleration.Reset();
-                m_inputActions.Player.SteeringAngle.Reset();
-                m_inputActions.Player.Interact.Reset();
-                m_inputActions.Player.ReloadCheckpoint.Reset();
+                InputActions.Player.Disable();
+                InputActions.Player.Brake.Reset();
+                InputActions.Player.Pause.Reset();
+                InputActions.Player.Acceleration.Reset();
+                InputActions.Player.SteeringAngle.Reset();
+                InputActions.Player.Interact.Reset();
+                InputActions.Player.ReloadCheckpoint.Reset();
 
                 isValid = false;
             }
@@ -82,11 +84,11 @@ namespace FastPolygons
 
         private void Update()
         {
-            float inputValue = m_inputActions.Player.SteeringAngle.ReadValue<float>();
+            float inputValue = InputActions.Player.SteeringAngle.ReadValue<float>();
             steeringAngle = Mathf.Lerp(steeringAngle, inputValue, lerpVelocity * Time.deltaTime);
             OnSteeringAngleEvent?.Invoke(steeringAngle);
 
-            float inputReload = m_inputActions.Player.ReloadCheckpoint.ReadValue<float>();
+            float inputReload = InputActions.Player.ReloadCheckpoint.ReadValue<float>();
             reloadValue = Mathf.MoveTowards(reloadValue, inputReload, 1f * Time.deltaTime);
             OnReloadEvent?.Invoke(reloadValue);
         }

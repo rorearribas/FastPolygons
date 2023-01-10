@@ -52,14 +52,13 @@ namespace FastPolygons.Manager
         public void OnReloadCheckpoint(float value)
         {
             if (!GameManager.Instance.State.Equals(GameManager.EStates.PLAYING)) return;
-            if (m_cooldown) return;
 
             int index = GetPlayerIndex(m_currentData);
             Player pPlayer = m_currentData[index].m_carObject.GetComponent<Player>();
             
             reloadFill.fillAmount = value;
 
-            if(value != 0) fillGameObject.SetActive(true);
+            if(value != 0f) fillGameObject.SetActive(true);
             else fillGameObject.SetActive(false);
 
             if (value >= 1f)
@@ -159,14 +158,12 @@ namespace FastPolygons.Manager
         public IEnumerator ICooldown()
         {
             if (InputManager.Instance == null) yield return null;
-            InputManager.OnReloadEvent -= OnReloadCheckpoint;
-            m_cooldown = true;
+            InputManager.Instance.InputActions.Player.ReloadCheckpoint.Disable();
 
             yield return new WaitForSeconds(5f);
 
             if (InputManager.Instance == null) yield return null;
-            InputManager.OnReloadEvent += OnReloadCheckpoint;
-            m_cooldown = false;
+            InputManager.Instance.InputActions.Player.ReloadCheckpoint.Enable();
         }
 
         private IEnumerator IEUpdate()

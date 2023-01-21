@@ -21,6 +21,11 @@ namespace FastPolygons
             PlayerCameraHelpers.Cam = GetComponent<Camera>();
         }
 
+        private void Start()
+        {
+            StartCoroutine(SearchPlayer());
+        }
+
         private void PlayerCamera_FindPlayer(object sender, EventArgs e)
         {
             if (GameManager.Instance.CurrentPlayer == null)
@@ -30,8 +35,9 @@ namespace FastPolygons
             OnFollowCar -= PlayerCamera_FindPlayer;
         }
 
-        private void Update()
+        private IEnumerator SearchPlayer()
         {
+            yield return new WaitUntil(() => GameManager.Instance.CurrentPlayer);
             OnFollowCar?.Invoke(this, EventArgs.Empty);
         }
 

@@ -208,7 +208,7 @@ namespace FastPolygons
             if (Mathf.Abs(dot) > 0.1f)
             {
                 float speed = m_rigidbody.velocity.magnitude;
-                result = dot < 0 ? -(speed / (m_vehicleConfig.reverseSpeed / 2f)) : speed / (m_vehicleConfig.maxSpeed / 2f);
+                result = dot < 0 ? -(speed / (m_vehicleConfig.maxReverseSpeed / 2f)) : speed / (m_vehicleConfig.maxSpeed / 2f);
             }
 
             return result;

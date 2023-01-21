@@ -33,7 +33,6 @@ namespace FastPolygons.Manager
 
         private readonly int frameInterval = 2;
         private readonly string FORMAT = "{0:00}:{1:00}:{2:00}";
-        private bool m_cooldown = false;
 
         public void Start()
         {
@@ -64,7 +63,6 @@ namespace FastPolygons.Manager
             if (value >= 1f)
             {
                 pPlayer.OnAccident?.Invoke(this, EventArgs.Empty);
-                reloadFill.fillAmount = 0f;
                 fillGameObject.SetActive(false);
                 StartCoroutine(ICooldown());
             }

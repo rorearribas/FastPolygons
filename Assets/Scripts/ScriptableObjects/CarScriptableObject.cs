@@ -2,14 +2,18 @@
 
 namespace FastPolygons
 {
-    [CreateAssetMenu(fileName = "New Car")]
+    [CreateAssetMenu(fileName = "NewProfile", menuName = "CREATE A NEW CAR")]
     public class CarScriptableObject : ScriptableObject
     {
+        [Header("STATS")]
         public float maxMotorTorque;
         public float maxBrakeTorque;
         public float maxSpeed;
+        public float maxReverseSpeed;
         public float maxSteerAngle;
-        public float reverseSpeed;
+
+        [Header("BODYWORK")]
         public Color color;
+        public MeshFilter meshFilter;
     }
 }

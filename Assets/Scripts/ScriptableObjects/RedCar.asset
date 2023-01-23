@@ -15,6 +15,7 @@ MonoBehaviour:
   maxMotorTorque: 450
   maxBrakeTorque: 600
   maxSpeed: 75
+  maxReverseSpeed: 0
   maxSteerAngle: 45
-  reverseSpeed: -300
   color: {r: 0.78431374, g: 0, b: 0, a: 1}
+  meshFilter: {fileID: 0}

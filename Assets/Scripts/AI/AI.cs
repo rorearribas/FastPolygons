@@ -109,8 +109,6 @@ namespace FastPolygons
 
             OnHandleCar();
             Sensors();
-
-            print(Velocity);
         }
 
         private void CheckWaypointDistance()

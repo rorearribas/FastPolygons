@@ -2629,6 +2629,7 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 2c5428149ea063e44b95945b1c0b980a, type: 2}
   m_position: 0
   m_maxLaps: 3
+  prefab: {fileID: 5586887092038248647, guid: 621d176f6b515434bb9a140e5527eb01, type: 3}
 --- !u!82 &1585825855
 AudioSource:
   m_ObjectHideFlags: 0

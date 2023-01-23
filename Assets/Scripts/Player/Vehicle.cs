@@ -55,8 +55,6 @@ namespace FastPolygons
             frontLeftWheelCollider.motorTorque = 0f;
             frontRightWheelCollider.motorTorque = 0f;
         }
-
-
         public void UpdateWheels()
         {
             UpdateSingleWheel(frontLeftWheelCollider, frontLeftWheelTransform); //Front Left Wheel

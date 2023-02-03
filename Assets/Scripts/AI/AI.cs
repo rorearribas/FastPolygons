@@ -18,6 +18,7 @@ namespace FastPolygons
         private float m_delay;
         private float m_newSteer;
         private float m_stopReverseTime;
+        private float avoidMultiplier;
         private bool isCollision;
 
         private List<Transform> m_wayPoints;
@@ -122,27 +123,24 @@ namespace FastPolygons
         {
             if (isCollision) return;
 
-            if (isReverse)
+            var frontLeft = frontLeftWheelCollider;
+            var frontRight = frontRightWheelCollider;
+            var torque = isReverse ? -200f : m_vehicleConfig.maxMotorTorque;
+            frontLeft.motorTorque = torque;
+            frontRight.motorTorque = torque;
+
+            if (!isReverse)
             {
-                frontLeftWheelCollider.motorTorque = -200f;
-                frontRightWheelCollider.motorTorque = -200f;
+                frontLeft.brakeTorque = 0f;
+                frontRight.brakeTorque = 0f;
             }
 
-            else
+            foreach (var particle in m_currentParticles)
             {
-                frontLeftWheelCollider.motorTorque = m_vehicleConfig.maxMotorTorque;
-                frontRightWheelCollider.motorTorque = m_vehicleConfig.maxMotorTorque;
-
-                frontLeftWheelCollider.brakeTorque = 0f;
-                frontRightWheelCollider.brakeTorque = 0f;
+                particle.Play();
             }
 
-            for (int i = 0; i < m_currentParticles.Count - 1; i++)
-            {
-                m_currentParticles[i].Play();
-            }
-
-            MeshRenderer matObj = brakeObj.GetComponent<MeshRenderer>();
+            var matObj = brakeObj.GetComponent<MeshRenderer>();
             matObj.material = m_brakeMaterials[0];
         }
 
@@ -210,207 +208,54 @@ namespace FastPolygons
             }
         }
 
+        private bool IsObstacle(RaycastHit hit)
+        {
+            BoxCollider bCollider = hit.collider.GetComponent<BoxCollider>();
+            return bCollider != null && !bCollider.isTrigger;
+        }
+
+        private bool ThrowRaycast(Transform pos, Vector3 dir, out RaycastHit Hit, float lenght)
+        {
+            return Physics.Raycast(pos.position, dir, out Hit, lenght);
+        }
+
+        private void CheckSensor(Transform sensorPos, Vector3 direction, float sensorLenght, bool isCenter = false)
+        {
+            if(!ThrowRaycast(sensorPos, direction, out RaycastHit hit, sensorLenght)) return;
+            if(!IsObstacle(hit)) return;
+
+            float factor = direction == transform.forward && Velocity > 10 ? 0.5f : 1f;
+            if (Velocity > 0.5f)
+            {
+                isAvoiding = true;
+                avoidMultiplier = isCenter
+                    ? (hit.normal.x < 0 && CurrentSpeed > 1 ? -1f : 1f)
+                    : avoidMultiplier - (direction == transform.forward ? 1 : -1) * factor;
+            }
+            else
+            {
+                isReverse = true;
+                avoidMultiplier += (direction == transform.forward ? 1 : -1) * factor;
+            }
+        }
+
         private void Sensors()
         {
-            float avoidMultiplier = 0;
             isAvoiding = false;
 
-            #region FrontSensors
+            // Front sensors
+            CheckSensor(sensorPos[1], transform.forward, sensorLenght);
+            CheckSensor(sensorPos[4], Quaternion.AngleAxis(sensorAngle, transform.up) * transform.forward, sensorLenght);
+            CheckSensor(sensorPos[2], transform.forward, sensorLenght);
+            CheckSensor(sensorPos[3], Quaternion.AngleAxis(-sensorAngle, transform.up) * transform.forward, sensorLenght);
+            CheckSensor(sensorPos[0], transform.forward, sensorLenght, true);
 
-            //FrontRight
-            if (Physics.Raycast(sensorPos[1].position, transform.forward, 
-                out RaycastHit hit, sensorLenght))
-            {
-                if (!hit.collider.TryGetComponent<BoxCollider>(out var bCollider)) return;
-                if (!bCollider.isTrigger)
-                {
-                    if (Velocity > 0.5f)
-                    {
-                        isAvoiding = true;
-                        avoidMultiplier -= 1f;
-                    }
-
-                    else
-                    {
-                        isReverse = true;
-                        avoidMultiplier += 1f;
-                    }
-                }
-            }
-
-            //FrontRight_Angle
-            else if (Physics.Raycast(sensorPos[4].position, Quaternion.AngleAxis(sensorAngle, transform.up) * 
-                transform.forward, out hit, sensorLenght))
-            {
-                if (!hit.collider.TryGetComponent<BoxCollider>(out var bCollider)) return;
-                if (!bCollider.isTrigger)
-                {
-                    if (Velocity > 10f)
-                    {
-                        isAvoiding = true;
-                        avoidMultiplier -= 0.5f;
-                    }
-
-                    else
-                    {
-                        isReverse = true;
-                        avoidMultiplier += 0.5f;
-                    }
-                }
-            }
-
-            Debug.DrawRay(sensorPos[4].position, Quaternion.AngleAxis(sensorAngle, transform.up) * transform.forward * sensorLenght);
-            Debug.DrawRay(sensorPos[1].position, transform.forward * sensorLenght);
-
-            //FrontLeft
-            if (Physics.Raycast(sensorPos[2].position, transform.forward, out hit, sensorLenght))
-            {
-                if (!hit.collider.TryGetComponent<BoxCollider>(out var bCollider)) return;
-                if (!bCollider.isTrigger)
-                {
-                    if (Velocity > 0.5f)
-                    {
-                        isAvoiding = true;
-                        avoidMultiplier += 1;
-                    }
-
-                    else
-                    {
-                        isReverse = true;
-                        avoidMultiplier -= 1f;
-                    }
-                }
-            }
-
-            //FrontLeft_Angle
-            else if (Physics.Raycast(sensorPos[3].position, Quaternion.AngleAxis(-sensorAngle, transform.up) 
-                * transform.forward, out hit, sensorLenght))
-            {
-                if (!hit.collider.TryGetComponent<BoxCollider>(out var bCollider)) return;
-                if (!bCollider.GetComponent<BoxCollider>().isTrigger)
-                {
-                    if (Velocity > 0.5f)
-                    {
-                        isAvoiding = true;
-                        avoidMultiplier += 0.5f;
-                    }
-
-                    else
-                    {
-                        isReverse = true;
-                        avoidMultiplier -= 0.5f;
-                    }
-
-                }
-            }
-
-            Debug.DrawRay(sensorPos[3].position, Quaternion.AngleAxis(-sensorAngle, transform.up) * transform.forward * sensorLenght);
-            Debug.DrawRay(sensorPos[2].position, transform.forward * sensorLenght);
-
-            //FrontCenter
-            if (avoidMultiplier == 0)
-            {
-                if (Physics.Raycast(sensorPos[0].position, transform.forward, out hit, sensorLenght))
-                {
-                    if (!hit.collider.TryGetComponent<BoxCollider>(out var bCollider)) return;
-                    if (!bCollider.isTrigger)
-                    {
-                        if (Velocity > 0.5f)
-                        {
-                            isAvoiding = true;
-                            if (hit.normal.x < 0 && CurrentSpeed > 1)
-                            {
-                                avoidMultiplier = -1f;
-                            }
-                            else
-                            {
-                                avoidMultiplier = 1f;
-                            }
-                        }
-
-                        else
-                        {
-                            isReverse = true;
-                        }
-
-                    }
-                }
-            }
-
-            #endregion
-
-            #region BackSensors
-
-            //BackRight
-            if (Physics.Raycast(backSensorPos[1].position, -transform.forward, out hit, sensorLenghtBack))
-            {
-                if (!hit.collider.TryGetComponent<BoxCollider>(out var bCollider)) return;
-                if (!bCollider.isTrigger)
-                {
-                    isReverse = false;
-                    m_stopReverseTime = 0;
-                }
-            }
-
-            //BackRight_Angle
-            else if (Physics.Raycast(backSensorPos[4].position, Quaternion.AngleAxis(-sensorAngle, transform.up) 
-                * -transform.forward, out hit, sensorLenghtBack))
-            {
-                if (!hit.collider.TryGetComponent<BoxCollider>(out var bCollider)) return;
-                if (!bCollider.isTrigger)
-                {
-                    isReverse = false;
-                    m_stopReverseTime = 0;
-                }
-            }
-
-            Debug.DrawRay(backSensorPos[4].position, Quaternion.AngleAxis(-sensorAngle, transform.up) * -transform.forward * sensorLenghtBack);
-            Debug.DrawRay(backSensorPos[1].position, -transform.forward * sensorLenghtBack);
-
-            //BackLeft
-            if (Physics.Raycast(backSensorPos[2].position, -transform.forward, out hit, sensorLenghtBack))
-            {
-                if (!hit.collider.TryGetComponent<BoxCollider>(out var bCollider)) return;
-                if (!bCollider.isTrigger)
-                {
-                    isReverse = false;
-                    m_stopReverseTime = 0;
-                }
-            }
-
-            //BackLeft_Angle
-            else if (Physics.Raycast(backSensorPos[3].position, Quaternion.AngleAxis(sensorAngle, transform.up) 
-                * -transform.forward, out hit, sensorLenghtBack))
-            {
-                if (!hit.collider.TryGetComponent<BoxCollider>(out var bCollider)) return;
-                if (!bCollider.isTrigger)
-                {
-                    isReverse = false;
-                    m_stopReverseTime = 0;
-                }
-            }
-
-            Debug.DrawRay(backSensorPos[3].position, Quaternion.AngleAxis(sensorAngle, transform.up) * -transform.forward * sensorLenghtBack);
-            Debug.DrawRay(backSensorPos[2].position, -transform.forward * sensorLenghtBack);
-
-            //BackCenter
-            if (avoidMultiplier == 0)
-            {
-                if (Physics.Raycast(backSensorPos[0].position, -transform.forward, out hit, sensorLenghtBack))
-                {
-                    if (!hit.collider.TryGetComponent<BoxCollider>(out var bCollider)) return;
-                    if (!bCollider.isTrigger)
-                    {
-                        isReverse = false;
-                        m_stopReverseTime = 0;
-                    }
-                }
-            }
-
-            #endregion
-
-            Debug.DrawRay(sensorPos[0].position, transform.forward * sensorLenght);
-            Debug.DrawRay(backSensorPos[0].position, -transform.forward * sensorLenghtBack);
+            // Back sensors
+            CheckSensor(backSensorPos[1], -transform.forward, sensorLenghtBack);
+            CheckSensor(backSensorPos[4], Quaternion.AngleAxis(-sensorAngle, transform.up) * -transform.forward, sensorLenghtBack);
+            CheckSensor(backSensorPos[2], -transform.forward, sensorLenghtBack);
+            CheckSensor(backSensorPos[3], Quaternion.AngleAxis(sensorAngle, transform.up) * -transform.forward, sensorLenghtBack);
+            CheckSensor(backSensorPos[0], -transform.forward, sensorLenghtBack);
 
             if (isAvoiding || isReverse)
             {
@@ -418,6 +263,7 @@ namespace FastPolygons
                 frontRightWheelCollider.steerAngle = m_vehicleConfig.maxSteerAngle * avoidMultiplier;
             }
         }
+
 
         private void AllowCollisions(bool status)
         {

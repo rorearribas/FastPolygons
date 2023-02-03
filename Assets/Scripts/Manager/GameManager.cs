@@ -53,7 +53,7 @@ namespace FastPolygons.Manager
         private bool m_startCountdown = false;
 
         //Delegate
-        public EventHandler OnLoadCars;
+        public static EventHandler OnLoadCars;
         public delegate void ChangeState(EStates state);
         public ChangeState OnChangedState;
 

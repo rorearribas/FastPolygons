@@ -36,16 +36,22 @@ namespace FastPolygons.Manager
 
         public void Start()
         {
-            GameManager.Instance.OnLoadCars += RaceManager_OnLoadCars;
+            GameManager.OnLoadCars += RaceManager_OnLoadCars;
             aS = GetComponent<AudioSource>();
 
             StartCoroutine(IEUpdate());
             StartCoroutine(IECounter(1f));
 
+            fillGameObject.SetActive(false);
+
             if (InputManager.Instance == null) return;
             InputManager.OnReloadEvent += OnReloadCheckpoint;
+        }
 
-            fillGameObject.SetActive(false);
+        private void OnDestroy()
+        {
+            GameManager.OnLoadCars -= RaceManager_OnLoadCars;
+            InputManager.OnReloadEvent -= OnReloadCheckpoint;
         }
 
         public void OnReloadCheckpoint(float value)
@@ -95,8 +101,7 @@ namespace FastPolygons.Manager
 
         private void RaceManager_OnLoadCars(object sender, EventArgs e)
         {
-            if (GameManager.Instance == null)
-                return;
+            if (GameManager.Instance == null)return;
 
             CreateCheckpoints();
             InitCheckpoints();
@@ -126,10 +131,8 @@ namespace FastPolygons.Manager
                 rnd = UnityEngine.Random.Range(0, position.Count);
                 int rndConfig = UnityEngine.Random.Range(0, carSettings.Count);
 
-                GameObject IA = Instantiate(
-                    Resources.Load<GameObject>("Prefabs/Car_IA"), 
-                    position[rnd].position, AssignRot(position[rnd])
-                    );
+                GameObject IA = Instantiate(Resources.Load<GameObject>("Prefabs/Car_IA"), 
+                    position[rnd].position, AssignRot(position[rnd]));
 
                 IA.GetComponent<AI>().m_vehicleConfig = carSettings[rndConfig];
                 tmpData.Add(IA);
@@ -150,7 +153,7 @@ namespace FastPolygons.Manager
             }
 
             tmpData.Clear();
-            GameManager.Instance.OnLoadCars -= RaceManager_OnLoadCars;
+            GameManager.OnLoadCars -= RaceManager_OnLoadCars;
         }
 
         public IEnumerator ICooldown()
@@ -173,6 +176,7 @@ namespace FastPolygons.Manager
                 }
                 StateManager();
             }
+            yield return null;
         }
 
         private IEnumerator IECounter(float interval)
@@ -182,6 +186,7 @@ namespace FastPolygons.Manager
                 yield return new WaitForSecondsRealtime(interval);
                 UpdateTime(interval);
             }
+            yield return null;
         }
 
         private void StateManager()
@@ -189,7 +194,7 @@ namespace FastPolygons.Manager
             switch (GameManager.Instance.State)
             {
                 case GameManager.EStates.START:
-                    GameManager.Instance.OnLoadCars?.Invoke(this, EventArgs.Empty);
+                    GameManager.OnLoadCars?.Invoke(this, EventArgs.Empty);
                     break;
                 case GameManager.EStates.PLAYING:
                     UpdateRanking();

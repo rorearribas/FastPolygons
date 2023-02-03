@@ -1,4 +1,3 @@
-using FastPolygons.Manager;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
@@ -33,14 +32,23 @@ namespace FastPolygons
                 return null;
 
             Vector3 vPlayerPos = pPlayer.transform.position;
+            Bounds bounds = m_boxCollider.bounds;
 
-            Vector3 vCenter = m_boxCollider.bounds.center;
-            Vector3 vExtents = m_boxCollider.bounds.extents;
+            Vector3 vRight = bounds.center;
+            vRight.x += bounds.extents.x;
+            vRight.y = vPlayerPos.y;
+            vRight.z = vPlayerPos.z;
 
-            Vector3 vRight = new(vCenter.x + vExtents.x, vPlayerPos.y, vPlayerPos.z);
-            Vector3 vLeft = new(vCenter.x - vExtents.x, vPlayerPos.y, vPlayerPos.z);
-            Vector3 vUp = new(vPlayerPos.x, vPlayerPos.y, vCenter.z + vExtents.z);
-            Vector3 vDown = new(vPlayerPos.x, vPlayerPos.y, vCenter.z - vExtents.z);
+            Vector3 vLeft = bounds.center;
+            vLeft.x -= bounds.extents.x;
+            vLeft.y = vPlayerPos.y;
+            vLeft.z = vPlayerPos.z;
+
+            Vector3 vUp = vPlayerPos;
+            vUp.z = bounds.center.z + bounds.extents.z;
+
+            Vector3 vDown = vPlayerPos;
+            vDown.z = bounds.center.z - bounds.extents.z;
 
             Vector3[] vPoints = { vRight, vLeft, vUp, vDown };
             return vPoints;
@@ -48,19 +56,19 @@ namespace FastPolygons
 
         private float GetClosestDistanceToEdge(Player pPlayer)
         {
-            if (GetCustomEdges(pPlayer)?.Length == 0)
+            Vector3[] customEdges = GetCustomEdges(pPlayer);
+            if (customEdges.Length == 0)
                 return -1f;
 
             float fDistance = float.MaxValue;
-            Vector3[] vPoints = GetCustomEdges(pPlayer);
             Vector3 playerPosition = pPlayer.transform.position;
 
-            for (int i = 0; i < vPoints.Length; i++) {
-                float fCurrentDist = Vector3.Distance(vPoints[i], playerPosition);
-                if (fDistance > fCurrentDist) {
-                    fDistance = fCurrentDist;
-                }
+            for (int i = 0; i < customEdges.Length; i++)
+            {
+                float fCurrentDist = Vector3.Distance(customEdges[i], playerPosition);
+                fDistance = Mathf.Min(fDistance, fCurrentDist);
             }
+
             return fDistance;
         }
 
@@ -76,20 +84,16 @@ namespace FastPolygons
 
         private void OnTriggerStay(Collider coll)
         {
-            if (coll.GetComponent<Player>())
-            {
-                if (isRespawn) return;
+            Player pPlayer = coll.GetComponent<Player>();
+            if (!pPlayer || isRespawn) return;
 
-                Player pPlayer = coll.GetComponent<Player>();
+            float minDistance = 25f;
+            float currentDist = GetClosestDistanceToEdge(pPlayer);
+            float Value = (minDistance - currentDist) / minDistance * 1f;
 
-                float currentDist = GetClosestDistanceToEdge(pPlayer);
-                float minDistance = 25f;
-                float Value = (minDistance - currentDist) / minDistance * 1f;
-
-                m_vignette.intensity.value = Mathf.Clamp(Value, 0.2f, 0.8f);
-                m_grain.intensity.value = Mathf.Clamp(Value, 0.1f, 0.5f);
-                m_chromaticAberration.intensity.value = Mathf.Clamp(Value, 0.05f, 0.8f);
-            };
+            m_vignette.intensity.value = Mathf.Clamp(Value, 0.2f, 0.8f);
+            m_grain.intensity.value = Mathf.Clamp(Value, 0.1f, 0.5f);
+            m_chromaticAberration.intensity.value = Mathf.Clamp(Value, 0.05f, 0.8f);
         }
 
         private IEnumerator Respawn()

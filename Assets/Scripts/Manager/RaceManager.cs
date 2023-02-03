@@ -169,9 +169,12 @@ namespace FastPolygons.Manager
 
         private IEnumerator IEUpdate()
         {
-            while (!GameManager.Instance.State.Equals(GameManager.EStates.END))
+            GameManager gameManager = GameManager.Instance;
+            int frameIntervalCache = frameInterval;
+
+            while (!gameManager.State.Equals(GameManager.EStates.END))
             {
-                for (int i = 0; i < frameInterval; i++) {
+                for (int i = 0; i < frameIntervalCache; i++) {
                     yield return new WaitForEndOfFrame();
                 }
                 StateManager();
@@ -181,7 +184,8 @@ namespace FastPolygons.Manager
 
         private IEnumerator IECounter(float interval)
         {
-            while (!GameManager.Instance.State.Equals(GameManager.EStates.END))
+            GameManager gameManager = GameManager.Instance;
+            while (!gameManager.State.Equals(GameManager.EStates.END))
             {
                 yield return new WaitForSecondsRealtime(interval);
                 UpdateTime(interval);

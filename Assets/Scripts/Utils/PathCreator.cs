@@ -8,12 +8,12 @@ namespace FastPolygons
         public Color lineColor;
         public List<Transform> wayPoints = new();
 
-        void OnDrawGizmos()
+        private void OnDrawGizmos()
         {
             Gizmos.color = lineColor;
 
             Transform[] pathTransform = GetComponentsInChildren<Transform>();
-            wayPoints = new List<Transform>();
+            wayPoints.Clear();
 
             for (int i = 0; i < pathTransform.Length; i++)
             {
@@ -23,26 +23,21 @@ namespace FastPolygons
                 }
             }
 
+            Vector3 previusNode = Vector3.zero;
             for (int i = 0; i < wayPoints.Count; i++)
             {
                 Vector3 currentNode = wayPoints[i].position;
-                Vector3 previusNode = Vector3.zero;
-
                 if (i > 0)
                 {
                     previusNode = wayPoints[i - 1].position;
                 }
-
                 else if (i == 0 && wayPoints.Count > 1)
                 {
                     previusNode = wayPoints[wayPoints.Count - 1].position;
                 }
-
                 Gizmos.DrawLine(previusNode, currentNode);
                 Gizmos.DrawSphere(currentNode, 0.3f);
             }
-
         }
-
     }
 }

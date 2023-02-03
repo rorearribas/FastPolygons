@@ -1,5 +1,7 @@
+using FastPolygons.Manager;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using UnityEditor;
 using UnityEngine;
 
@@ -11,6 +13,7 @@ namespace FastPolygons
         private PathCreator pathCreator;
         private SerializedObject obj;
         private SerializedProperty wayPointsProp;
+        private float dBetweenWaypoints;
 
         private void OnEnable()
         {
@@ -24,6 +27,7 @@ namespace FastPolygons
             obj.Update();
 
             EditorGUILayout.PropertyField(wayPointsProp, true);
+            dBetweenWaypoints = EditorGUILayout.FloatField("Distance", dBetweenWaypoints);
 
             obj.ApplyModifiedProperties();
 
@@ -52,8 +56,21 @@ namespace FastPolygons
         {
             GameObject newWaypoint = new();
             newWaypoint.transform.parent = pathCreator.transform;
-            newWaypoint.name = "Waypoint " + (pathCreator.transform.childCount + 1);
-            newWaypoint.transform.position = pathCreator.transform.position;
+
+            int currentWaypoint = pathCreator.wayPoints.Count;
+            newWaypoint.name = "Waypoint_" + (currentWaypoint);
+
+            if(currentWaypoint > 0)
+            {
+                Vector3 vPos = pathCreator.wayPoints[currentWaypoint - 1].position;
+                Vector3 vForward = pathCreator.wayPoints[currentWaypoint - 1].transform.forward;
+                Vector3 Offset = vPos - (vForward * dBetweenWaypoints);
+                newWaypoint.transform.position = Offset;
+            }
+            else
+            {
+                newWaypoint.transform.position = pathCreator.transform.position;
+            }
             pathCreator.wayPoints.Add(newWaypoint.transform);
         }
 
@@ -68,7 +85,7 @@ namespace FastPolygons
 
         private void CreatePathCreator()
         {
-            GameObject newPathCreator = new GameObject();
+            GameObject newPathCreator = new();
             newPathCreator.AddComponent<PathCreator>();
             newPathCreator.name = "Path Creator";
         }

@@ -20,6 +20,9 @@ namespace FastPolygons
             pathCreator = target as PathCreator;
             obj = new SerializedObject(pathCreator);
             wayPointsProp = obj.FindProperty("wayPoints");
+
+            dBetweenWaypoints = 5f;
+            pathCreator.lineColor = Color.red;
         }
 
         public override void OnInspectorGUI()
@@ -28,6 +31,7 @@ namespace FastPolygons
 
             EditorGUILayout.PropertyField(wayPointsProp, true);
             dBetweenWaypoints = EditorGUILayout.FloatField("Distance", dBetweenWaypoints);
+            pathCreator.lineColor = EditorGUILayout.ColorField("Color", pathCreator.lineColor);
 
             obj.ApplyModifiedProperties();
 
@@ -36,19 +40,9 @@ namespace FastPolygons
                 AddWaypoint();
             }
 
-            if (GUILayout.Button("Remove Waypoint"))
+            if (GUILayout.Button("Remove Last Waypoint"))
             {
                 RemoveWaypoint();
-            }
-
-            if (GUILayout.Button("Create PathCreator"))
-            {
-                CreatePathCreator();
-            }
-
-            if (GUILayout.Button("Open Path Options"))
-            {
-                OpenPathOptions();
             }
         }
 
@@ -76,23 +70,12 @@ namespace FastPolygons
 
         private void RemoveWaypoint()
         {
-            if (Selection.activeTransform != null && Selection.activeTransform.parent == pathCreator.transform)
-            {
-                pathCreator.wayPoints.Remove(Selection.activeTransform);
-                DestroyImmediate(Selection.activeTransform.gameObject);
-            }
-        }
+            if (pathCreator.wayPoints.Count == 0) return;
 
-        private void CreatePathCreator()
-        {
-            GameObject newPathCreator = new();
-            newPathCreator.AddComponent<PathCreator>();
-            newPathCreator.name = "Path Creator";
-        }
-
-        private void OpenPathOptions()
-        {
-            // Aquí iría el código para abrir una ventana con opciones para personalizar el camino
+            int size = pathCreator.wayPoints.Count - 1;
+            Transform wayPoint = pathCreator.wayPoints[size];
+            pathCreator.wayPoints.RemoveAt(size);
+            DestroyImmediate(wayPoint.gameObject);
         }
     }
 }

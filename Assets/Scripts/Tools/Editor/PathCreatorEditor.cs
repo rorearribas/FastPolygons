@@ -1,8 +1,3 @@
-using FastPolygons.Manager;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Drawing.Printing;
 using UnityEditor;
 using UnityEngine;
 
@@ -13,127 +8,83 @@ namespace FastPolygons
     {
         private PathCreator pathCreator;
         private SerializedObject obj;
-        private SerializedProperty wayPointsProp;
-
-        private float dBetweenWaypoints;
-        private float fLastAngle;
-        private bool forwardStart;
 
         private void OnEnable()
         {
             pathCreator = target as PathCreator;
             obj = new SerializedObject(pathCreator);
-            wayPointsProp = obj.FindProperty("wayPoints");
 
-            dBetweenWaypoints = 5f;
-            pathCreator.lineColor = Color.red;
-            forwardStart = true;
+            pathCreator.singleWaypoint.dBetweenWaypoints = 5f;
+            pathCreator.singleWaypoint.forwardStart = true;
+
+            //Debug lines.
+            pathCreator.debugParams.color = Color.red;
+            pathCreator.debugParams.radius = 0.3f;
+
+            //Curve config
+            pathCreator.curveType.maxAngle = 90f;
+            pathCreator.curveType.dBetweenPoints = 5f;
+            pathCreator.curveType.invertYAxis = true;
+            pathCreator.curveType.maxWaypoints = 5;
+
+            //Curve Debug.
+            pathCreator.curveType.debug.color = Color.green;
+            pathCreator.curveType.debug.radius = 0.3f;
+            pathCreator.curveType.debug.showDebug = true;
         }
 
         public override void OnInspectorGUI()
         {
             obj.Update();
+            EditorGUILayout.PropertyField(obj.FindProperty("actionType"));
 
-            EditorGUILayout.PropertyField(wayPointsProp, true);
+            switch (pathCreator.actionType)
+            {
+                case PathCreator.EActionType.SingleWaypoint:
+                    SingleWaypointLayout();
+                    break;
+                case PathCreator.EActionType.Custom:
+                    CustomLayout();
+                    break;
+            }
 
-            pathCreator.lineColor = EditorGUILayout.ColorField("Color", pathCreator.lineColor);
-            dBetweenWaypoints = EditorGUILayout.FloatField("Distance", dBetweenWaypoints);
-            forwardStart = EditorGUILayout.Toggle("Forward Start", forwardStart);
 
             obj.ApplyModifiedProperties();
+        }
+        private void SingleWaypointLayout()
+        {
+            EditorGUILayout.PropertyField(obj.FindProperty("singleWaypoint"));
 
             if (GUILayout.Button("Add Waypoint"))
             {
-                AddWaypoint();
+                pathCreator.AddSingleWaypoint();
             }
 
             if (GUILayout.Button("Remove Last Waypoint"))
             {
-                RemoveWaypoint();
+                pathCreator.RemoveLastWaypoint();
             }
 
-            if(GUILayout.Button("Reset All"))
+            if (GUILayout.Button("Reset All"))
             {
-                ResetAll();
+                pathCreator.ResetAll();
             }
+
+            EditorGUILayout.PropertyField(obj.FindProperty("debugParams"));
         }
 
-        private void AddWaypoint()
+        private void CustomLayout()
         {
-            GameObject newWaypoint = new();
-            newWaypoint.transform.parent = pathCreator.transform;
-
-            Vector3 NewPosition;
-            int currentWaypoint = pathCreator.wayPoints.Count;
-            newWaypoint.name = "Waypoint_" + (currentWaypoint);
-
-            newWaypoint.transform.position = pathCreator.transform.position;
-            pathCreator.wayPoints.Add(newWaypoint.transform);
-
-            if (currentWaypoint > 0)
+            EditorGUILayout.PropertyField(obj.FindProperty("curveType"));
+            if (GUILayout.Button("Create Custom Curve"))
             {
-                Transform vPos = pathCreator.wayPoints[currentWaypoint - 1].transform;
-                Vector3 vForward = pathCreator.wayPoints[currentWaypoint - 1].transform.forward;
-
-                NewPosition = forwardStart ? vPos.position - (vForward * dBetweenWaypoints) : 
-                    vPos.position + (vForward * dBetweenWaypoints);
-
-                newWaypoint.transform.SetPositionAndRotation(NewPosition, vPos.rotation);
-
-                if (currentWaypoint > 1)
-                {
-                    Transform tCurrentWaypoint = pathCreator.wayPoints[currentWaypoint - 1].transform;
-                    Transform tPrevWaypoint = pathCreator.wayPoints[currentWaypoint - 2].transform;
-                    Vector3 dir = (tCurrentWaypoint.position - tPrevWaypoint.position);
-
-                    Quaternion NewRotation;
-                    tPrevWaypoint.rotation = Quaternion.identity;
-
-                    float dot = Vector3.Dot(dir.normalized, tPrevWaypoint.forward);
-                    if(dot > 0)
-                    {
-                        float fAngle = Vector3.Angle(dir, tPrevWaypoint.forward);
-                        NewRotation = fAngle != 0 ? Quaternion.Euler(0f, fAngle, 0f) :
-                            Quaternion.identity;
-                    }
-                    else
-                    {
-                        float fAngle = Vector3.Angle(dir * -1f, tPrevWaypoint.forward);
-                        NewRotation = fAngle != 0 ? Quaternion.Euler(0f, fAngle, 0f) :
-                            Quaternion.identity;
-                    }
-
-                    tCurrentWaypoint.transform.rotation = NewRotation;
-                    NewPosition = dot > 0f ? vPos.position + (vForward * dBetweenWaypoints) :
-                         vPos.position - (vForward * dBetweenWaypoints);
-
-                    newWaypoint.transform.position = NewPosition;
-                }
+                pathCreator.CreateCustomCurve();
             }
-        }
 
-        private void RemoveWaypoint()
-        {
-            if (pathCreator.wayPoints.Count == 0) return;
-
-            int size = pathCreator.wayPoints.Count - 1;
-            Transform wayPoint = pathCreator.wayPoints[size];
-            pathCreator.wayPoints.RemoveAt(size);
-            DestroyImmediate(wayPoint.gameObject);
-        }
-
-        private void ResetAll()
-        {
-            var wayPoints = pathCreator.wayPoints;
-            int count = wayPoints.Count;
-            if (count == 0) return;
-
-            for (int i = 0; i < count; i++)
+            if (GUILayout.Button("Remove Last Custom Curve"))
             {
-                Transform wayPoint = wayPoints[i];
-                DestroyImmediate(wayPoint.gameObject);
+                pathCreator.RemoveLastCustomCurve();
             }
-            wayPoints.Clear();
         }
     }
 }

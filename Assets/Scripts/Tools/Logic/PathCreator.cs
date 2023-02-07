@@ -10,7 +10,6 @@ namespace FastPolygons
         public EActionType actionType;
         private int lastSingleWaypoint;
 
-
         public Debug debugParams;
         [System.Serializable]
         public struct Debug
@@ -37,11 +36,9 @@ namespace FastPolygons
             public bool invertYAxis;
 
             [Header("SETTINGS")]
-            public float dBetweenPoints;
-            public int maxWaypoints;
-            [Range(-360f, 360f)]
-            public float maxAngle;
-
+            [Range(0.0f, 50.0f)] public float dBetweenPoints;
+            [Range(1, 50)] public int maxWaypoints;
+            [Range(-360.0f, 360.0f)] public float maxAngle;
             public Debug debug;
         }
 
@@ -114,9 +111,6 @@ namespace FastPolygons
             Vector3 vForward = wayPoints[lastSingleWaypoint].forward;
 
             float fElapsedAngle = curveType.maxAngle;
-            float maxAngle = fElapsedAngle + ((curveType.maxAngle 
-                / curveType.maxWaypoints) * curveType.maxWaypoints);
-
             for (int i = 0; i <= curveType.maxWaypoints; i++)
             {
                 GameObject newWaypoint = new();
@@ -136,7 +130,6 @@ namespace FastPolygons
                 prevPoint = newWaypoint.transform.position;
 
                 fElapsedAngle += curveType.maxAngle / curveType.maxWaypoints;
-                maxAngle -= (curveType.maxAngle / curveType.maxWaypoints);
             }
 
             SortList();
@@ -180,12 +173,12 @@ namespace FastPolygons
         private void SortList()
         {
             if (wayPoints.Count == 0) return;
+
             for (int i = 0; i < wayPoints.Count; i++)
             {
                 wayPoints[i].name = "Waypoint_" + (i + 1);
             }
         }
-
 #if UNITY_EDITOR
         private void OnDrawGizmos()
         {

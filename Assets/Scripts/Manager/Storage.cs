@@ -6,17 +6,12 @@ namespace FastPolygons
 {
     public class Storage : MonoBehaviour
     {
-        public static void Save<T>(T data, string filePath, string fileName)
+        public static void Save<T>(T data, string filePath)
         {
             try
             {
-                if (!Directory.Exists(filePath))
-                {
-                    Directory.CreateDirectory(filePath);
-                }
-
                 XmlSerializer xmlSerializer = new XmlSerializer(typeof(T));
-                StreamWriter writer = new StreamWriter(fileName + ".xml");
+                StreamWriter writer = new StreamWriter(filePath + ".xml");
                 
                 xmlSerializer.Serialize(writer.BaseStream, data);
                 writer.Close();

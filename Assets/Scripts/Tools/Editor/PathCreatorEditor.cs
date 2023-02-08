@@ -9,7 +9,6 @@ namespace FastPolygons
     {
         private PathCreator pathCreator;
         private SerializedObject obj;
-        public string fileName;
 
         private void OnEnable()
         {
@@ -33,9 +32,6 @@ namespace FastPolygons
             pathCreator.curveType.debug.color = Color.green;
             pathCreator.curveType.debug.radius = 0.3f;
             pathCreator.curveType.debug.showDebug = true;
-
-            //Storage.
-            fileName = "New circuit";
         }
 
         public override void OnInspectorGUI()
@@ -79,15 +75,14 @@ namespace FastPolygons
 
         private void StorageLayout()
         {
-            fileName = EditorGUILayout.TextField("Filename", fileName);
             if (GUILayout.Button("Save Circuit"))
             {
-                string folder = EditorUtility.OpenFolderPanel("Select Folder", "", "");
-                OnButtonSaveCircuit(folder);
+                string path = EditorUtility.SaveFilePanel("Save file", "", "NewCircuit", "");
+                OnButtonSaveCircuit(path);
             }
             if (GUILayout.Button("Load Circuit"))
             {
-                string file = EditorUtility.OpenFilePanel("Select Folder", "", "");
+                string file = EditorUtility.OpenFilePanel("Load file", "", "xml");
                 OnButtonLoadCircuit(file);
             }
         }
@@ -98,10 +93,10 @@ namespace FastPolygons
             if (isEmpty) return;
 
             PathCreator.Data data = new PathCreator.Data();
-            data.circuitName = fileName;
+            data.circuitName = System.IO.Path.GetFileName(_folderPath);
 
             data.CopyWaypoints(pathCreator.wayPoints);
-            Storage.Save<PathCreator.Data>(data, _folderPath, fileName);
+            Storage.Save<PathCreator.Data>(data, _folderPath);
         }
 
         private void OnButtonLoadCircuit(string _folderPath)

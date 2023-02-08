@@ -68,7 +68,7 @@ namespace FastPolygons
             [Header("SETTINGS")]
             [Range(0.0f, 50.0f)] public float dBetweenPoints;
             [Range(1, 50)] public int maxWaypoints;
-            [Range(-360.0f, 360.0f)] public float maxAngle;
+            [Range(0.0f, 360.0f)] public float maxAngle;
             public Debug debug;
         }
 

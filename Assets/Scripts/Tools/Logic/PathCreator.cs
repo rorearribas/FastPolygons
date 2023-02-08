@@ -9,10 +9,10 @@ namespace FastPolygons
     {
         public struct Data
         {
-            [XmlArray("Position"), XmlArrayItem("WaypointPosition_")]
+            [XmlArray("Position"), XmlArrayItem("WaypointPos")]
             public Vector3[] wayPointsPosition;
 
-            [XmlArray("Rotation"), XmlArrayItem("WaypointRotation_")]
+            [XmlArray("Rotation"), XmlArrayItem("WaypointRot")]
             public Quaternion[] wayPointsRotation;
 
             [XmlElement("Name")]

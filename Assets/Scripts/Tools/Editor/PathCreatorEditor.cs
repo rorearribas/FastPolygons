@@ -45,7 +45,7 @@ namespace FastPolygons
                     SingleWaypointLayout();
                     break;
                 case PathCreator.EActionType.CustomWaypoint:
-                    CustomLayout();
+                    CustomWaypointLayout();
                     break;
                 case PathCreator.EActionType.Storage:
                     StorageLayout();
@@ -65,7 +65,7 @@ namespace FastPolygons
             EditorGUILayout.PropertyField(obj.FindProperty("debugParams"));
         }
 
-        private void CustomLayout()
+        private void CustomWaypointLayout()
         {
             EditorGUILayout.PropertyField(obj.FindProperty("curveType"));
 
@@ -77,6 +77,12 @@ namespace FastPolygons
         {
             if (GUILayout.Button("Save Circuit"))
             {
+                bool isEmpty = pathCreator.wayPoints.Count == 0;
+                if (isEmpty) {
+                    Debug.Log("Your current path is empty!");
+                    return;
+                }
+
                 string path = EditorUtility.SaveFilePanel("Save file", "", "NewCircuit", "");
                 OnButtonSaveCircuit(path);
             }
@@ -89,20 +95,17 @@ namespace FastPolygons
 
         private void OnButtonSaveCircuit(string _folderPath)
         {
-            bool isEmpty = pathCreator.wayPoints.Count == 0;
-            if (isEmpty) return;
+            PathCreator.Data NewData = new PathCreator.Data();
+            NewData.circuitName = System.IO.Path.GetFileName(_folderPath);
 
-            PathCreator.Data data = new PathCreator.Data();
-            data.circuitName = System.IO.Path.GetFileName(_folderPath);
-
-            data.CopyWaypoints(pathCreator.wayPoints);
-            Storage.Save<PathCreator.Data>(data, _folderPath);
+            NewData.CopyWaypoints(pathCreator.wayPoints);
+            Storage.Save<PathCreator.Data>(NewData, _folderPath);
         }
 
         private void OnButtonLoadCircuit(string _folderPath)
         {
-            PathCreator.Data data = Storage.Load<PathCreator.Data>(_folderPath);
-            pathCreator.LoadCircuit(data);
+            PathCreator.Data getData = Storage.Load<PathCreator.Data>(_folderPath);
+            pathCreator.LoadCircuit(getData);
         }
     }
 }

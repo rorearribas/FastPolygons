@@ -1,12 +1,42 @@
 ﻿using System.Collections.Generic;
+using System.Xml.Serialization;
 using UnityEngine;
 
 namespace FastPolygons
 {
+
     public class PathCreator : MonoBehaviour
     {
+        public struct Data
+        {
+            [XmlArray("Position"), XmlArrayItem("WaypointPosition_")]
+            public Vector3[] wayPointsPosition;
+
+            [XmlArray("Rotation"), XmlArrayItem("WaypointRotation_")]
+            public Quaternion[] wayPointsRotation;
+
+            [XmlElement("Name")]
+            public string circuitName;
+
+            [XmlElement("PathSize")]
+            public int size;
+
+            public void CopyWaypoints(List<Transform> _transform)
+            {
+                wayPointsPosition = new Vector3[_transform.Count];
+                wayPointsRotation = new Quaternion[_transform.Count];
+                size = _transform.Count;
+
+                for (int i = 0; i < _transform.Count; i++)
+                {
+                    wayPointsPosition[i] = _transform[i].position;
+                    wayPointsRotation[i] = _transform[i].rotation;
+                }
+            }
+        }
+
         public List<Transform> wayPoints = new();
-        public enum EActionType { SingleWaypoint, Custom }
+        public enum EActionType { SingleWaypoint, CustomWaypoint, Storage }
         public EActionType actionType;
         private int lastSingleWaypoint;
 
@@ -14,8 +44,8 @@ namespace FastPolygons
         [System.Serializable]
         public struct Debug
         {
-            public float radius;
             public Color color;
+            public float radius;
             public bool showDebug;
         }
 
@@ -41,7 +71,6 @@ namespace FastPolygons
             [Range(-360.0f, 360.0f)] public float maxAngle;
             public Debug debug;
         }
-
 
         public void AddSingleWaypoint()
         {
@@ -179,6 +208,26 @@ namespace FastPolygons
                 wayPoints[i].name = "Waypoint_" + (i + 1);
             }
         }
+
+        public void LoadCircuit(Data circuitData)
+        {
+            if (circuitData.size == 0) return;
+            ResetAll();
+
+            for (int i = 0; i < circuitData.size; i++)
+            {
+                GameObject newWaypoint = new GameObject();
+
+                newWaypoint.transform.position = circuitData.wayPointsPosition[i];
+                newWaypoint.transform.rotation = circuitData.wayPointsRotation[i];
+                newWaypoint.transform.parent = transform;
+
+                wayPoints.Add(newWaypoint.transform);
+            }
+
+            SortList();
+        }
+
 #if UNITY_EDITOR
         private void OnDrawGizmos()
         {
@@ -205,7 +254,7 @@ namespace FastPolygons
             }
 
             //Curve pre-visualizer.
-            if (curveType.debug.showDebug && actionType == EActionType.Custom)
+            if (curveType.debug.showDebug && actionType == EActionType.CustomWaypoint)
             {
                 if (wayPoints.Count == 0) return;
 
